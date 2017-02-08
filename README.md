@@ -1,0 +1,165 @@
+# Aventine SIMD vector library #
+
+This is a crate that provides an SIMD vector library for Rust, it's nowhere near as polished or complete as the language support in Clang / OpenCL (compiler limitations) but it's intended to be a start to get us out and be productive at least.
+
+The main goal is to be ABI compatible with the Apple standard library `simd` for use on macOS and iOS. Right now it only builds on Apple platforms since we depend on `libSystem`, but the goal is to replace those bits as soon as possible.
+
+## Build the source ##
+
+Right now you can regenerate the source code from the Ruby script via `rake`, this is a temporary measure until the point I am happy with the output and try to write optimisations. Then we'll fossilise the code and remove the generator.
+
+# TODO #
+
+This is a TODO list, a check means that it is done and tested.
+
+ - [ ] Vectors
+   - [ ] Types
+     - [ ] `char`
+     - [ ] `uchar`
+     - [ ] `short`
+     - [ ] `ushort`
+     - [x] `int`
+     - [ ] `uint`
+     - [ ] `long`
+     - [ ] `ulong`
+     - [ ] `half` (blocked on compiler)
+     - [x] `float`
+     - [ ] `double`
+   - [ ] Widths
+     - [x] 2
+     - [x] 3
+     - [x] 4
+     - [ ] 8
+     - [ ] 16
+   - [ ] Swizzling (partially blocked on compiler)
+     - [ ] `xyzw` specifier
+     - [ ] `rgba` specifier
+     - [ ] `s0123456789abcdef` specifier
+     - [ ] `s0123456789ABCDEF` specifier
+     - [x] `hi` specifier
+     - [ ] `high` specifier
+     - [x] `lo` specifier
+     - [ ] `low` specifier
+     - [ ] `odd` specifier
+     - [ ] `even` specifier
+   - [ ] Constructors
+     - [x] Basic "scalar" constructor
+     - [ ] Vector and scalars constructor (blocked on compiler)
+     - [ ] Vector and vector constructor (blocked on compiler)
+     - [ ] Arbitrary mix constructor (blocked on compiler)
+   - [ ] Constants
+   - [ ] Operators
+   - [x] Logical
+     - [x] `all`
+     - [x] `any`
+     - [x] `select`
+     - [x] `bitselect`
+   - [x] Common Functions
+     - [x] `abs`
+     - [x] `max`
+     - [x] `min`
+     - [x] `clamp`
+     - [x] `sign`
+     - [x] `mix`
+     - [x] `recip`
+     - [x] `rsqrt`
+     - [x] `fract`
+     - [x] `step`
+     - [x] `smoothstep`
+     - [x] `reduce_add`
+     - [x] `reduce_min`
+     - [x] `reduce_max`
+   - [ ] Conversion Functions
+   - [ ] Math Functions
+     - [ ] `copysign`
+     - [ ] `sqrt`
+     - [ ] `ceil`
+     - [ ] `floor`
+     - [ ] `rint`
+     - [ ] `trunc`
+     - [ ] `cos`
+     - [ ] `sin`
+   - [ ] Extended Math Functions (From OpenCL)
+     - [ ] `acos`
+     - [ ] `acosh`
+     - [ ] `acospi`
+     - [ ] `asin`
+     - [ ] `asinh`
+     - [ ] `asinpi`
+     - [ ] `atan`
+     - [ ] `atan2`
+     - [ ] `atanh`
+     - [ ] `atanpi`
+     - [ ] `atan2pi`
+     - [ ] `cbrt`
+     - [ ] `cosh`
+     - [ ] `cospi`
+     - [ ] `erfc`
+     - [ ] `erf`
+     - [ ] `exp`
+     - [ ] `exp2`
+     - [ ] `exp10`
+     - [ ] `expm1`
+     - [ ] `fabs`
+     - [ ] `fdim`
+     - [ ] `fma`
+     - [ ] `fmax`
+     - [ ] `fmax` (vector / scalar)
+     - [ ] `fmin`
+     - [ ] `fmin` (vector / scalar)
+     - [ ] `fmod`
+     - [ ] `fract`
+     - [ ] `frexp`
+     - [ ] `frexp` (vector / scalar)
+     - [ ] `hypot`
+     - [ ] `ilogb`
+     - [ ] `ldexp`
+     - [ ] `lgamma`
+     - [ ] `lgamma_r`
+     - [ ] `log`
+     - [ ] `log2`
+     - [ ] `log10`
+     - [ ] `log1p`
+     - [ ] `logb`
+     - [ ] `mad`
+     - [ ] `maxmag`
+     - [ ] `minmag`
+     - [ ] `modf`
+     - [ ] `nan`
+     - [ ] `nextafter`
+     - [ ] `pow`
+     - [ ] `pown`
+     - [ ] `powr`
+     - [ ] `remainder`
+     - [ ] `remquo`
+     - [ ] `rootn`
+     - [ ] `round`
+     - [ ] `rsqrt`
+     - [ ] `sincos`
+     - [ ] `sinh`
+     - [ ] `sinpi`
+     - [ ] `tan`
+     - [ ] `tanh`
+     - [ ] `tanpi`
+     - [ ] `tgamma`
+ - [ ] Matrices
+   - [ ] Types
+     - [x] `float`
+     - [ ] `double`
+   - [ ] Constructors
+     - [x] Basic
+     - [ ] From columns
+     - [ ] From rows
+     - [ ] From diagonal
+  - [ ] Operators
+  - [ ] Functions
+    - [ ] `scale`
+    - [ ] `linear_combination`
+    - [ ] `add`
+    - [ ] `sub`
+    - [ ] `transpose`
+    - [ ] `invert`
+    - [ ] `multiply`
+    - [ ] `equal`
+    - [ ] `almost_equal_elements`
+    - [ ] `almost_equal_elements_relative`

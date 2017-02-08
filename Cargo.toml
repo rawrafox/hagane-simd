@@ -1,0 +1,4 @@
+[package]
+name = "aventine-simd"
+version = "0.1.0"
+authors = ["Aurora <aurora@aventine.se>"]
