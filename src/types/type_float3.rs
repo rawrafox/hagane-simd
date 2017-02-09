@@ -237,7 +237,8 @@ impl float3 {
 
   #[inline]
   pub fn sign(x: float3) -> float3 {
-    return float3(if x.0 == 0.0 { 0.0} else { x.0.signum() }, if x.1 == 0.0 { 0.0} else { x.1.signum() }, if x.2 == 0.0 { 0.0} else { x.2.signum() });
+    let (zero, one) = (float3::broadcast(0.0), float3::broadcast(1.0));
+    return float3::bitselect(float3::copysign(one, x), zero, float3::eq(x, zero) | float3::ne(x, x));
   }
 
   #[inline]

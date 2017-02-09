@@ -294,9 +294,9 @@ module Bridge
               if kind.include?(:float)
                 o.puts("#[inline]", pad: true)
                 o.block("pub fn sign(x: #{name}) -> #{name}") do |o|
-                  result = width.times.map { |i| "if x.#{i} == 0.0 { 0.0} else { x.#{i}.signum() }" }.join(", ")
+                  o.puts("let (zero, one) = (#{name}::broadcast(0.0), #{name}::broadcast(1.0));")
 
-                  o.puts("return #{name}(#{result});")
+                  o.puts("return #{name}::bitselect(#{name}::copysign(one, x), zero, #{name}::eq(x, zero) | #{name}::ne(x, x));")
                 end
 
                 o.puts("#[inline]", pad: true)

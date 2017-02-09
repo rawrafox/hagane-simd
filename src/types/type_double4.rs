@@ -237,7 +237,8 @@ impl double4 {
 
   #[inline]
   pub fn sign(x: double4) -> double4 {
-    return double4(if x.0 == 0.0 { 0.0} else { x.0.signum() }, if x.1 == 0.0 { 0.0} else { x.1.signum() }, if x.2 == 0.0 { 0.0} else { x.2.signum() }, if x.3 == 0.0 { 0.0} else { x.3.signum() });
+    let (zero, one) = (double4::broadcast(0.0), double4::broadcast(1.0));
+    return double4::bitselect(double4::copysign(one, x), zero, double4::eq(x, zero) | double4::ne(x, x));
   }
 
   #[inline]
