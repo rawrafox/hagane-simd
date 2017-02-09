@@ -48,7 +48,7 @@ This is a TODO list, a check means that it is "done".
      - [ ] Vector and vector constructor (blocked on compiler)
      - [ ] Arbitrary mix constructor (blocked on compiler)
    - [ ] Constants
-   - [ ] Operators
+   - [x] Operators
    - [x] Logical
      - [x] `all`
      - [x] `any`

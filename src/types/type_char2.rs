@@ -368,7 +368,8 @@ impl char2 {
 
   #[inline]
   pub fn abs(x: char2) -> char2 {
-    return char2(x.0.abs(), x.1.abs());
+    let mask = x >> 7;
+    return (x ^ mask) - mask;
   }
 
   #[inline]

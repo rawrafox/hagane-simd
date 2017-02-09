@@ -368,7 +368,8 @@ impl int4 {
 
   #[inline]
   pub fn abs(x: int4) -> int4 {
-    return int4(x.0.abs(), x.1.abs(), x.2.abs(), x.3.abs());
+    let mask = x >> 31;
+    return (x ^ mask) - mask;
   }
 
   #[inline]

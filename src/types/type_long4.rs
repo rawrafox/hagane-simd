@@ -368,7 +368,8 @@ impl long4 {
 
   #[inline]
   pub fn abs(x: long4) -> long4 {
-    return long4(x.0.abs(), x.1.abs(), x.2.abs(), x.3.abs());
+    let mask = x >> 63;
+    return (x ^ mask) - mask;
   }
 
   #[inline]

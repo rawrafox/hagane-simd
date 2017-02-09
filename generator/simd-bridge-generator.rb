@@ -244,7 +244,14 @@ module Bridge
 
               # Common
 
-              if kind.include?(:signed) || kind.include?(:float)
+              if kind.include?(:signed)
+                o.puts("#[inline]", pad: true)
+                o.block("pub fn abs(x: #{name}) -> #{name}") do |o|
+                  o.puts("let mask = x >> #{attributes.fetch(:size) * 8 - 1};")
+
+                  o.puts("return (x ^ mask) - mask;")
+                end
+              elsif kind.include?(:float)
                 o.puts("#[inline]", pad: true)
                 o.block("pub fn abs(x: #{name}) -> #{name}") do |o|
                   result = width.times.map { |i| "x.#{i}.abs()" }.join(", ")

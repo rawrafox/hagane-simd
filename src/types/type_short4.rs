@@ -368,7 +368,8 @@ impl short4 {
 
   #[inline]
   pub fn abs(x: short4) -> short4 {
-    return short4(x.0.abs(), x.1.abs(), x.2.abs(), x.3.abs());
+    let mask = x >> 15;
+    return (x ^ mask) - mask;
   }
 
   #[inline]
