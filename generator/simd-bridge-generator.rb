@@ -308,14 +308,14 @@ module Bridge
 
                 o.puts("#[inline]", pad: true)
                 o.block("pub fn recip(x: #{name}) -> #{name}") do |o|
-                  o.puts("return #{name}::broadcast(1.0) / x;")
+                  o.puts("return 1.0 / x;")
                 end
 
                 o.puts("#[inline]", pad: true)
                 o.block("pub fn rsqrt(x: #{name}) -> #{name}") do |o|
                   result = width.times.map { |i| "1.0 / x.#{i}.sqrt()" }.join(", ")
 
-                  o.puts("return #{name}::broadcast(1.0) / #{name}::sqrt(x);")
+                  o.puts("return 1.0 / #{name}::sqrt(x);")
                 end
 
                 o.puts("#[inline]", pad: true)

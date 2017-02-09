@@ -248,12 +248,12 @@ impl float2 {
 
   #[inline]
   pub fn recip(x: float2) -> float2 {
-    return float2::broadcast(1.0) / x;
+    return 1.0 / x;
   }
 
   #[inline]
   pub fn rsqrt(x: float2) -> float2 {
-    return float2::broadcast(1.0) / float2::sqrt(x);
+    return 1.0 / float2::sqrt(x);
   }
 
   #[inline]

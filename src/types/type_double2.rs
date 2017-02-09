@@ -248,12 +248,12 @@ impl double2 {
 
   #[inline]
   pub fn recip(x: double2) -> double2 {
-    return double2::broadcast(1.0) / x;
+    return 1.0 / x;
   }
 
   #[inline]
   pub fn rsqrt(x: double2) -> double2 {
-    return double2::broadcast(1.0) / double2::sqrt(x);
+    return 1.0 / double2::sqrt(x);
   }
 
   #[inline]
