@@ -184,7 +184,7 @@ module Bridge
                 o.puts
                 o.puts("#[inline]")
                 o.block("fn not(self) -> Self") do |o|
-                  o.puts("return self ^ #{name}::broadcast(-1);")
+                  o.puts("return self ^ -1;")
                 end
               end
             end

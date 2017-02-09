@@ -288,7 +288,7 @@ impl std::ops::Not for int3 {
 
   #[inline]
   fn not(self) -> Self {
-    return self ^ int3::broadcast(-1);
+    return self ^ -1;
   }
 }
 
