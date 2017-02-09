@@ -186,6 +186,36 @@ impl float4 {
   }
 
   #[inline]
+  pub fn eq(x: float4, y: float4) -> int4 {
+    return unsafe { simd_eq(x, y) };
+  }
+
+  #[inline]
+  pub fn ne(x: float4, y: float4) -> int4 {
+    return unsafe { simd_ne(x, y) };
+  }
+
+  #[inline]
+  pub fn lt(x: float4, y: float4) -> int4 {
+    return unsafe { simd_lt(x, y) };
+  }
+
+  #[inline]
+  pub fn le(x: float4, y: float4) -> int4 {
+    return unsafe { simd_le(x, y) };
+  }
+
+  #[inline]
+  pub fn gt(x: float4, y: float4) -> int4 {
+    return unsafe { simd_gt(x, y) };
+  }
+
+  #[inline]
+  pub fn ge(x: float4, y: float4) -> int4 {
+    return unsafe { simd_ge(x, y) };
+  }
+
+  #[inline]
   pub fn abs(x: float4) -> float4 {
     return float4(x.0.abs(), x.1.abs(), x.2.abs(), x.3.abs());
   }
@@ -222,7 +252,7 @@ impl float4 {
 
   #[inline]
   pub fn rsqrt(x: float4) -> float4 {
-    return float4(1.0 / x.0.sqrt(), 1.0 / x.1.sqrt(), 1.0 / x.2.sqrt(), 1.0 / x.3.sqrt());
+    return float4::broadcast(1.0) / float4::sqrt(x);
   }
 
   #[inline]
@@ -258,33 +288,38 @@ impl float4 {
   }
 
   #[inline]
-  pub fn eq(x: float4, y: float4) -> int4 {
-    return unsafe { simd_eq(x, y) };
+  pub fn copysign(x: float4, y: float4) -> float4 {
+    return float4::bitselect(y, x, int4::broadcast(std::i32::MAX));
   }
 
   #[inline]
-  pub fn ne(x: float4, y: float4) -> int4 {
-    return unsafe { simd_ne(x, y) };
+  pub fn sqrt(x: float4) -> float4 {
+    return float4(x.0.sqrt(), x.1.sqrt(), x.2.sqrt(), x.3.sqrt());
   }
 
   #[inline]
-  pub fn lt(x: float4, y: float4) -> int4 {
-    return unsafe { simd_lt(x, y) };
+  pub fn ceil(x: float4) -> float4 {
+    return float4(x.0.ceil(), x.1.ceil(), x.2.ceil(), x.3.ceil());
   }
 
   #[inline]
-  pub fn le(x: float4, y: float4) -> int4 {
-    return unsafe { simd_le(x, y) };
+  pub fn floor(x: float4) -> float4 {
+    return float4(x.0.floor(), x.1.floor(), x.2.floor(), x.3.floor());
   }
 
   #[inline]
-  pub fn gt(x: float4, y: float4) -> int4 {
-    return unsafe { simd_gt(x, y) };
+  pub fn trunc(x: float4) -> float4 {
+    return float4(x.0.trunc(), x.1.trunc(), x.2.trunc(), x.3.trunc());
   }
 
   #[inline]
-  pub fn ge(x: float4, y: float4) -> int4 {
-    return unsafe { simd_ge(x, y) };
+  pub fn sin(x: float4) -> float4 {
+    return float4(x.0.sin(), x.1.sin(), x.2.sin(), x.3.sin());
+  }
+
+  #[inline]
+  pub fn cos(x: float4) -> float4 {
+    return float4(x.0.cos(), x.1.cos(), x.2.cos(), x.3.cos());
   }
 
   #[inline]

@@ -337,6 +337,36 @@ impl long3 {
   }
 
   #[inline]
+  pub fn eq(x: long3, y: long3) -> long3 {
+    return unsafe { simd_eq(x, y) };
+  }
+
+  #[inline]
+  pub fn ne(x: long3, y: long3) -> long3 {
+    return unsafe { simd_ne(x, y) };
+  }
+
+  #[inline]
+  pub fn lt(x: long3, y: long3) -> long3 {
+    return unsafe { simd_lt(x, y) };
+  }
+
+  #[inline]
+  pub fn le(x: long3, y: long3) -> long3 {
+    return unsafe { simd_le(x, y) };
+  }
+
+  #[inline]
+  pub fn gt(x: long3, y: long3) -> long3 {
+    return unsafe { simd_gt(x, y) };
+  }
+
+  #[inline]
+  pub fn ge(x: long3, y: long3) -> long3 {
+    return unsafe { simd_ge(x, y) };
+  }
+
+  #[inline]
   pub fn abs(x: long3) -> long3 {
     return long3(x.0.abs(), x.1.abs(), x.2.abs());
   }
@@ -369,36 +399,6 @@ impl long3 {
   #[inline]
   pub fn reduce_max(x: long3) -> i64 {
     return std::cmp::max(long2::reduce_max(x.lo()), x.2);
-  }
-
-  #[inline]
-  pub fn eq(x: long3, y: long3) -> long3 {
-    return unsafe { simd_eq(x, y) };
-  }
-
-  #[inline]
-  pub fn ne(x: long3, y: long3) -> long3 {
-    return unsafe { simd_ne(x, y) };
-  }
-
-  #[inline]
-  pub fn lt(x: long3, y: long3) -> long3 {
-    return unsafe { simd_lt(x, y) };
-  }
-
-  #[inline]
-  pub fn le(x: long3, y: long3) -> long3 {
-    return unsafe { simd_le(x, y) };
-  }
-
-  #[inline]
-  pub fn gt(x: long3, y: long3) -> long3 {
-    return unsafe { simd_gt(x, y) };
-  }
-
-  #[inline]
-  pub fn ge(x: long3, y: long3) -> long3 {
-    return unsafe { simd_ge(x, y) };
   }
 
   #[inline]

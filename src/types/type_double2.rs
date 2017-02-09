@@ -186,6 +186,36 @@ impl double2 {
   }
 
   #[inline]
+  pub fn eq(x: double2, y: double2) -> long2 {
+    return unsafe { simd_eq(x, y) };
+  }
+
+  #[inline]
+  pub fn ne(x: double2, y: double2) -> long2 {
+    return unsafe { simd_ne(x, y) };
+  }
+
+  #[inline]
+  pub fn lt(x: double2, y: double2) -> long2 {
+    return unsafe { simd_lt(x, y) };
+  }
+
+  #[inline]
+  pub fn le(x: double2, y: double2) -> long2 {
+    return unsafe { simd_le(x, y) };
+  }
+
+  #[inline]
+  pub fn gt(x: double2, y: double2) -> long2 {
+    return unsafe { simd_gt(x, y) };
+  }
+
+  #[inline]
+  pub fn ge(x: double2, y: double2) -> long2 {
+    return unsafe { simd_ge(x, y) };
+  }
+
+  #[inline]
   pub fn abs(x: double2) -> double2 {
     return double2(x.0.abs(), x.1.abs());
   }
@@ -222,7 +252,7 @@ impl double2 {
 
   #[inline]
   pub fn rsqrt(x: double2) -> double2 {
-    return double2(1.0 / x.0.sqrt(), 1.0 / x.1.sqrt());
+    return double2::broadcast(1.0) / double2::sqrt(x);
   }
 
   #[inline]
@@ -258,33 +288,38 @@ impl double2 {
   }
 
   #[inline]
-  pub fn eq(x: double2, y: double2) -> long2 {
-    return unsafe { simd_eq(x, y) };
+  pub fn copysign(x: double2, y: double2) -> double2 {
+    return double2::bitselect(y, x, long2::broadcast(std::i64::MAX));
   }
 
   #[inline]
-  pub fn ne(x: double2, y: double2) -> long2 {
-    return unsafe { simd_ne(x, y) };
+  pub fn sqrt(x: double2) -> double2 {
+    return double2(x.0.sqrt(), x.1.sqrt());
   }
 
   #[inline]
-  pub fn lt(x: double2, y: double2) -> long2 {
-    return unsafe { simd_lt(x, y) };
+  pub fn ceil(x: double2) -> double2 {
+    return double2(x.0.ceil(), x.1.ceil());
   }
 
   #[inline]
-  pub fn le(x: double2, y: double2) -> long2 {
-    return unsafe { simd_le(x, y) };
+  pub fn floor(x: double2) -> double2 {
+    return double2(x.0.floor(), x.1.floor());
   }
 
   #[inline]
-  pub fn gt(x: double2, y: double2) -> long2 {
-    return unsafe { simd_gt(x, y) };
+  pub fn trunc(x: double2) -> double2 {
+    return double2(x.0.trunc(), x.1.trunc());
   }
 
   #[inline]
-  pub fn ge(x: double2, y: double2) -> long2 {
-    return unsafe { simd_ge(x, y) };
+  pub fn sin(x: double2) -> double2 {
+    return double2(x.0.sin(), x.1.sin());
+  }
+
+  #[inline]
+  pub fn cos(x: double2) -> double2 {
+    return double2(x.0.cos(), x.1.cos());
   }
 
   #[inline]

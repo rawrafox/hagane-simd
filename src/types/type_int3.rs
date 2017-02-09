@@ -337,6 +337,36 @@ impl int3 {
   }
 
   #[inline]
+  pub fn eq(x: int3, y: int3) -> int3 {
+    return unsafe { simd_eq(x, y) };
+  }
+
+  #[inline]
+  pub fn ne(x: int3, y: int3) -> int3 {
+    return unsafe { simd_ne(x, y) };
+  }
+
+  #[inline]
+  pub fn lt(x: int3, y: int3) -> int3 {
+    return unsafe { simd_lt(x, y) };
+  }
+
+  #[inline]
+  pub fn le(x: int3, y: int3) -> int3 {
+    return unsafe { simd_le(x, y) };
+  }
+
+  #[inline]
+  pub fn gt(x: int3, y: int3) -> int3 {
+    return unsafe { simd_gt(x, y) };
+  }
+
+  #[inline]
+  pub fn ge(x: int3, y: int3) -> int3 {
+    return unsafe { simd_ge(x, y) };
+  }
+
+  #[inline]
   pub fn abs(x: int3) -> int3 {
     return int3(x.0.abs(), x.1.abs(), x.2.abs());
   }
@@ -369,36 +399,6 @@ impl int3 {
   #[inline]
   pub fn reduce_max(x: int3) -> i32 {
     return std::cmp::max(int2::reduce_max(x.lo()), x.2);
-  }
-
-  #[inline]
-  pub fn eq(x: int3, y: int3) -> int3 {
-    return unsafe { simd_eq(x, y) };
-  }
-
-  #[inline]
-  pub fn ne(x: int3, y: int3) -> int3 {
-    return unsafe { simd_ne(x, y) };
-  }
-
-  #[inline]
-  pub fn lt(x: int3, y: int3) -> int3 {
-    return unsafe { simd_lt(x, y) };
-  }
-
-  #[inline]
-  pub fn le(x: int3, y: int3) -> int3 {
-    return unsafe { simd_le(x, y) };
-  }
-
-  #[inline]
-  pub fn gt(x: int3, y: int3) -> int3 {
-    return unsafe { simd_gt(x, y) };
-  }
-
-  #[inline]
-  pub fn ge(x: int3, y: int3) -> int3 {
-    return unsafe { simd_ge(x, y) };
   }
 
   #[inline]

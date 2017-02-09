@@ -337,6 +337,36 @@ impl int4 {
   }
 
   #[inline]
+  pub fn eq(x: int4, y: int4) -> int4 {
+    return unsafe { simd_eq(x, y) };
+  }
+
+  #[inline]
+  pub fn ne(x: int4, y: int4) -> int4 {
+    return unsafe { simd_ne(x, y) };
+  }
+
+  #[inline]
+  pub fn lt(x: int4, y: int4) -> int4 {
+    return unsafe { simd_lt(x, y) };
+  }
+
+  #[inline]
+  pub fn le(x: int4, y: int4) -> int4 {
+    return unsafe { simd_le(x, y) };
+  }
+
+  #[inline]
+  pub fn gt(x: int4, y: int4) -> int4 {
+    return unsafe { simd_gt(x, y) };
+  }
+
+  #[inline]
+  pub fn ge(x: int4, y: int4) -> int4 {
+    return unsafe { simd_ge(x, y) };
+  }
+
+  #[inline]
   pub fn abs(x: int4) -> int4 {
     return int4(x.0.abs(), x.1.abs(), x.2.abs(), x.3.abs());
   }
@@ -369,36 +399,6 @@ impl int4 {
   #[inline]
   pub fn reduce_max(x: int4) -> i32 {
     return int2::reduce_max(int2::max(x.lo(), x.hi()));
-  }
-
-  #[inline]
-  pub fn eq(x: int4, y: int4) -> int4 {
-    return unsafe { simd_eq(x, y) };
-  }
-
-  #[inline]
-  pub fn ne(x: int4, y: int4) -> int4 {
-    return unsafe { simd_ne(x, y) };
-  }
-
-  #[inline]
-  pub fn lt(x: int4, y: int4) -> int4 {
-    return unsafe { simd_lt(x, y) };
-  }
-
-  #[inline]
-  pub fn le(x: int4, y: int4) -> int4 {
-    return unsafe { simd_le(x, y) };
-  }
-
-  #[inline]
-  pub fn gt(x: int4, y: int4) -> int4 {
-    return unsafe { simd_gt(x, y) };
-  }
-
-  #[inline]
-  pub fn ge(x: int4, y: int4) -> int4 {
-    return unsafe { simd_ge(x, y) };
   }
 
   #[inline]

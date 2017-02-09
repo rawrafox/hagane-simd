@@ -71,14 +71,14 @@ This is a TODO list, a check means that it is done and tested.
      - [x] `reduce_max`
    - [ ] Conversion Functions
    - [ ] Math Functions
-     - [ ] `copysign`
-     - [ ] `sqrt`
-     - [ ] `ceil`
-     - [ ] `floor`
+     - [x] `copysign`
+     - [x] `sqrt`
+     - [x] `ceil`
+     - [x] `floor`
      - [ ] `rint`
-     - [ ] `trunc`
-     - [ ] `cos`
-     - [ ] `sin`
+     - [x] `trunc`
+     - [x] `cos`
+     - [x] `sin`
    - [ ] Extended Math Functions (From OpenCL)
      - [ ] `acos`
      - [ ] `acosh`

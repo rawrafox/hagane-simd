@@ -18,6 +18,8 @@ module Bridge
       # { size: 8, max_width: 4, type: 'u64', opencl: "ulong", unsigned: true },
       { size: 8, max_width: 4, type: 'f64', opencl: "double", kind: %i(float), bool: "long", max_matrix_size: 4 }
     ]
+    
+    TYPES_BY_NAME = TYPES.map { |x| [x[:opencl], x] }.to_h
 
     WIDTHS = [1, 2, 3, 4, 8, 16]
 
@@ -231,6 +233,17 @@ module Bridge
                 o.puts("return unsafe { simd_insert(self, i, x) };")
               end
 
+              # Comparison
+
+              %w(eq ne lt le gt ge).each do |op|
+                o.puts("#[inline]", pad: true)
+                o.block("pub fn #{op}(x: #{name}, y: #{name}) -> #{bool_name}") do |o|
+                  o.puts("return unsafe { simd_#{op}(x, y) };")
+                end
+              end
+
+              # Common
+
               if kind.include?(:signed) || kind.include?(:float)
                 o.puts("#[inline]", pad: true)
                 o.block("pub fn abs(x: #{name}) -> #{name}") do |o|
@@ -299,7 +312,7 @@ module Bridge
                 o.block("pub fn rsqrt(x: #{name}) -> #{name}") do |o|
                   result = width.times.map { |i| "1.0 / x.#{i}.sqrt()" }.join(", ")
 
-                  o.puts("return #{name}(#{result});")
+                  o.puts("return #{name}::broadcast(1.0) / #{name}::sqrt(x);")
                 end
 
                 o.puts("#[inline]", pad: true)
@@ -374,12 +387,66 @@ module Bridge
                 end
               end
 
-              %w(eq ne lt le gt ge).each do |op|
+              # Math
+
+              if kind.include?(:float)
                 o.puts("#[inline]", pad: true)
-                o.block("pub fn #{op}(x: #{name}, y: #{name}) -> #{bool_name}") do |o|
-                  o.puts("return unsafe { simd_#{op}(x, y) };")
+                o.block("pub fn copysign(x: #{name}, y: #{name}) -> #{name}") do |o|
+                  o.puts("return #{name}::bitselect(y, x, #{bool_name}::broadcast(std::#{TYPES_BY_NAME[bool][:type]}::MAX));")
                 end
+
+                o.puts("#[inline]", pad: true)
+                o.block("pub fn sqrt(x: #{name}) -> #{name}") do |o|
+                  result = width.times.map { |i| "x.#{i}.sqrt()" }.join(", ")
+
+                  o.puts("return #{name}(#{result});")
+                end
+
+                o.puts("#[inline]", pad: true)
+                o.block("pub fn ceil(x: #{name}) -> #{name}") do |o|
+                  result = width.times.map { |i| "x.#{i}.ceil()" }.join(", ")
+
+                  o.puts("return #{name}(#{result});")
+                end
+
+                o.puts("#[inline]", pad: true)
+                o.block("pub fn floor(x: #{name}) -> #{name}") do |o|
+                  result = width.times.map { |i| "x.#{i}.floor()" }.join(", ")
+
+                  o.puts("return #{name}(#{result});")
+                end
+
+                # TODO: Blocked by libstd
+                # o.puts("#[inline]", pad: true)
+                # o.block("pub fn rint(x: #{name}) -> #{name}") do |o|
+                #   result = width.times.map { |i| "x.#{i}.rint()" }.join(", ")
+                # 
+                #   o.puts("return #{name}(#{result});")
+                # end
+
+                o.puts("#[inline]", pad: true)
+                o.block("pub fn trunc(x: #{name}) -> #{name}") do |o|
+                  result = width.times.map { |i| "x.#{i}.trunc()" }.join(", ")
+
+                  o.puts("return #{name}(#{result});")
+                end
+
+                o.puts("#[inline]", pad: true)
+                o.block("pub fn sin(x: #{name}) -> #{name}") do |o|
+                  result = width.times.map { |i| "x.#{i}.sin()" }.join(", ")
+
+                  o.puts("return #{name}(#{result});")
+                end
+
+                o.puts("#[inline]", pad: true)
+                o.block("pub fn cos(x: #{name}) -> #{name}") do |o|
+                  result = width.times.map { |i| "x.#{i}.cos()" }.join(", ")
+
+                  o.puts("return #{name}(#{result});")
+                end
+
               end
+
 
               # Logic
 
