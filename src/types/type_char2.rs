@@ -374,12 +374,12 @@ impl char2 {
 
   #[inline]
   pub fn max(x: char2, y: char2) -> char2 {
-    return char2(std::cmp::max(x.0, y.0), std::cmp::max(x.1, y.1));
+    return char2::bitselect(x, y, char2::gt(y, x));
   }
 
   #[inline]
   pub fn min(x: char2, y: char2) -> char2 {
-    return char2(std::cmp::min(x.0, y.0), std::cmp::min(x.1, y.1));
+    return char2::bitselect(x, y, char2::lt(y, x));
   }
 
   #[inline]

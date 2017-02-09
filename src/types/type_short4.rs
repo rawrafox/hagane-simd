@@ -374,12 +374,12 @@ impl short4 {
 
   #[inline]
   pub fn max(x: short4, y: short4) -> short4 {
-    return short4(std::cmp::max(x.0, y.0), std::cmp::max(x.1, y.1), std::cmp::max(x.2, y.2), std::cmp::max(x.3, y.3));
+    return short4::bitselect(x, y, short4::gt(y, x));
   }
 
   #[inline]
   pub fn min(x: short4, y: short4) -> short4 {
-    return short4(std::cmp::min(x.0, y.0), std::cmp::min(x.1, y.1), std::cmp::min(x.2, y.2), std::cmp::min(x.3, y.3));
+    return short4::bitselect(x, y, short4::lt(y, x));
   }
 
   #[inline]

@@ -374,12 +374,12 @@ impl int4 {
 
   #[inline]
   pub fn max(x: int4, y: int4) -> int4 {
-    return int4(std::cmp::max(x.0, y.0), std::cmp::max(x.1, y.1), std::cmp::max(x.2, y.2), std::cmp::max(x.3, y.3));
+    return int4::bitselect(x, y, int4::gt(y, x));
   }
 
   #[inline]
   pub fn min(x: int4, y: int4) -> int4 {
-    return int4(std::cmp::min(x.0, y.0), std::cmp::min(x.1, y.1), std::cmp::min(x.2, y.2), std::cmp::min(x.3, y.3));
+    return int4::bitselect(x, y, int4::lt(y, x));
   }
 
   #[inline]

@@ -263,16 +263,12 @@ module Bridge
               if kind.include?(:integer)
                 o.puts("#[inline]", pad: true)
                 o.block("pub fn max(x: #{name}, y: #{name}) -> #{name}") do |o|
-                  result = width.times.map { |i| "std::cmp::max(x.#{i}, y.#{i})" }.join(", ")
-
-                  o.puts("return #{name}(#{result});")
+                  o.puts("return #{name}::bitselect(x, y, #{name}::gt(y, x));")
                 end
 
                 o.puts("#[inline]", pad: true)
                 o.block("pub fn min(x: #{name}, y: #{name}) -> #{name}") do |o|
-                  result = width.times.map { |i| "std::cmp::min(x.#{i}, y.#{i})" }.join(", ")
-
-                  o.puts("return #{name}(#{result});")
+                  o.puts("return #{name}::bitselect(x, y, #{name}::lt(y, x));")
                 end
               elsif kind.include?(:float)
                 o.puts("#[inline]", pad: true)

@@ -374,12 +374,12 @@ impl long2 {
 
   #[inline]
   pub fn max(x: long2, y: long2) -> long2 {
-    return long2(std::cmp::max(x.0, y.0), std::cmp::max(x.1, y.1));
+    return long2::bitselect(x, y, long2::gt(y, x));
   }
 
   #[inline]
   pub fn min(x: long2, y: long2) -> long2 {
-    return long2(std::cmp::min(x.0, y.0), std::cmp::min(x.1, y.1));
+    return long2::bitselect(x, y, long2::lt(y, x));
   }
 
   #[inline]

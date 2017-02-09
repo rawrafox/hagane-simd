@@ -374,12 +374,12 @@ impl int3 {
 
   #[inline]
   pub fn max(x: int3, y: int3) -> int3 {
-    return int3(std::cmp::max(x.0, y.0), std::cmp::max(x.1, y.1), std::cmp::max(x.2, y.2));
+    return int3::bitselect(x, y, int3::gt(y, x));
   }
 
   #[inline]
   pub fn min(x: int3, y: int3) -> int3 {
-    return int3(std::cmp::min(x.0, y.0), std::cmp::min(x.1, y.1), std::cmp::min(x.2, y.2));
+    return int3::bitselect(x, y, int3::lt(y, x));
   }
 
   #[inline]
