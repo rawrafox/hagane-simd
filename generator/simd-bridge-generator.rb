@@ -14,9 +14,9 @@ module Bridge
       { size: 4, max_width: 4, type: 'i32', opencl: "int", kind: %i(signed integer), bool: "int" },
       # { size: 4, max_width: 4, type: 'u32', opencl: "uint", unsigned: true },
       { size: 4, max_width: 4, type: 'f32', opencl: "float", kind: %i(float), bool: "int", max_matrix_size: 4 },
-      # { size: 8, max_width: 4, type: 'i64', opencl: "long", signed: true },
+      { size: 8, max_width: 4, type: 'i64', opencl: "long", kind: %i(signed integer), bool: "long" },
       # { size: 8, max_width: 4, type: 'u64', opencl: "ulong", unsigned: true },
-      # { size: 8, max_width: 4, type: 'f64', opencl: "double", float: true, max_matrix_size: 4 }
+      { size: 8, max_width: 4, type: 'f64', opencl: "double", kind: %i(float), bool: "long", max_matrix_size: 4 }
     ]
 
     WIDTHS = [1, 2, 3, 4, 8, 16]

@@ -20,11 +20,11 @@ This is a TODO list, a check means that it is done and tested.
      - [ ] `ushort`
      - [x] `int`
      - [ ] `uint`
-     - [ ] `long`
+     - [x] `long`
      - [ ] `ulong`
      - [ ] `half` (blocked on compiler)
      - [x] `float`
-     - [ ] `double`
+     - [x] `double`
    - [ ] Widths
      - [x] 2
      - [x] 3
