@@ -10,13 +10,13 @@ Right now you can regenerate the source code from the Ruby script via `rake`, th
 
 # TODO #
 
-This is a TODO list, a check means that it is done and tested.
+This is a TODO list, a check means that it is "done".
 
  - [ ] Vectors
    - [ ] Types
-     - [ ] `char`
+     - [x] `char`
      - [ ] `uchar`
-     - [ ] `short`
+     - [x] `short`
      - [ ] `ushort`
      - [x] `int`
      - [ ] `uint`
@@ -75,7 +75,7 @@ This is a TODO list, a check means that it is done and tested.
      - [x] `sqrt`
      - [x] `ceil`
      - [x] `floor`
-     - [ ] `rint`
+     - [ ] `rint` (blocked on stdlib)
      - [x] `trunc`
      - [x] `cos`
      - [x] `sin`

@@ -12,6 +12,14 @@ fn abs() {
   assert_eq!(double3::abs(double3(10.0, -3.0, -9.5)), double3(10.0, 3.0, 9.5));
   assert_eq!(double4::abs(double4(10.0, -3.0, -9.5, 0.0)), double4(10.0, 3.0, 9.5, 0.0));
 
+  assert_eq!(char2::abs(char2(10, -3)), char2(10, 3));
+  assert_eq!(char3::abs(char3(10, -3, -9)), char3(10, 3, 9));
+  assert_eq!(char4::abs(char4(10, -3, -9, 0)), char4(10, 3, 9, 0));
+
+  assert_eq!(short2::abs(short2(10, -3)), short2(10, 3));
+  assert_eq!(short3::abs(short3(10, -3, -9)), short3(10, 3, 9));
+  assert_eq!(short4::abs(short4(10, -3, -9, 0)), short4(10, 3, 9, 0));
+
   assert_eq!(int2::abs(int2(10, -3)), int2(10, 3));
   assert_eq!(int3::abs(int3(10, -3, -9)), int3(10, 3, 9));
   assert_eq!(int4::abs(int4(10, -3, -9, 0)), int4(10, 3, 9, 0));
@@ -31,6 +39,14 @@ fn max() {
   assert_eq!(double3::max(double3(10.0, -2.0, -9.5), double3(11.0, -3.0, 10.0)), double3(11.0, -2.0, 10.0));
   assert_eq!(double4::max(double4(10.0, -2.0, -9.5, 1.0), double4(11.0, -3.0, 10.0, 0.0)), double4(11.0, -2.0, 10.0, 1.0));
 
+  assert_eq!(char2::max(char2(10, -2), char2(11, -3)), char2(11, -2));
+  assert_eq!(char3::max(char3(10, -2, -9), char3(11, -3, 10)), char3(11, -2, 10));
+  assert_eq!(char4::max(char4(10, -2, -9, 1), char4(11, -3, 10, 0)), char4(11, -2, 10, 1));
+
+  assert_eq!(short2::max(short2(10, -2), short2(11, -3)), short2(11, -2));
+  assert_eq!(short3::max(short3(10, -2, -9), short3(11, -3, 10)), short3(11, -2, 10));
+  assert_eq!(short4::max(short4(10, -2, -9, 1), short4(11, -3, 10, 0)), short4(11, -2, 10, 1));
+
   assert_eq!(int2::max(int2(10, -2), int2(11, -3)), int2(11, -2));
   assert_eq!(int3::max(int3(10, -2, -9), int3(11, -3, 10)), int3(11, -2, 10));
   assert_eq!(int4::max(int4(10, -2, -9, 1), int4(11, -3, 10, 0)), int4(11, -2, 10, 1));
@@ -49,6 +65,14 @@ fn min() {
   assert_eq!(double2::min(double2(10.0, -2.0), double2(11.0, -3.0)), double2(10.0, -3.0));
   assert_eq!(double3::min(double3(10.0, -2.0, -9.5), double3(11.0, -3.0, 10.0)), double3(10.0, -3.0, -9.5));
   assert_eq!(double4::min(double4(10.0, -2.0, -9.5, 1.0), double4(11.0, -3.0, 10.0, 0.0)), double4(10.0, -3.0, -9.5, 0.0));
+
+  assert_eq!(char2::min(char2(10, -2), char2(11, -3)), char2(10, -3));
+  assert_eq!(char3::min(char3(10, -2, -9), char3(11, -3, 10)), char3(10, -3, -9));
+  assert_eq!(char4::min(char4(10, -2, -9, 1), char4(11, -3, 10, 0)), char4(10, -3, -9, 0));
+
+  assert_eq!(short2::min(short2(10, -2), short2(11, -3)), short2(10, -3));
+  assert_eq!(short3::min(short3(10, -2, -9), short3(11, -3, 10)), short3(10, -3, -9));
+  assert_eq!(short4::min(short4(10, -2, -9, 1), short4(11, -3, 10, 0)), short4(10, -3, -9, 0));
 
   assert_eq!(int2::min(int2(10, -2), int2(11, -3)), int2(10, -3));
   assert_eq!(int3::min(int3(10, -2, -9), int3(11, -3, 10)), int3(10, -3, -9));
@@ -157,6 +181,14 @@ fn reduce_add() {
   assert_eq!(double3::reduce_add(double3(10.0, -3.0, -9.5)), -2.5);
   assert_eq!(double4::reduce_add(double4(10.0, -3.0, -9.5, 0.0)), -2.5);
 
+  assert_eq!(char2::reduce_add(char2(10, -3)), 7);
+  assert_eq!(char3::reduce_add(char3(10, -3, -9)), -2);
+  assert_eq!(char4::reduce_add(char4(10, -3, -9, 0)), -2);
+
+  assert_eq!(short2::reduce_add(short2(10, -3)), 7);
+  assert_eq!(short3::reduce_add(short3(10, -3, -9)), -2);
+  assert_eq!(short4::reduce_add(short4(10, -3, -9, 0)), -2);
+
   assert_eq!(int2::reduce_add(int2(10, -3)), 7);
   assert_eq!(int3::reduce_add(int3(10, -3, -9)), -2);
   assert_eq!(int4::reduce_add(int4(10, -3, -9, 0)), -2);
@@ -176,6 +208,14 @@ fn reduce_min() {
   assert_eq!(double3::reduce_min(double3(10.0, -3.0, -9.5)), -9.5);
   assert_eq!(double4::reduce_min(double4(10.0, -3.0, -9.5, 0.0)), -9.5);
 
+  assert_eq!(char2::reduce_min(char2(10, -3)), -3);
+  assert_eq!(char3::reduce_min(char3(10, -3, -9)), -9);
+  assert_eq!(char4::reduce_min(char4(10, -3, -9, 0)), -9);
+
+  assert_eq!(short2::reduce_min(short2(10, -3)), -3);
+  assert_eq!(short3::reduce_min(short3(10, -3, -9)), -9);
+  assert_eq!(short4::reduce_min(short4(10, -3, -9, 0)), -9);
+
   assert_eq!(int2::reduce_min(int2(10, -3)), -3);
   assert_eq!(int3::reduce_min(int3(10, -3, -9)), -9);
   assert_eq!(int4::reduce_min(int4(10, -3, -9, 0)), -9);
@@ -194,6 +234,14 @@ fn reduce_max() {
   assert_eq!(double2::reduce_max(double2(10.0, -3.0)), 10.0);
   assert_eq!(double3::reduce_max(double3(10.0, -3.0, -9.5)), 10.0);
   assert_eq!(double4::reduce_max(double4(10.0, -3.0, -9.5, 0.0)), 10.0);
+
+  assert_eq!(char2::reduce_max(char2(10, -3)), 10);
+  assert_eq!(char3::reduce_max(char3(10, -3, -9)), 10);
+  assert_eq!(char4::reduce_max(char4(10, -3, -9, 0)), 10);
+
+  assert_eq!(short2::reduce_max(short2(10, -3)), 10);
+  assert_eq!(short3::reduce_max(short3(10, -3, -9)), 10);
+  assert_eq!(short4::reduce_max(short4(10, -3, -9, 0)), 10);
 
   assert_eq!(int2::reduce_max(int2(10, -3)), 10);
   assert_eq!(int3::reduce_max(int3(10, -3, -9)), 10);

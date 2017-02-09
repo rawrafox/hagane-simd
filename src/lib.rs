@@ -2,6 +2,16 @@
 
 #![allow(non_camel_case_types)]
 
+#[path = "types/type_char1.rs"] mod type_char1;
+#[path = "types/type_char2.rs"] mod type_char2;
+#[path = "types/type_char3.rs"] mod type_char3;
+#[path = "types/type_char4.rs"] mod type_char4;
+
+#[path = "types/type_short1.rs"] mod type_short1;
+#[path = "types/type_short2.rs"] mod type_short2;
+#[path = "types/type_short3.rs"] mod type_short3;
+#[path = "types/type_short4.rs"] mod type_short4;
+
 #[path = "types/type_int1.rs"] mod type_int1;
 #[path = "types/type_int2.rs"] mod type_int2;
 #[path = "types/type_int3.rs"] mod type_int3;
@@ -41,6 +51,16 @@
 #[path = "types/type_double2x4.rs"] mod type_double2x4;
 #[path = "types/type_double3x4.rs"] mod type_double3x4;
 #[path = "types/type_double4x4.rs"] mod type_double4x4;
+
+pub use type_char1::*;
+pub use type_char2::*;
+pub use type_char3::*;
+pub use type_char4::*;
+
+pub use type_short1::*;
+pub use type_short2::*;
+pub use type_short3::*;
+pub use type_short4::*;
 
 pub use type_int1::*;
 pub use type_int2::*;

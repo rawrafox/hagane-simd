@@ -7,9 +7,9 @@ require "bridge/output"
 module Bridge
   class SIMD
     TYPES = [
-      # { size: 1, max_width: 4, type: 'i8', opencl: 'char', signed: true },
+      { size: 1, max_width: 4, type: 'i8', opencl: 'char', kind: %i(signed integer), bool: "char" },
       # { size: 1, max_width: 4, type: 'u8', opencl: 'uchar', unsigned: true },
-      # { size: 2, max_width: 4, type: 'i16', opencl: "short", signed: true },
+      { size: 2, max_width: 4, type: 'i16', opencl: "short", kind: %i(signed integer), bool: "short" },
       # { size: 2, max_width: 4, type: 'u16', opencl: "ushort", unsigned: true },
       { size: 4, max_width: 4, type: 'i32', opencl: "int", kind: %i(signed integer), bool: "int" },
       # { size: 4, max_width: 4, type: 'u32', opencl: "uint", unsigned: true },
@@ -446,7 +446,6 @@ module Bridge
                 end
 
               end
-
 
               # Logic
 
