@@ -43,6 +43,10 @@ fn max() {
   assert_eq!(char3::max(char3(10, -2, -9), char3(11, -3, 10)), char3(11, -2, 10));
   assert_eq!(char4::max(char4(10, -2, -9, 1), char4(11, -3, 10, 0)), char4(11, -2, 10, 1));
 
+  assert_eq!(uchar2::max(uchar2(10, 2), uchar2(11, 3)), uchar2(11, 3));
+  assert_eq!(uchar3::max(uchar3(10, 2, 9), uchar3(11, 3, 10)), uchar3(11, 3, 10));
+  assert_eq!(uchar4::max(uchar4(10, 2, 9, 1), uchar4(11, 3, 10, 0)), uchar4(11, 3, 10, 1));
+
   assert_eq!(short2::max(short2(10, -2), short2(11, -3)), short2(11, -2));
   assert_eq!(short3::max(short3(10, -2, -9), short3(11, -3, 10)), short3(11, -2, 10));
   assert_eq!(short4::max(short4(10, -2, -9, 1), short4(11, -3, 10, 0)), short4(11, -2, 10, 1));
@@ -69,6 +73,10 @@ fn min() {
   assert_eq!(char2::min(char2(10, -2), char2(11, -3)), char2(10, -3));
   assert_eq!(char3::min(char3(10, -2, -9), char3(11, -3, 10)), char3(10, -3, -9));
   assert_eq!(char4::min(char4(10, -2, -9, 1), char4(11, -3, 10, 0)), char4(10, -3, -9, 0));
+
+  assert_eq!(uchar2::min(uchar2(10, 2), uchar2(11, 3)), uchar2(10, 2));
+  assert_eq!(uchar3::min(uchar3(10, 2, 9), uchar3(11, 3, 10)), uchar3(10, 2, 9));
+  assert_eq!(uchar4::min(uchar4(10, 2, 9, 1), uchar4(11, 3, 10, 0)), uchar4(10, 2, 9, 0));
 
   assert_eq!(short2::min(short2(10, -2), short2(11, -3)), short2(10, -3));
   assert_eq!(short3::min(short3(10, -2, -9), short3(11, -3, 10)), short3(10, -3, -9));
@@ -185,6 +193,10 @@ fn reduce_add() {
   assert_eq!(char3::reduce_add(char3(10, -3, -9)), -2);
   assert_eq!(char4::reduce_add(char4(10, -3, -9, 0)), -2);
 
+  assert_eq!(uchar2::reduce_add(uchar2(10, 3)), 13);
+  assert_eq!(uchar3::reduce_add(uchar3(10, 3, 9)), 22);
+  assert_eq!(uchar4::reduce_add(uchar4(10, 3, 9, 0)), 22);
+
   assert_eq!(short2::reduce_add(short2(10, -3)), 7);
   assert_eq!(short3::reduce_add(short3(10, -3, -9)), -2);
   assert_eq!(short4::reduce_add(short4(10, -3, -9, 0)), -2);
@@ -212,6 +224,10 @@ fn reduce_min() {
   assert_eq!(char3::reduce_min(char3(10, -3, -9)), -9);
   assert_eq!(char4::reduce_min(char4(10, -3, -9, 0)), -9);
 
+  assert_eq!(uchar2::reduce_min(uchar2(10, 3)), 3);
+  assert_eq!(uchar3::reduce_min(uchar3(10, 3, 9)), 3);
+  assert_eq!(uchar4::reduce_min(uchar4(10, 3, 9, 0)), 0);
+
   assert_eq!(short2::reduce_min(short2(10, -3)), -3);
   assert_eq!(short3::reduce_min(short3(10, -3, -9)), -9);
   assert_eq!(short4::reduce_min(short4(10, -3, -9, 0)), -9);
@@ -238,6 +254,10 @@ fn reduce_max() {
   assert_eq!(char2::reduce_max(char2(10, -3)), 10);
   assert_eq!(char3::reduce_max(char3(10, -3, -9)), 10);
   assert_eq!(char4::reduce_max(char4(10, -3, -9, 0)), 10);
+
+  assert_eq!(uchar2::reduce_max(uchar2(10, 3)), 10);
+  assert_eq!(uchar3::reduce_max(uchar3(10, 3, 9)), 10);
+  assert_eq!(uchar4::reduce_max(uchar4(10, 3, 9, 0)), 10);
 
   assert_eq!(short2::reduce_max(short2(10, -3)), 10);
   assert_eq!(short3::reduce_max(short3(10, -3, -9)), 10);

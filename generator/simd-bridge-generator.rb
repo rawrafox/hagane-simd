@@ -8,7 +8,7 @@ module Bridge
   class SIMD
     TYPES = [
       { size: 1, max_width: 4, type: 'i8', opencl: 'char', kind: %i(signed integer), bool: "char" },
-      # { size: 1, max_width: 4, type: 'u8', opencl: 'uchar', unsigned: true },
+      { size: 1, max_width: 4, type: 'u8', opencl: 'uchar', kind: %i(unsigned integer), bool: "char" },
       { size: 2, max_width: 4, type: 'i16', opencl: "short", kind: %i(signed integer), bool: "short" },
       # { size: 2, max_width: 4, type: 'u16', opencl: "ushort", unsigned: true },
       { size: 4, max_width: 4, type: 'i32', opencl: "int", kind: %i(signed integer), bool: "int" },
@@ -184,7 +184,11 @@ module Bridge
                 o.puts
                 o.puts("#[inline]")
                 o.block("fn not(self) -> Self") do |o|
-                  o.puts("return self ^ -1;")
+                  if kind.include?(:unsigned)
+                    o.puts("return self ^ std::#{scalar}::MAX;")
+                  else
+                    o.puts("return self ^ -1;")
+                  end
                 end
               end
             end
@@ -453,7 +457,7 @@ module Bridge
               # Logic
 
               if kind.include?(:integer)
-                constant = kind.include?(:signed) ? "std::#{scalar}::MIN" : "std::#{scalar}::MAX"
+                constant = kind.include?(:signed) ? "std::#{scalar}::MIN" : "0x8#{"0" * (attributes.fetch(:size) * 2 - 1)}"
 
                 o.puts("#[inline]", pad: true)
                 o.block("pub fn all(x: #{name}) -> bool") do |o|

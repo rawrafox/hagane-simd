@@ -15,7 +15,7 @@ This is a TODO list, a check means that it is "done".
  - [ ] Vectors
    - [ ] Types
      - [x] `char`
-     - [ ] `uchar`
+     - [x] `uchar`
      - [x] `short`
      - [ ] `ushort`
      - [x] `int`

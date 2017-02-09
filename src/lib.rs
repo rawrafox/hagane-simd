@@ -7,6 +7,11 @@
 #[path = "types/type_char3.rs"] mod type_char3;
 #[path = "types/type_char4.rs"] mod type_char4;
 
+#[path = "types/type_uchar1.rs"] mod type_uchar1;
+#[path = "types/type_uchar2.rs"] mod type_uchar2;
+#[path = "types/type_uchar3.rs"] mod type_uchar3;
+#[path = "types/type_uchar4.rs"] mod type_uchar4;
+
 #[path = "types/type_short1.rs"] mod type_short1;
 #[path = "types/type_short2.rs"] mod type_short2;
 #[path = "types/type_short3.rs"] mod type_short3;
@@ -56,6 +61,11 @@ pub use type_char1::*;
 pub use type_char2::*;
 pub use type_char3::*;
 pub use type_char4::*;
+
+pub use type_uchar1::*;
+pub use type_uchar2::*;
+pub use type_uchar3::*;
+pub use type_uchar4::*;
 
 pub use type_short1::*;
 pub use type_short2::*;
