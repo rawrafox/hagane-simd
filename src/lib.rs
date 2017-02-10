@@ -142,6 +142,8 @@ pub use type_double2x4::*;
 pub use type_double3x4::*;
 pub use type_double4x4::*;
 
+pub mod objc;
+
 pub trait Dot<RHS = Self> {
   type Output;
 

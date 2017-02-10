@@ -27,6 +27,8 @@ extern "platform-intrinsic" {
   fn simd_gt<T, U>(x: T, y: T) -> U;
   fn simd_ge<T, U>(x: T, y: T) -> U;
 
+  fn simd_cast<T, U>(x: T) -> U;
+
   fn simd_insert<T, E>(x: T, i: u32, e: E) -> T;
   fn simd_extract<T, E>(x: T, i: u32) -> E;
 }
@@ -420,6 +422,96 @@ impl char3 {
   #[inline]
   pub fn bitselect(x: char3, y: char3, z: char3) -> char3 {
     return (x & !z) | (y & z);
+  }
+
+  #[inline]
+  pub fn to_char(x: char3) -> char3 {
+    return unsafe { simd_cast(x) };
+  }
+
+  #[inline]
+  pub fn to_char_sat(x: char3) -> char3 {
+    return x;
+  }
+
+  #[inline]
+  pub fn to_uchar(x: char3) -> uchar3 {
+    return unsafe { simd_cast(x) };
+  }
+
+  #[inline]
+  pub fn to_uchar_sat(x: char3) -> uchar3 {
+    return char3::to_uchar(char3::max(x, char3::broadcast(0)));
+  }
+
+  #[inline]
+  pub fn to_short(x: char3) -> short3 {
+    return short3(x.0 as i16, x.1 as i16, x.2 as i16);
+  }
+
+  #[inline]
+  pub fn to_short_sat(x: char3) -> short3 {
+    return char3::to_short(x);
+  }
+
+  #[inline]
+  pub fn to_ushort(x: char3) -> ushort3 {
+    return ushort3(x.0 as u16, x.1 as u16, x.2 as u16);
+  }
+
+  #[inline]
+  pub fn to_ushort_sat(x: char3) -> ushort3 {
+    return char3::to_ushort(char3::max(x, char3::broadcast(0)));
+  }
+
+  #[inline]
+  pub fn to_int(x: char3) -> int3 {
+    return int3(x.0 as i32, x.1 as i32, x.2 as i32);
+  }
+
+  #[inline]
+  pub fn to_int_sat(x: char3) -> int3 {
+    return char3::to_int(x);
+  }
+
+  #[inline]
+  pub fn to_uint(x: char3) -> uint3 {
+    return uint3(x.0 as u32, x.1 as u32, x.2 as u32);
+  }
+
+  #[inline]
+  pub fn to_uint_sat(x: char3) -> uint3 {
+    return char3::to_uint(char3::max(x, char3::broadcast(0)));
+  }
+
+  #[inline]
+  pub fn to_float(x: char3) -> float3 {
+    return float3(x.0 as f32, x.1 as f32, x.2 as f32);
+  }
+
+  #[inline]
+  pub fn to_long(x: char3) -> long3 {
+    return long3(x.0 as i64, x.1 as i64, x.2 as i64);
+  }
+
+  #[inline]
+  pub fn to_long_sat(x: char3) -> long3 {
+    return char3::to_long(x);
+  }
+
+  #[inline]
+  pub fn to_ulong(x: char3) -> ulong3 {
+    return ulong3(x.0 as u64, x.1 as u64, x.2 as u64);
+  }
+
+  #[inline]
+  pub fn to_ulong_sat(x: char3) -> ulong3 {
+    return char3::to_ulong(char3::max(x, char3::broadcast(0)));
+  }
+
+  #[inline]
+  pub fn to_double(x: char3) -> double3 {
+    return double3(x.0 as f64, x.1 as f64, x.2 as f64);
   }
 
   #[inline]

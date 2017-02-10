@@ -27,6 +27,8 @@ extern "platform-intrinsic" {
   fn simd_gt<T, U>(x: T, y: T) -> U;
   fn simd_ge<T, U>(x: T, y: T) -> U;
 
+  fn simd_cast<T, U>(x: T) -> U;
+
   fn simd_insert<T, E>(x: T, i: u32, e: E) -> T;
   fn simd_extract<T, E>(x: T, i: u32) -> E;
 }
@@ -419,6 +421,96 @@ impl ulong2 {
   #[inline]
   pub fn bitselect(x: ulong2, y: ulong2, z: long2) -> ulong2 {
     return ulong2::bitcast(long2::bitselect(long2::bitcast(x), long2::bitcast(y), z));
+  }
+
+  #[inline]
+  pub fn to_char(x: ulong2) -> char2 {
+    return unsafe { simd_cast(x) };
+  }
+
+  #[inline]
+  pub fn to_char_sat(x: ulong2) -> char2 {
+    return ulong2::to_char(ulong2::min(x, ulong2::broadcast(std::i8::MAX as u64)));
+  }
+
+  #[inline]
+  pub fn to_uchar(x: ulong2) -> uchar2 {
+    return unsafe { simd_cast(x) };
+  }
+
+  #[inline]
+  pub fn to_uchar_sat(x: ulong2) -> uchar2 {
+    return ulong2::to_uchar(ulong2::min(x, ulong2::broadcast(std::u8::MAX as u64)));
+  }
+
+  #[inline]
+  pub fn to_short(x: ulong2) -> short2 {
+    return unsafe { simd_cast(x) };
+  }
+
+  #[inline]
+  pub fn to_short_sat(x: ulong2) -> short2 {
+    return ulong2::to_short(ulong2::min(x, ulong2::broadcast(std::i16::MAX as u64)));
+  }
+
+  #[inline]
+  pub fn to_ushort(x: ulong2) -> ushort2 {
+    return unsafe { simd_cast(x) };
+  }
+
+  #[inline]
+  pub fn to_ushort_sat(x: ulong2) -> ushort2 {
+    return ulong2::to_ushort(ulong2::min(x, ulong2::broadcast(std::u16::MAX as u64)));
+  }
+
+  #[inline]
+  pub fn to_int(x: ulong2) -> int2 {
+    return unsafe { simd_cast(x) };
+  }
+
+  #[inline]
+  pub fn to_int_sat(x: ulong2) -> int2 {
+    return ulong2::to_int(ulong2::min(x, ulong2::broadcast(std::i32::MAX as u64)));
+  }
+
+  #[inline]
+  pub fn to_uint(x: ulong2) -> uint2 {
+    return unsafe { simd_cast(x) };
+  }
+
+  #[inline]
+  pub fn to_uint_sat(x: ulong2) -> uint2 {
+    return ulong2::to_uint(ulong2::min(x, ulong2::broadcast(std::u32::MAX as u64)));
+  }
+
+  #[inline]
+  pub fn to_float(x: ulong2) -> float2 {
+    return unsafe { simd_cast(x) };
+  }
+
+  #[inline]
+  pub fn to_long(x: ulong2) -> long2 {
+    return unsafe { simd_cast(x) };
+  }
+
+  #[inline]
+  pub fn to_long_sat(x: ulong2) -> long2 {
+    return ulong2::to_long(ulong2::min(x, ulong2::broadcast(std::i64::MAX as u64)));
+  }
+
+  #[inline]
+  pub fn to_ulong(x: ulong2) -> ulong2 {
+    return unsafe { simd_cast(x) };
+  }
+
+  #[inline]
+  pub fn to_ulong_sat(x: ulong2) -> ulong2 {
+    return x;
+  }
+
+  #[inline]
+  pub fn to_double(x: ulong2) -> double2 {
+    return unsafe { simd_cast(x) };
   }
 
   #[inline]

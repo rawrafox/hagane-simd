@@ -4,7 +4,6 @@ use ::*;
 #[repr(C)]
 #[derive(Copy, Clone, Debug)]
 pub struct float2x2(pub float2, pub float2);
-pub type matrix_float2x2 = float2x2;
 
 extern {
   fn __invert_f2(a: float2x2) -> float2x2;

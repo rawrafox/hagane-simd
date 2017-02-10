@@ -27,6 +27,8 @@ extern "platform-intrinsic" {
   fn simd_gt<T, U>(x: T, y: T) -> U;
   fn simd_ge<T, U>(x: T, y: T) -> U;
 
+  fn simd_cast<T, U>(x: T) -> U;
+
   fn simd_insert<T, E>(x: T, i: u32, e: E) -> T;
   fn simd_extract<T, E>(x: T, i: u32) -> E;
 }
@@ -419,6 +421,96 @@ impl uchar4 {
   #[inline]
   pub fn bitselect(x: uchar4, y: uchar4, z: char4) -> uchar4 {
     return uchar4::bitcast(char4::bitselect(char4::bitcast(x), char4::bitcast(y), z));
+  }
+
+  #[inline]
+  pub fn to_char(x: uchar4) -> char4 {
+    return unsafe { simd_cast(x) };
+  }
+
+  #[inline]
+  pub fn to_char_sat(x: uchar4) -> char4 {
+    return uchar4::to_char(uchar4::min(x, uchar4::broadcast(std::i8::MAX as u8)));
+  }
+
+  #[inline]
+  pub fn to_uchar(x: uchar4) -> uchar4 {
+    return unsafe { simd_cast(x) };
+  }
+
+  #[inline]
+  pub fn to_uchar_sat(x: uchar4) -> uchar4 {
+    return x;
+  }
+
+  #[inline]
+  pub fn to_short(x: uchar4) -> short4 {
+    return unsafe { simd_cast(x) };
+  }
+
+  #[inline]
+  pub fn to_short_sat(x: uchar4) -> short4 {
+    return uchar4::to_short(uchar4::min(x, uchar4::broadcast(std::i16::MAX as u8)));
+  }
+
+  #[inline]
+  pub fn to_ushort(x: uchar4) -> ushort4 {
+    return unsafe { simd_cast(x) };
+  }
+
+  #[inline]
+  pub fn to_ushort_sat(x: uchar4) -> ushort4 {
+    return uchar4::to_ushort(x);
+  }
+
+  #[inline]
+  pub fn to_int(x: uchar4) -> int4 {
+    return unsafe { simd_cast(x) };
+  }
+
+  #[inline]
+  pub fn to_int_sat(x: uchar4) -> int4 {
+    return uchar4::to_int(uchar4::min(x, uchar4::broadcast(std::i32::MAX as u8)));
+  }
+
+  #[inline]
+  pub fn to_uint(x: uchar4) -> uint4 {
+    return unsafe { simd_cast(x) };
+  }
+
+  #[inline]
+  pub fn to_uint_sat(x: uchar4) -> uint4 {
+    return uchar4::to_uint(x);
+  }
+
+  #[inline]
+  pub fn to_float(x: uchar4) -> float4 {
+    return unsafe { simd_cast(x) };
+  }
+
+  #[inline]
+  pub fn to_long(x: uchar4) -> long4 {
+    return unsafe { simd_cast(x) };
+  }
+
+  #[inline]
+  pub fn to_long_sat(x: uchar4) -> long4 {
+    return uchar4::to_long(uchar4::min(x, uchar4::broadcast(std::i64::MAX as u8)));
+  }
+
+  #[inline]
+  pub fn to_ulong(x: uchar4) -> ulong4 {
+    return unsafe { simd_cast(x) };
+  }
+
+  #[inline]
+  pub fn to_ulong_sat(x: uchar4) -> ulong4 {
+    return uchar4::to_ulong(x);
+  }
+
+  #[inline]
+  pub fn to_double(x: uchar4) -> double4 {
+    return unsafe { simd_cast(x) };
   }
 
   #[inline]

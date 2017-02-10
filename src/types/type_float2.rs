@@ -20,6 +20,8 @@ extern "platform-intrinsic" {
   fn simd_gt<T, U>(x: T, y: T) -> U;
   fn simd_ge<T, U>(x: T, y: T) -> U;
 
+  fn simd_cast<T, U>(x: T) -> U;
+
   fn simd_insert<T, E>(x: T, i: u32, e: E) -> T;
   fn simd_extract<T, E>(x: T, i: u32) -> E;
 }
@@ -398,6 +400,96 @@ impl float2 {
     let dp = float2::dot(x, n);
     let k = 1.0 - eta * eta * (1.0 - dp * dp);
     return if k >= 0.0 { eta * x - (eta * dp + k.sqrt()) } else { float2::broadcast(0.0) };
+  }
+
+  #[inline]
+  pub fn to_char(x: float2) -> char2 {
+    return unsafe { simd_cast(x) };
+  }
+
+  #[inline]
+  pub fn to_char_sat(x: float2) -> char2 {
+    return float2::to_char(float2::clamp(x, float2::broadcast(std::i8::MIN as f32), float2::broadcast(std::i8::MAX as f32)));
+  }
+
+  #[inline]
+  pub fn to_uchar(x: float2) -> uchar2 {
+    return unsafe { simd_cast(x) };
+  }
+
+  #[inline]
+  pub fn to_uchar_sat(x: float2) -> uchar2 {
+    return float2::to_uchar(float2::clamp(x, float2::broadcast(std::u8::MIN as f32), float2::broadcast(std::u8::MAX as f32)));
+  }
+
+  #[inline]
+  pub fn to_short(x: float2) -> short2 {
+    return unsafe { simd_cast(x) };
+  }
+
+  #[inline]
+  pub fn to_short_sat(x: float2) -> short2 {
+    return float2::to_short(float2::clamp(x, float2::broadcast(std::i16::MIN as f32), float2::broadcast(std::i16::MAX as f32)));
+  }
+
+  #[inline]
+  pub fn to_ushort(x: float2) -> ushort2 {
+    return unsafe { simd_cast(x) };
+  }
+
+  #[inline]
+  pub fn to_ushort_sat(x: float2) -> ushort2 {
+    return float2::to_ushort(float2::clamp(x, float2::broadcast(std::u16::MIN as f32), float2::broadcast(std::u16::MAX as f32)));
+  }
+
+  #[inline]
+  pub fn to_int(x: float2) -> int2 {
+    return unsafe { simd_cast(x) };
+  }
+
+  #[inline]
+  pub fn to_int_sat(x: float2) -> int2 {
+    return float2::to_int(float2::clamp(x, float2::broadcast(std::i32::MIN as f32), float2::broadcast(std::i32::MAX as f32)));
+  }
+
+  #[inline]
+  pub fn to_uint(x: float2) -> uint2 {
+    return unsafe { simd_cast(x) };
+  }
+
+  #[inline]
+  pub fn to_uint_sat(x: float2) -> uint2 {
+    return float2::to_uint(float2::clamp(x, float2::broadcast(std::u32::MIN as f32), float2::broadcast(std::u32::MAX as f32)));
+  }
+
+  #[inline]
+  pub fn to_float(x: float2) -> float2 {
+    return unsafe { simd_cast(x) };
+  }
+
+  #[inline]
+  pub fn to_long(x: float2) -> long2 {
+    return unsafe { simd_cast(x) };
+  }
+
+  #[inline]
+  pub fn to_long_sat(x: float2) -> long2 {
+    return float2::to_long(float2::clamp(x, float2::broadcast(std::i64::MIN as f32), float2::broadcast(std::i64::MAX as f32)));
+  }
+
+  #[inline]
+  pub fn to_ulong(x: float2) -> ulong2 {
+    return unsafe { simd_cast(x) };
+  }
+
+  #[inline]
+  pub fn to_ulong_sat(x: float2) -> ulong2 {
+    return float2::to_ulong(float2::clamp(x, float2::broadcast(std::u64::MIN as f32), float2::broadcast(std::u64::MAX as f32)));
+  }
+
+  #[inline]
+  pub fn to_double(x: float2) -> double2 {
+    return unsafe { simd_cast(x) };
   }
 
   #[inline]

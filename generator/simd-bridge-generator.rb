@@ -43,7 +43,6 @@ module Bridge
 
           if width == 1
             o.puts("pub type #{name} = #{attributes.fetch(:type)};", pad: true)
-            o.puts("pub type vector_#{name} = #{name};")
           else
             content = (["pub #{attributes.fetch(:type)}"] * width).join(", ")
 
@@ -77,6 +76,8 @@ module Bridge
               o.puts("fn simd_le<T, U>(x: T, y: T) -> U;")
               o.puts("fn simd_gt<T, U>(x: T, y: T) -> U;")
               o.puts("fn simd_ge<T, U>(x: T, y: T) -> U;")
+
+              o.puts("fn simd_cast<T, U>(x: T) -> U;", pad: true)
 
               o.puts("fn simd_insert<T, E>(x: T, i: u32, e: E) -> T;", pad: true)
               o.puts("fn simd_extract<T, E>(x: T, i: u32) -> E;")
@@ -603,6 +604,27 @@ module Bridge
                 # end
               end
 
+              # Conversion
+              
+              self.conversion(o, type, "char", width)
+              self.conversion(o, type, "char", width, saturate: true)
+              self.conversion(o, type, "uchar", width)
+              self.conversion(o, type, "uchar", width, saturate: true)
+              self.conversion(o, type, "short", width)
+              self.conversion(o, type, "short", width, saturate: true)
+              self.conversion(o, type, "ushort", width)
+              self.conversion(o, type, "ushort", width, saturate: true)
+              self.conversion(o, type, "int", width)
+              self.conversion(o, type, "int", width, saturate: true)
+              self.conversion(o, type, "uint", width)
+              self.conversion(o, type, "uint", width, saturate: true)
+              self.conversion(o, type, "float", width)
+              self.conversion(o, type, "long", width)
+              self.conversion(o, type, "long", width, saturate: true)
+              self.conversion(o, type, "ulong", width)
+              self.conversion(o, type, "ulong", width, saturate: true)
+              self.conversion(o, type, "double", width)
+
               # Swizzles
 
               case width
@@ -697,7 +719,6 @@ module Bridge
             o.puts("#[repr(C)]", pad: true)
             o.puts("#[derive(Copy, Clone, Debug)]")
             o.puts("pub struct #{name}(#{content});")
-            o.puts("pub type matrix_#{name} = #{name};")
 
             if i == j
               if ["f32", "f64"].include?(scalar)
@@ -855,6 +876,49 @@ module Bridge
       end
 
       files
+    end
+    
+    def self.conversion(o, in_ty, out_ty, width, saturate: false)
+      in_ty = TYPES_BY_NAME.fetch(in_ty)
+      out_ty = TYPES_BY_NAME.fetch(out_ty)
+
+      in_scalar = "#{in_ty.fetch(:type)}"
+      in_type = "#{in_ty.fetch(:opencl)}"
+      in_name = "#{in_type}#{width}"
+      in_size = in_ty.fetch(:size)
+      in_kind = in_ty.fetch(:kind)
+
+      out_scalar = "#{out_ty.fetch(:type)}"
+      out_type = "#{out_ty.fetch(:opencl)}"
+      out_name = "#{out_type}#{width}"
+      out_size = out_ty.fetch(:size)
+      out_kind = out_ty.fetch(:kind)
+
+      o.puts("#[inline]", pad: true)
+      o.block("pub fn to_#{out_type}#{"_sat" if saturate}(x: #{in_name}) -> #{out_name}") do |o|
+        if saturate
+          min = "#{in_name}::broadcast(std::#{out_scalar}::MIN as #{in_scalar})"
+          max = "#{in_name}::broadcast(std::#{out_scalar}::MAX as #{in_scalar})"
+
+          if in_scalar == out_scalar
+            o.puts("return x;")
+          elsif in_kind == out_kind && in_size < out_size
+            o.puts("return #{in_name}::to_#{out_type}(x);")
+          elsif in_kind.include?(:signed) && out_kind.include?(:unsigned) && in_size <= out_size
+            o.puts("return #{in_name}::to_#{out_type}(#{in_name}::max(x, #{in_name}::broadcast(0)));")
+          elsif in_kind.include?(:unsigned)
+            o.puts("return #{in_name}::to_#{out_type}(#{in_name}::min(x, #{max}));")
+          else
+            o.puts("return #{in_name}::to_#{out_type}(#{in_name}::clamp(x, #{min}, #{max}));")
+          end
+        else
+          if width == 3 && !in_kind.include?(:float) && in_size < out_size # TODO: Fix this compiler bug
+            o.puts("return #{out_name}(x.0 as #{out_scalar}, x.1 as #{out_scalar}, x.2 as #{out_scalar});")
+          else
+            o.puts("return unsafe { simd_cast(x) };")
+          end
+        end
+      end
     end
   end
 end

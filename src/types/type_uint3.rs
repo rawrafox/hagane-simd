@@ -27,6 +27,8 @@ extern "platform-intrinsic" {
   fn simd_gt<T, U>(x: T, y: T) -> U;
   fn simd_ge<T, U>(x: T, y: T) -> U;
 
+  fn simd_cast<T, U>(x: T) -> U;
+
   fn simd_insert<T, E>(x: T, i: u32, e: E) -> T;
   fn simd_extract<T, E>(x: T, i: u32) -> E;
 }
@@ -419,6 +421,96 @@ impl uint3 {
   #[inline]
   pub fn bitselect(x: uint3, y: uint3, z: int3) -> uint3 {
     return uint3::bitcast(int3::bitselect(int3::bitcast(x), int3::bitcast(y), z));
+  }
+
+  #[inline]
+  pub fn to_char(x: uint3) -> char3 {
+    return unsafe { simd_cast(x) };
+  }
+
+  #[inline]
+  pub fn to_char_sat(x: uint3) -> char3 {
+    return uint3::to_char(uint3::min(x, uint3::broadcast(std::i8::MAX as u32)));
+  }
+
+  #[inline]
+  pub fn to_uchar(x: uint3) -> uchar3 {
+    return unsafe { simd_cast(x) };
+  }
+
+  #[inline]
+  pub fn to_uchar_sat(x: uint3) -> uchar3 {
+    return uint3::to_uchar(uint3::min(x, uint3::broadcast(std::u8::MAX as u32)));
+  }
+
+  #[inline]
+  pub fn to_short(x: uint3) -> short3 {
+    return unsafe { simd_cast(x) };
+  }
+
+  #[inline]
+  pub fn to_short_sat(x: uint3) -> short3 {
+    return uint3::to_short(uint3::min(x, uint3::broadcast(std::i16::MAX as u32)));
+  }
+
+  #[inline]
+  pub fn to_ushort(x: uint3) -> ushort3 {
+    return unsafe { simd_cast(x) };
+  }
+
+  #[inline]
+  pub fn to_ushort_sat(x: uint3) -> ushort3 {
+    return uint3::to_ushort(uint3::min(x, uint3::broadcast(std::u16::MAX as u32)));
+  }
+
+  #[inline]
+  pub fn to_int(x: uint3) -> int3 {
+    return unsafe { simd_cast(x) };
+  }
+
+  #[inline]
+  pub fn to_int_sat(x: uint3) -> int3 {
+    return uint3::to_int(uint3::min(x, uint3::broadcast(std::i32::MAX as u32)));
+  }
+
+  #[inline]
+  pub fn to_uint(x: uint3) -> uint3 {
+    return unsafe { simd_cast(x) };
+  }
+
+  #[inline]
+  pub fn to_uint_sat(x: uint3) -> uint3 {
+    return x;
+  }
+
+  #[inline]
+  pub fn to_float(x: uint3) -> float3 {
+    return unsafe { simd_cast(x) };
+  }
+
+  #[inline]
+  pub fn to_long(x: uint3) -> long3 {
+    return long3(x.0 as i64, x.1 as i64, x.2 as i64);
+  }
+
+  #[inline]
+  pub fn to_long_sat(x: uint3) -> long3 {
+    return uint3::to_long(uint3::min(x, uint3::broadcast(std::i64::MAX as u32)));
+  }
+
+  #[inline]
+  pub fn to_ulong(x: uint3) -> ulong3 {
+    return ulong3(x.0 as u64, x.1 as u64, x.2 as u64);
+  }
+
+  #[inline]
+  pub fn to_ulong_sat(x: uint3) -> ulong3 {
+    return uint3::to_ulong(x);
+  }
+
+  #[inline]
+  pub fn to_double(x: uint3) -> double3 {
+    return double3(x.0 as f64, x.1 as f64, x.2 as f64);
   }
 
   #[inline]

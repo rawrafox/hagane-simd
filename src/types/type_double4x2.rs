@@ -4,7 +4,6 @@ use ::*;
 #[repr(C)]
 #[derive(Copy, Clone, Debug)]
 pub struct double4x2(pub double2, pub double2, pub double2, pub double2);
-pub type matrix_double4x2 = double4x2;
 
 impl std::ops::Add for double4x2 {
   type Output = Self;

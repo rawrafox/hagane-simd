@@ -4,7 +4,6 @@ use ::*;
 #[repr(C)]
 #[derive(Copy, Clone, Debug)]
 pub struct double3x3(pub double3, pub double3, pub double3);
-pub type matrix_double3x3 = double3x3;
 
 extern {
   fn __invert_d3(a: double3x3) -> double3x3;
