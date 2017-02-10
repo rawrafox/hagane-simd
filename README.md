@@ -13,22 +13,12 @@ Right now you can regenerate the source code from the Ruby script via `rake`, th
 This is a TODO list, a check means that it is "done".
 
  - [ ] Vectors
-   - [ ] Types
-     - [x] `char`
-     - [x] `uchar`
-     - [x] `short`
-     - [x] `ushort`
-     - [x] `int`
-     - [x] `uint`
-     - [x] `long`
-     - [x] `ulong`
-     - [ ] `half` (blocked on compiler)
-     - [x] `float`
-     - [x] `double`
+   - [ ] `half` type (blocked on compiler)
+   - [ ] `rint` function (blocked on stdlib)
+   - [ ] Vector and scalars constructors (blocked on compiler)
+   - [ ] Vector and vector constructors (blocked on compiler)
+   - [ ] Arbitrary mix constructors (blocked on compiler)
    - [ ] Widths
-     - [x] 2
-     - [x] 3
-     - [x] 4
      - [ ] 8
      - [ ] 16
    - [ ] Swizzling (partially blocked on compiler)
@@ -36,29 +26,7 @@ This is a TODO list, a check means that it is "done".
      - [ ] `rgba` specifier
      - [ ] `s0123456789abcdef` specifier
      - [ ] `s0123456789ABCDEF` specifier
-     - [x] `hi` specifier
-     - [x] `lo` specifier
-     - [x] `odd` specifier
-     - [x] `even` specifier
-   - [ ] Constructors
-     - [x] Basic "scalar" constructor
-     - [ ] Vector and scalars constructor (blocked on compiler)
-     - [ ] Vector and vector constructor (blocked on compiler)
-     - [ ] Arbitrary mix constructor (blocked on compiler)
    - [ ] Constants
-   - [x] Operators
-   - [x] Logical
-   - [x] Common Functions
-   - [x] Conversion Functions
-   - [ ] Math Functions
-     - [x] `copysign`
-     - [x] `sqrt`
-     - [x] `ceil`
-     - [x] `floor`
-     - [ ] `rint` (blocked on stdlib)
-     - [x] `trunc`
-     - [x] `cos`
-     - [x] `sin`
    - [ ] Extended Math Functions (From OpenCL)
      - [ ] `acos`
      - [ ] `acosh`
@@ -83,10 +51,6 @@ This is a TODO list, a check means that it is "done".
      - [ ] `fabs`
      - [ ] `fdim`
      - [ ] `fma`
-     - [ ] `fmax`
-     - [ ] `fmax` (vector / scalar)
-     - [ ] `fmin`
-     - [ ] `fmin` (vector / scalar)
      - [ ] `fmod`
      - [ ] `fract`
      - [ ] `frexp`
@@ -101,7 +65,6 @@ This is a TODO list, a check means that it is "done".
      - [ ] `log10`
      - [ ] `log1p`
      - [ ] `logb`
-     - [ ] `mad`
      - [ ] `maxmag`
      - [ ] `minmag`
      - [ ] `modf`
@@ -113,7 +76,6 @@ This is a TODO list, a check means that it is "done".
      - [ ] `remainder`
      - [ ] `remquo`
      - [ ] `rootn`
-     - [ ] `round`
      - [ ] `rsqrt`
      - [ ] `sincos`
      - [ ] `sinh`
