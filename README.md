@@ -37,11 +37,9 @@ This is a TODO list, a check means that it is "done".
      - [ ] `s0123456789abcdef` specifier
      - [ ] `s0123456789ABCDEF` specifier
      - [x] `hi` specifier
-     - [ ] `high` specifier
      - [x] `lo` specifier
-     - [ ] `low` specifier
-     - [ ] `odd` specifier
-     - [ ] `even` specifier
+     - [x] `odd` specifier
+     - [x] `even` specifier
    - [ ] Constructors
      - [x] Basic "scalar" constructor
      - [ ] Vector and scalars constructor (blocked on compiler)
@@ -50,25 +48,7 @@ This is a TODO list, a check means that it is "done".
    - [ ] Constants
    - [x] Operators
    - [x] Logical
-     - [x] `all`
-     - [x] `any`
-     - [x] `select`
-     - [x] `bitselect`
    - [x] Common Functions
-     - [x] `abs`
-     - [x] `max`
-     - [x] `min`
-     - [x] `clamp`
-     - [x] `sign`
-     - [x] `mix`
-     - [x] `recip`
-     - [x] `rsqrt`
-     - [x] `fract`
-     - [x] `step`
-     - [x] `smoothstep`
-     - [x] `reduce_add`
-     - [x] `reduce_min`
-     - [x] `reduce_max`
    - [ ] Conversion Functions
    - [ ] Math Functions
      - [x] `copysign`

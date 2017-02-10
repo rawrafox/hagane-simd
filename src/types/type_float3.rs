@@ -216,6 +216,11 @@ impl float3 {
   }
 
   #[inline]
+  pub fn madd(x: float3, y: float3, z: float3) -> float3 {
+    return x * y + z;
+  }
+
+  #[inline]
   pub fn abs(x: float3) -> float3 {
     return float3(x.0.abs(), x.1.abs(), x.2.abs());
   }
@@ -404,5 +409,15 @@ impl float3 {
   #[inline]
   pub fn hi(self) -> float2 {
     return float2(self.2, 0.0);
+  }
+
+  #[inline]
+  pub fn odd(self) -> float2 {
+    return float2(self.1, 0.0);
+  }
+
+  #[inline]
+  pub fn even(self) -> float2 {
+    return float2(self.0, self.2);
   }
 }

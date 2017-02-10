@@ -367,6 +367,11 @@ impl ulong4 {
   }
 
   #[inline]
+  pub fn madd(x: ulong4, y: ulong4, z: ulong4) -> ulong4 {
+    return x * y + z;
+  }
+
+  #[inline]
   pub fn max(x: ulong4, y: ulong4) -> ulong4 {
     return ulong4::bitselect(x, y, ulong4::gt(y, x));
   }
@@ -419,5 +424,15 @@ impl ulong4 {
   #[inline]
   pub fn hi(self) -> ulong2 {
     return ulong2(self.2, self.3);
+  }
+
+  #[inline]
+  pub fn odd(self) -> ulong2 {
+    return ulong2(self.1, self.3);
+  }
+
+  #[inline]
+  pub fn even(self) -> ulong2 {
+    return ulong2(self.0, self.2);
   }
 }

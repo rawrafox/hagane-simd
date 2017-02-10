@@ -367,6 +367,11 @@ impl uint4 {
   }
 
   #[inline]
+  pub fn madd(x: uint4, y: uint4, z: uint4) -> uint4 {
+    return x * y + z;
+  }
+
+  #[inline]
   pub fn max(x: uint4, y: uint4) -> uint4 {
     return uint4::bitselect(x, y, uint4::gt(y, x));
   }
@@ -419,5 +424,15 @@ impl uint4 {
   #[inline]
   pub fn hi(self) -> uint2 {
     return uint2(self.2, self.3);
+  }
+
+  #[inline]
+  pub fn odd(self) -> uint2 {
+    return uint2(self.1, self.3);
+  }
+
+  #[inline]
+  pub fn even(self) -> uint2 {
+    return uint2(self.0, self.2);
   }
 }

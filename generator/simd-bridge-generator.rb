@@ -246,6 +246,13 @@ module Bridge
                 end
               end
 
+              # Additions
+
+              o.puts("#[inline]", pad: true)
+              o.block("pub fn madd(x: #{name}, y: #{name}, z: #{name}) -> #{name}") do |o|
+                o.puts("return x * y + z;")
+              end
+
               # Common
 
               if kind.include?(:signed)
@@ -598,13 +605,23 @@ module Bridge
               case width
               when 2
                 o.puts("#[inline]", pad: true)
-                o.block("pub fn lo(self) -> #{type}#{width / 2}") do |o|
+                o.block("pub fn lo(self) -> #{scalar}") do |o|
                   o.puts("return self.0;")
                 end
 
                 o.puts("#[inline]", pad: true)
-                o.block("pub fn hi(self) -> #{type}#{width / 2}") do |o|
+                o.block("pub fn hi(self) -> #{scalar}") do |o|
                   o.puts("return self.1;")
+                end
+
+                o.puts("#[inline]", pad: true)
+                o.block("pub fn odd(self) -> #{scalar}") do |o|
+                  o.puts("return self.1;")
+                end
+
+                o.puts("#[inline]", pad: true)
+                o.block("pub fn even(self) -> #{scalar}") do |o|
+                  o.puts("return self.0;")
                 end
               when 3
                 o.puts("#[inline]", pad: true)
@@ -616,6 +633,16 @@ module Bridge
                 o.block("pub fn hi(self) -> #{type}2") do |o|
                   o.puts("return #{type}2(self.2, 0#{".0" if kind.include?(:float)});")
                 end
+
+                o.puts("#[inline]", pad: true)
+                o.block("pub fn odd(self) -> #{type}2") do |o|
+                  o.puts("return #{type}2(self.1, 0#{".0" if kind.include?(:float)});")
+                end
+
+                o.puts("#[inline]", pad: true)
+                o.block("pub fn even(self) -> #{type}2") do |o|
+                  o.puts("return #{type}2(self.0, self.2);")
+                end
               else
                 o.puts("#[inline]", pad: true)
                 o.block("pub fn lo(self) -> #{type}#{width / 2}") do |o|
@@ -625,6 +652,16 @@ module Bridge
                 o.puts("#[inline]", pad: true)
                 o.block("pub fn hi(self) -> #{type}#{width / 2}") do |o|
                   o.puts("return #{type}#{width / 2}(#{(width / 2).times.map { |i| "self.#{width / 2 + i}"}.join(", ")});")
+                end
+
+                o.puts("#[inline]", pad: true)
+                o.block("pub fn odd(self) -> #{type}#{width / 2}") do |o|
+                  o.puts("return #{type}#{width / 2}(#{(width / 2).times.map { |i| "self.#{2 * i + 1}"}.join(", ")});")
+                end
+
+                o.puts("#[inline]", pad: true)
+                o.block("pub fn even(self) -> #{type}#{width / 2}") do |o|
+                  o.puts("return #{type}#{width / 2}(#{(width / 2).times.map { |i| "self.#{2 * i}"}.join(", ")});")
                 end
               end
             end

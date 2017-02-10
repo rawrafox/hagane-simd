@@ -216,6 +216,11 @@ impl double2 {
   }
 
   #[inline]
+  pub fn madd(x: double2, y: double2, z: double2) -> double2 {
+    return x * y + z;
+  }
+
+  #[inline]
   pub fn abs(x: double2) -> double2 {
     return double2(x.0.abs(), x.1.abs());
   }
@@ -396,12 +401,22 @@ impl double2 {
   }
 
   #[inline]
-  pub fn lo(self) -> double1 {
+  pub fn lo(self) -> f64 {
     return self.0;
   }
 
   #[inline]
-  pub fn hi(self) -> double1 {
+  pub fn hi(self) -> f64 {
     return self.1;
+  }
+
+  #[inline]
+  pub fn odd(self) -> f64 {
+    return self.1;
+  }
+
+  #[inline]
+  pub fn even(self) -> f64 {
+    return self.0;
   }
 }

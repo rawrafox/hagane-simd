@@ -367,6 +367,11 @@ impl short3 {
   }
 
   #[inline]
+  pub fn madd(x: short3, y: short3, z: short3) -> short3 {
+    return x * y + z;
+  }
+
+  #[inline]
   pub fn abs(x: short3) -> short3 {
     let mask = x >> 15;
     return (x ^ mask) - mask;
@@ -425,5 +430,15 @@ impl short3 {
   #[inline]
   pub fn hi(self) -> short2 {
     return short2(self.2, 0);
+  }
+
+  #[inline]
+  pub fn odd(self) -> short2 {
+    return short2(self.1, 0);
+  }
+
+  #[inline]
+  pub fn even(self) -> short2 {
+    return short2(self.0, self.2);
   }
 }

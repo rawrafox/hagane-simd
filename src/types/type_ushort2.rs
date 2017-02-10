@@ -367,6 +367,11 @@ impl ushort2 {
   }
 
   #[inline]
+  pub fn madd(x: ushort2, y: ushort2, z: ushort2) -> ushort2 {
+    return x * y + z;
+  }
+
+  #[inline]
   pub fn max(x: ushort2, y: ushort2) -> ushort2 {
     return ushort2::bitselect(x, y, ushort2::gt(y, x));
   }
@@ -412,12 +417,22 @@ impl ushort2 {
   }
 
   #[inline]
-  pub fn lo(self) -> ushort1 {
+  pub fn lo(self) -> u16 {
     return self.0;
   }
 
   #[inline]
-  pub fn hi(self) -> ushort1 {
+  pub fn hi(self) -> u16 {
     return self.1;
+  }
+
+  #[inline]
+  pub fn odd(self) -> u16 {
+    return self.1;
+  }
+
+  #[inline]
+  pub fn even(self) -> u16 {
+    return self.0;
   }
 }

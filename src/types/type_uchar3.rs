@@ -367,6 +367,11 @@ impl uchar3 {
   }
 
   #[inline]
+  pub fn madd(x: uchar3, y: uchar3, z: uchar3) -> uchar3 {
+    return x * y + z;
+  }
+
+  #[inline]
   pub fn max(x: uchar3, y: uchar3) -> uchar3 {
     return uchar3::bitselect(x, y, uchar3::gt(y, x));
   }
@@ -419,5 +424,15 @@ impl uchar3 {
   #[inline]
   pub fn hi(self) -> uchar2 {
     return uchar2(self.2, 0);
+  }
+
+  #[inline]
+  pub fn odd(self) -> uchar2 {
+    return uchar2(self.1, 0);
+  }
+
+  #[inline]
+  pub fn even(self) -> uchar2 {
+    return uchar2(self.0, self.2);
   }
 }

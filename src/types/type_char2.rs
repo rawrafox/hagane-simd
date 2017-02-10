@@ -367,6 +367,11 @@ impl char2 {
   }
 
   #[inline]
+  pub fn madd(x: char2, y: char2, z: char2) -> char2 {
+    return x * y + z;
+  }
+
+  #[inline]
   pub fn abs(x: char2) -> char2 {
     let mask = x >> 7;
     return (x ^ mask) - mask;
@@ -418,12 +423,22 @@ impl char2 {
   }
 
   #[inline]
-  pub fn lo(self) -> char1 {
+  pub fn lo(self) -> i8 {
     return self.0;
   }
 
   #[inline]
-  pub fn hi(self) -> char1 {
+  pub fn hi(self) -> i8 {
     return self.1;
+  }
+
+  #[inline]
+  pub fn odd(self) -> i8 {
+    return self.1;
+  }
+
+  #[inline]
+  pub fn even(self) -> i8 {
+    return self.0;
   }
 }

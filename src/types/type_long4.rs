@@ -367,6 +367,11 @@ impl long4 {
   }
 
   #[inline]
+  pub fn madd(x: long4, y: long4, z: long4) -> long4 {
+    return x * y + z;
+  }
+
+  #[inline]
   pub fn abs(x: long4) -> long4 {
     let mask = x >> 63;
     return (x ^ mask) - mask;
@@ -425,5 +430,15 @@ impl long4 {
   #[inline]
   pub fn hi(self) -> long2 {
     return long2(self.2, self.3);
+  }
+
+  #[inline]
+  pub fn odd(self) -> long2 {
+    return long2(self.1, self.3);
+  }
+
+  #[inline]
+  pub fn even(self) -> long2 {
+    return long2(self.0, self.2);
   }
 }
