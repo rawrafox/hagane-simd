@@ -49,7 +49,7 @@ This is a TODO list, a check means that it is "done".
    - [x] Operators
    - [x] Logical
    - [x] Common Functions
-   - [ ] Conversion Functions
+   - [x] Conversion Functions
    - [ ] Math Functions
      - [x] `copysign`
      - [x] `sqrt`
