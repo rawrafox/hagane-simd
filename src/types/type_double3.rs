@@ -334,6 +334,69 @@ impl double3 {
   }
 
   #[inline]
+  pub fn dot(x: double3, y: double3) -> f64 {
+    return double3::reduce_add(x * y);
+  }
+
+  #[inline]
+  pub fn project(x: double3, y: double3) -> double3 {
+    return double3::dot(x, y) / double3::dot(y, y) * y;
+  }
+
+  #[inline]
+  pub fn length(x: double3) -> f64 {
+    return double3::length_squared(x).sqrt();
+  }
+
+  #[inline]
+  pub fn length_squared(x: double3) -> f64 {
+    return double3::dot(x, x);
+  }
+
+  #[inline]
+  pub fn norm_one(x: double3) -> f64 {
+    return double3::reduce_add(double3::abs(x));
+  }
+
+  #[inline]
+  pub fn norm_inf(x: double3) -> f64 {
+    return double3::reduce_max(double3::abs(x));
+  }
+
+  #[inline]
+  pub fn distance(x: double3, y: double3) -> f64 {
+    return double3::length(x - y);
+  }
+
+  #[inline]
+  pub fn distance_squared(x: double3, y: double3) -> f64 {
+    return double3::length_squared(x - y);
+  }
+
+  #[inline]
+  pub fn normalize(x: double3) -> double3 {
+    return x * double3::rsqrt(double3::broadcast(double3::length_squared(x)));
+  }
+
+  #[inline]
+  pub fn cross(x: double3, y: double3) -> double3 {
+    let a = x * double3(y.2, y.1, y.0) - double3(x.2, x.1, x.0) * y;
+    return double3(a.2, a.1, a.0);
+  }
+
+  #[inline]
+  pub fn reflect(x: double3, n: double3) -> double3 {
+    return x - 2.0 * double3::dot(x, n) * n;
+  }
+
+  #[inline]
+  pub fn refract(x: double3, n: double3, eta: f64) -> double3 {
+    let dp = double3::dot(x, n);
+    let k = 1.0 - eta * eta * (1.0 - dp * dp);
+    return if k >= 0.0 { eta * x - (eta * dp + k.sqrt()) } else { double3::broadcast(0.0) };
+  }
+
+  #[inline]
   pub fn lo(self) -> double2 {
     return double2(self.0, self.1);
   }

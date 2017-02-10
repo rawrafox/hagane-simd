@@ -334,6 +334,68 @@ impl float2 {
   }
 
   #[inline]
+  pub fn dot(x: float2, y: float2) -> f32 {
+    return float2::reduce_add(x * y);
+  }
+
+  #[inline]
+  pub fn project(x: float2, y: float2) -> float2 {
+    return float2::dot(x, y) / float2::dot(y, y) * y;
+  }
+
+  #[inline]
+  pub fn length(x: float2) -> f32 {
+    return float2::length_squared(x).sqrt();
+  }
+
+  #[inline]
+  pub fn length_squared(x: float2) -> f32 {
+    return float2::dot(x, x);
+  }
+
+  #[inline]
+  pub fn norm_one(x: float2) -> f32 {
+    return float2::reduce_add(float2::abs(x));
+  }
+
+  #[inline]
+  pub fn norm_inf(x: float2) -> f32 {
+    return float2::reduce_max(float2::abs(x));
+  }
+
+  #[inline]
+  pub fn distance(x: float2, y: float2) -> f32 {
+    return float2::length(x - y);
+  }
+
+  #[inline]
+  pub fn distance_squared(x: float2, y: float2) -> f32 {
+    return float2::length_squared(x - y);
+  }
+
+  #[inline]
+  pub fn normalize(x: float2) -> float2 {
+    return x * float2::rsqrt(float2::broadcast(float2::length_squared(x)));
+  }
+
+  #[inline]
+  pub fn cross(x: float2, y: float2) -> float3 {
+    return float3(0.0, 0.0, x.0 * y.1 - x.1 * y.0);
+  }
+
+  #[inline]
+  pub fn reflect(x: float2, n: float2) -> float2 {
+    return x - 2.0 * float2::dot(x, n) * n;
+  }
+
+  #[inline]
+  pub fn refract(x: float2, n: float2, eta: f32) -> float2 {
+    let dp = float2::dot(x, n);
+    let k = 1.0 - eta * eta * (1.0 - dp * dp);
+    return if k >= 0.0 { eta * x - (eta * dp + k.sqrt()) } else { float2::broadcast(0.0) };
+  }
+
+  #[inline]
   pub fn lo(self) -> float1 {
     return self.0;
   }

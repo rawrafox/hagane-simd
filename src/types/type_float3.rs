@@ -334,6 +334,69 @@ impl float3 {
   }
 
   #[inline]
+  pub fn dot(x: float3, y: float3) -> f32 {
+    return float3::reduce_add(x * y);
+  }
+
+  #[inline]
+  pub fn project(x: float3, y: float3) -> float3 {
+    return float3::dot(x, y) / float3::dot(y, y) * y;
+  }
+
+  #[inline]
+  pub fn length(x: float3) -> f32 {
+    return float3::length_squared(x).sqrt();
+  }
+
+  #[inline]
+  pub fn length_squared(x: float3) -> f32 {
+    return float3::dot(x, x);
+  }
+
+  #[inline]
+  pub fn norm_one(x: float3) -> f32 {
+    return float3::reduce_add(float3::abs(x));
+  }
+
+  #[inline]
+  pub fn norm_inf(x: float3) -> f32 {
+    return float3::reduce_max(float3::abs(x));
+  }
+
+  #[inline]
+  pub fn distance(x: float3, y: float3) -> f32 {
+    return float3::length(x - y);
+  }
+
+  #[inline]
+  pub fn distance_squared(x: float3, y: float3) -> f32 {
+    return float3::length_squared(x - y);
+  }
+
+  #[inline]
+  pub fn normalize(x: float3) -> float3 {
+    return x * float3::rsqrt(float3::broadcast(float3::length_squared(x)));
+  }
+
+  #[inline]
+  pub fn cross(x: float3, y: float3) -> float3 {
+    let a = x * float3(y.2, y.1, y.0) - float3(x.2, x.1, x.0) * y;
+    return float3(a.2, a.1, a.0);
+  }
+
+  #[inline]
+  pub fn reflect(x: float3, n: float3) -> float3 {
+    return x - 2.0 * float3::dot(x, n) * n;
+  }
+
+  #[inline]
+  pub fn refract(x: float3, n: float3, eta: f32) -> float3 {
+    let dp = float3::dot(x, n);
+    let k = 1.0 - eta * eta * (1.0 - dp * dp);
+    return if k >= 0.0 { eta * x - (eta * dp + k.sqrt()) } else { float3::broadcast(0.0) };
+  }
+
+  #[inline]
   pub fn lo(self) -> float2 {
     return float2(self.0, self.1);
   }

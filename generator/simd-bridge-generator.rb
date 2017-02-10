@@ -18,7 +18,7 @@ module Bridge
       { size: 8, max_width: 4, type: 'u64', opencl: "ulong", kind: %i(unsigned integer), bool: "long"  },
       { size: 8, max_width: 4, type: 'f64', opencl: "double", kind: %i(float), bool: "long", max_matrix_size: 4 }
     ]
-    
+
     TYPES_BY_NAME = TYPES.map { |x| [x[:opencl], x] }.to_h
 
     WIDTHS = [1, 2, 3, 4, 8, 16]
@@ -427,7 +427,7 @@ module Bridge
                 # o.puts("#[inline]", pad: true)
                 # o.block("pub fn rint(x: #{name}) -> #{name}") do |o|
                 #   result = width.times.map { |i| "x.#{i}.rint()" }.join(", ")
-                # 
+                #
                 #   o.puts("return #{name}(#{result});")
                 # end
 
@@ -495,18 +495,103 @@ module Bridge
 
               # Geometry
 
-              # if kind.include?(:float)
-              #   o.puts("#[inline]", pad: true)
-              #   o.block("pub fn length_squared(self) -> #{scalar}") do |o|
-              #     o.puts("return self.dot(self);")
-              #   end
-              #
-              #   o.puts("#[inline]", pad: true)
-              #   o.block("pub fn normalize(self) -> #{name}") do |o|
-              #     o.puts("return self / self.length_squared().sqrt();") # TODO: Use some rsqrt approximation
-              #   end
-              # end
+              if kind.include?(:float)
+                o.puts("#[inline]", pad: true)
+                o.block("pub fn dot(x: #{name}, y: #{name}) -> #{scalar}") do |o|
+                  o.puts("return #{name}::reduce_add(x * y);")
+                end
 
+                o.puts("#[inline]", pad: true)
+                o.block("pub fn project(x: #{name}, y: #{name}) -> #{name}") do |o|
+                  o.puts("return #{name}::dot(x, y) / #{name}::dot(y, y) * y;")
+                end
+
+                o.puts("#[inline]", pad: true)
+                o.block("pub fn length(x: #{name}) -> #{scalar}") do |o|
+                  o.puts("return #{name}::length_squared(x).sqrt();")
+                end
+
+                o.puts("#[inline]", pad: true)
+                o.block("pub fn length_squared(x: #{name}) -> #{scalar}") do |o|
+                  o.puts("return #{name}::dot(x, x);")
+                end
+
+                o.puts("#[inline]", pad: true)
+                o.block("pub fn norm_one(x: #{name}) -> #{scalar}") do |o|
+                  o.puts("return #{name}::reduce_add(#{name}::abs(x));")
+                end
+
+                o.puts("#[inline]", pad: true)
+                o.block("pub fn norm_inf(x: #{name}) -> #{scalar}") do |o|
+                  o.puts("return #{name}::reduce_max(#{name}::abs(x));")
+                end
+
+                o.puts("#[inline]", pad: true)
+                o.block("pub fn distance(x: #{name}, y: #{name}) -> #{scalar}") do |o|
+                  o.puts("return #{name}::length(x - y);")
+                end
+
+                o.puts("#[inline]", pad: true)
+                o.block("pub fn distance_squared(x: #{name}, y: #{name}) -> #{scalar}") do |o|
+                  o.puts("return #{name}::length_squared(x - y);")
+                end
+
+                o.puts("#[inline]", pad: true)
+                o.block("pub fn normalize(x: #{name}) -> #{name}") do |o|
+                  o.puts("return x * #{name}::rsqrt(#{name}::broadcast(#{name}::length_squared(x)));")
+                end
+
+                case width
+                when 2
+                  o.puts("#[inline]", pad: true)
+                  o.block("pub fn cross(x: #{name}, y: #{name}) -> #{type}3") do |o|
+                    o.puts("return #{type}3(0.0, 0.0, x.0 * y.1 - x.1 * y.0);")
+                  end
+                when 3
+                  o.puts("#[inline]", pad: true)
+                  o.block("pub fn cross(x: #{name}, y: #{name}) -> #{name}") do |o|
+                    o.puts("let a = x * #{name}(y.2, y.1, y.0) - #{name}(x.2, x.1, x.0) * y;")
+
+                    o.puts("return #{name}(a.2, a.1, a.0);")
+                  end
+                end
+
+                o.puts("#[inline]", pad: true)
+                o.block("pub fn reflect(x: #{name}, n: #{name}) -> #{name}") do |o|
+                  o.puts("return x - 2.0 * #{name}::dot(x, n) * n;")
+                end
+
+                o.puts("#[inline]", pad: true)
+                o.block("pub fn refract(x: #{name}, n: #{name}, eta: #{scalar}) -> #{name}") do |o|
+                  o.puts("let dp = #{name}::dot(x, n);")
+                  o.puts("let k = 1.0 - eta * eta * (1.0 - dp * dp);")
+
+                  o.puts("return if k >= 0.0 { eta * x - (eta * dp + k.sqrt()) } else { #{name}::broadcast(0.0) };")
+                end
+
+                # TODO: Link these extern functions / implement in Rust
+                # o.puts("#[inline]", pad: true)
+                # o.block("pub fn orient(x: #{name}, y: #{name}) -> #{name}") do |o|
+                #   o.puts("let a = x * float3(y.2, y.1, y.0) - float3(x.2, x.1, x.0) * y;")
+                #
+                #   o.puts("return #{name}(a.2, a.1, a.0);")
+                # end
+                #
+                # case width
+                # when 2
+                #   o.puts("#[inline]", pad: true)
+                #   o.block("pub fn incircle(x: #{name}, y: #{name}) -> #{name}") do |o|
+                #     o.puts("return #{name}(0.0, 0.0, x.0 * y.1 - x.1 * y.0);")
+                #   end
+                # when 3
+                #   o.puts("#[inline]", pad: true)
+                #   o.block("pub fn insphere(x: #{name}, y: #{name}) -> #{name}") do |o|
+                #     o.puts("let a = x * float3(y.2, y.1, y.0) - float3(x.2, x.1, x.0) * y;")
+                #
+                #     o.puts("return #{name}(a.2, a.1, a.0);")
+                #   end
+                # end
+              end
 
               # Swizzles
 
