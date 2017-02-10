@@ -51,13 +51,25 @@ fn max() {
   assert_eq!(short3::max(short3(10, -2, -9), short3(11, -3, 10)), short3(11, -2, 10));
   assert_eq!(short4::max(short4(10, -2, -9, 1), short4(11, -3, 10, 0)), short4(11, -2, 10, 1));
 
+  assert_eq!(ushort2::max(ushort2(10, 2), ushort2(11, 3)), ushort2(11, 3));
+  assert_eq!(ushort3::max(ushort3(10, 2, 9), ushort3(11, 3, 10)), ushort3(11, 3, 10));
+  assert_eq!(ushort4::max(ushort4(10, 2, 9, 1), ushort4(11, 3, 10, 0)), ushort4(11, 3, 10, 1));
+
   assert_eq!(int2::max(int2(10, -2), int2(11, -3)), int2(11, -2));
   assert_eq!(int3::max(int3(10, -2, -9), int3(11, -3, 10)), int3(11, -2, 10));
   assert_eq!(int4::max(int4(10, -2, -9, 1), int4(11, -3, 10, 0)), int4(11, -2, 10, 1));
 
+  assert_eq!(uint2::max(uint2(10, 2), uint2(11, 3)), uint2(11, 3));
+  assert_eq!(uint3::max(uint3(10, 2, 9), uint3(11, 3, 10)), uint3(11, 3, 10));
+  assert_eq!(uint4::max(uint4(10, 2, 9, 1), uint4(11, 3, 10, 0)), uint4(11, 3, 10, 1));
+
   assert_eq!(long2::max(long2(10, -2), long2(11, -3)), long2(11, -2));
   assert_eq!(long3::max(long3(10, -2, -9), long3(11, -3, 10)), long3(11, -2, 10));
   assert_eq!(long4::max(long4(10, -2, -9, 1), long4(11, -3, 10, 0)), long4(11, -2, 10, 1));
+
+  assert_eq!(ulong2::max(ulong2(10, 2), ulong2(11, 3)), ulong2(11, 3));
+  assert_eq!(ulong3::max(ulong3(10, 2, 9), ulong3(11, 3, 10)), ulong3(11, 3, 10));
+  assert_eq!(ulong4::max(ulong4(10, 2, 9, 1), ulong4(11, 3, 10, 0)), ulong4(11, 3, 10, 1));
 }
 
 #[test]
@@ -82,13 +94,25 @@ fn min() {
   assert_eq!(short3::min(short3(10, -2, -9), short3(11, -3, 10)), short3(10, -3, -9));
   assert_eq!(short4::min(short4(10, -2, -9, 1), short4(11, -3, 10, 0)), short4(10, -3, -9, 0));
 
+  assert_eq!(ushort2::min(ushort2(10, 2), ushort2(11, 3)), ushort2(10, 2));
+  assert_eq!(ushort3::min(ushort3(10, 2, 9), ushort3(11, 3, 10)), ushort3(10, 2, 9));
+  assert_eq!(ushort4::min(ushort4(10, 2, 9, 1), ushort4(11, 3, 10, 0)), ushort4(10, 2, 9, 0));
+
   assert_eq!(int2::min(int2(10, -2), int2(11, -3)), int2(10, -3));
   assert_eq!(int3::min(int3(10, -2, -9), int3(11, -3, 10)), int3(10, -3, -9));
   assert_eq!(int4::min(int4(10, -2, -9, 1), int4(11, -3, 10, 0)), int4(10, -3, -9, 0));
 
+  assert_eq!(uint2::min(uint2(10, 2), uint2(11, 3)), uint2(10, 2));
+  assert_eq!(uint3::min(uint3(10, 2, 9), uint3(11, 3, 10)), uint3(10, 2, 9));
+  assert_eq!(uint4::min(uint4(10, 2, 9, 1), uint4(11, 3, 10, 0)), uint4(10, 2, 9, 0));
+
   assert_eq!(long2::min(long2(10, -2), long2(11, -3)), long2(10, -3));
   assert_eq!(long3::min(long3(10, -2, -9), long3(11, -3, 10)), long3(10, -3, -9));
   assert_eq!(long4::min(long4(10, -2, -9, 1), long4(11, -3, 10, 0)), long4(10, -3, -9, 0));
+
+  assert_eq!(ulong2::min(ulong2(10, 2), ulong2(11, 3)), ulong2(10, 2));
+  assert_eq!(ulong3::min(ulong3(10, 2, 9), ulong3(11, 3, 10)), ulong3(10, 2, 9));
+  assert_eq!(ulong4::min(ulong4(10, 2, 9, 1), ulong4(11, 3, 10, 0)), ulong4(10, 2, 9, 0));
 }
 
 #[test]
@@ -201,13 +225,25 @@ fn reduce_add() {
   assert_eq!(short3::reduce_add(short3(10, -3, -9)), -2);
   assert_eq!(short4::reduce_add(short4(10, -3, -9, 0)), -2);
 
+  assert_eq!(ushort2::reduce_add(ushort2(10, 3)), 13);
+  assert_eq!(ushort3::reduce_add(ushort3(10, 3, 9)), 22);
+  assert_eq!(ushort4::reduce_add(ushort4(10, 3, 9, 0)), 22);
+
   assert_eq!(int2::reduce_add(int2(10, -3)), 7);
   assert_eq!(int3::reduce_add(int3(10, -3, -9)), -2);
   assert_eq!(int4::reduce_add(int4(10, -3, -9, 0)), -2);
 
+  assert_eq!(uint2::reduce_add(uint2(10, 3)), 13);
+  assert_eq!(uint3::reduce_add(uint3(10, 3, 9)), 22);
+  assert_eq!(uint4::reduce_add(uint4(10, 3, 9, 0)), 22);
+
   assert_eq!(long2::reduce_add(long2(10, -3)), 7);
   assert_eq!(long3::reduce_add(long3(10, -3, -9)), -2);
   assert_eq!(long4::reduce_add(long4(10, -3, -9, 0)), -2);
+
+  assert_eq!(ulong2::reduce_add(ulong2(10, 3)), 13);
+  assert_eq!(ulong3::reduce_add(ulong3(10, 3, 9)), 22);
+  assert_eq!(ulong4::reduce_add(ulong4(10, 3, 9, 0)), 22);
 }
 
 #[test]
@@ -232,13 +268,25 @@ fn reduce_min() {
   assert_eq!(short3::reduce_min(short3(10, -3, -9)), -9);
   assert_eq!(short4::reduce_min(short4(10, -3, -9, 0)), -9);
 
+  assert_eq!(ushort2::reduce_min(ushort2(10, 3)), 3);
+  assert_eq!(ushort3::reduce_min(ushort3(10, 3, 9)), 3);
+  assert_eq!(ushort4::reduce_min(ushort4(10, 3, 9, 0)), 0);
+
   assert_eq!(int2::reduce_min(int2(10, -3)), -3);
   assert_eq!(int3::reduce_min(int3(10, -3, -9)), -9);
   assert_eq!(int4::reduce_min(int4(10, -3, -9, 0)), -9);
 
+  assert_eq!(uint2::reduce_min(uint2(10, 3)), 3);
+  assert_eq!(uint3::reduce_min(uint3(10, 3, 9)), 3);
+  assert_eq!(uint4::reduce_min(uint4(10, 3, 9, 0)), 0);
+
   assert_eq!(long2::reduce_min(long2(10, -3)), -3);
   assert_eq!(long3::reduce_min(long3(10, -3, -9)), -9);
   assert_eq!(long4::reduce_min(long4(10, -3, -9, 0)), -9);
+
+  assert_eq!(ulong2::reduce_min(ulong2(10, 3)), 3);
+  assert_eq!(ulong3::reduce_min(ulong3(10, 3, 9)), 3);
+  assert_eq!(ulong4::reduce_min(ulong4(10, 3, 9, 0)), 0);
 }
 
 #[test]
@@ -263,11 +311,23 @@ fn reduce_max() {
   assert_eq!(short3::reduce_max(short3(10, -3, -9)), 10);
   assert_eq!(short4::reduce_max(short4(10, -3, -9, 0)), 10);
 
+  assert_eq!(ushort2::reduce_max(ushort2(10, 3)), 10);
+  assert_eq!(ushort3::reduce_max(ushort3(10, 3, 9)), 10);
+  assert_eq!(ushort4::reduce_max(ushort4(10, 3, 9, 0)), 10);
+
   assert_eq!(int2::reduce_max(int2(10, -3)), 10);
   assert_eq!(int3::reduce_max(int3(10, -3, -9)), 10);
   assert_eq!(int4::reduce_max(int4(10, -3, -9, 0)), 10);
 
+  assert_eq!(uint2::reduce_max(uint2(10, 3)), 10);
+  assert_eq!(uint3::reduce_max(uint3(10, 3, 9)), 10);
+  assert_eq!(uint4::reduce_max(uint4(10, 3, 9, 0)), 10);
+
   assert_eq!(long2::reduce_max(long2(10, -3)), 10);
   assert_eq!(long3::reduce_max(long3(10, -3, -9)), 10);
   assert_eq!(long4::reduce_max(long4(10, -3, -9, 0)), 10);
+
+  assert_eq!(ulong2::reduce_max(ulong2(10, 3)), 10);
+  assert_eq!(ulong3::reduce_max(ulong3(10, 3, 9)), 10);
+  assert_eq!(ulong4::reduce_max(ulong4(10, 3, 9, 0)), 10);
 }

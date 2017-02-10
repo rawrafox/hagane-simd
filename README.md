@@ -17,11 +17,11 @@ This is a TODO list, a check means that it is "done".
      - [x] `char`
      - [x] `uchar`
      - [x] `short`
-     - [ ] `ushort`
+     - [x] `ushort`
      - [x] `int`
-     - [ ] `uint`
+     - [x] `uint`
      - [x] `long`
-     - [ ] `ulong`
+     - [x] `ulong`
      - [ ] `half` (blocked on compiler)
      - [x] `float`
      - [x] `double`

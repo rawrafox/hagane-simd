@@ -10,12 +10,12 @@ module Bridge
       { size: 1, max_width: 4, type: 'i8', opencl: 'char', kind: %i(signed integer), bool: "char" },
       { size: 1, max_width: 4, type: 'u8', opencl: 'uchar', kind: %i(unsigned integer), bool: "char" },
       { size: 2, max_width: 4, type: 'i16', opencl: "short", kind: %i(signed integer), bool: "short" },
-      # { size: 2, max_width: 4, type: 'u16', opencl: "ushort", unsigned: true },
+      { size: 2, max_width: 4, type: 'u16', opencl: "ushort", kind: %i(unsigned integer), bool: "short" },
       { size: 4, max_width: 4, type: 'i32', opencl: "int", kind: %i(signed integer), bool: "int" },
-      # { size: 4, max_width: 4, type: 'u32', opencl: "uint", unsigned: true },
+      { size: 4, max_width: 4, type: 'u32', opencl: "uint", kind: %i(unsigned integer), bool: "int" },
       { size: 4, max_width: 4, type: 'f32', opencl: "float", kind: %i(float), bool: "int", max_matrix_size: 4 },
       { size: 8, max_width: 4, type: 'i64', opencl: "long", kind: %i(signed integer), bool: "long" },
-      # { size: 8, max_width: 4, type: 'u64', opencl: "ulong", unsigned: true },
+      { size: 8, max_width: 4, type: 'u64', opencl: "ulong", kind: %i(unsigned integer), bool: "long"  },
       { size: 8, max_width: 4, type: 'f64', opencl: "double", kind: %i(float), bool: "long", max_matrix_size: 4 }
     ]
     

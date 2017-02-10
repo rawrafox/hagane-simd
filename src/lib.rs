@@ -17,10 +17,20 @@
 #[path = "types/type_short3.rs"] mod type_short3;
 #[path = "types/type_short4.rs"] mod type_short4;
 
+#[path = "types/type_ushort1.rs"] mod type_ushort1;
+#[path = "types/type_ushort2.rs"] mod type_ushort2;
+#[path = "types/type_ushort3.rs"] mod type_ushort3;
+#[path = "types/type_ushort4.rs"] mod type_ushort4;
+
 #[path = "types/type_int1.rs"] mod type_int1;
 #[path = "types/type_int2.rs"] mod type_int2;
 #[path = "types/type_int3.rs"] mod type_int3;
 #[path = "types/type_int4.rs"] mod type_int4;
+
+#[path = "types/type_uint1.rs"] mod type_uint1;
+#[path = "types/type_uint2.rs"] mod type_uint2;
+#[path = "types/type_uint3.rs"] mod type_uint3;
+#[path = "types/type_uint4.rs"] mod type_uint4;
 
 #[path = "types/type_float1.rs"] mod type_float1;
 #[path = "types/type_float2.rs"] mod type_float2;
@@ -31,6 +41,11 @@
 #[path = "types/type_long2.rs"] mod type_long2;
 #[path = "types/type_long3.rs"] mod type_long3;
 #[path = "types/type_long4.rs"] mod type_long4;
+
+#[path = "types/type_ulong1.rs"] mod type_ulong1;
+#[path = "types/type_ulong2.rs"] mod type_ulong2;
+#[path = "types/type_ulong3.rs"] mod type_ulong3;
+#[path = "types/type_ulong4.rs"] mod type_ulong4;
 
 #[path = "types/type_double1.rs"] mod type_double1;
 #[path = "types/type_double2.rs"] mod type_double2;
@@ -72,10 +87,20 @@ pub use type_short2::*;
 pub use type_short3::*;
 pub use type_short4::*;
 
+pub use type_ushort1::*;
+pub use type_ushort2::*;
+pub use type_ushort3::*;
+pub use type_ushort4::*;
+
 pub use type_int1::*;
 pub use type_int2::*;
 pub use type_int3::*;
 pub use type_int4::*;
+
+pub use type_uint1::*;
+pub use type_uint2::*;
+pub use type_uint3::*;
+pub use type_uint4::*;
 
 pub use type_float1::*;
 pub use type_float2::*;
@@ -86,6 +111,11 @@ pub use type_long1::*;
 pub use type_long2::*;
 pub use type_long3::*;
 pub use type_long4::*;
+
+pub use type_ulong1::*;
+pub use type_ulong2::*;
+pub use type_ulong3::*;
+pub use type_ulong4::*;
 
 pub use type_double1::*;
 pub use type_double2::*;
