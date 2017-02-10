@@ -222,7 +222,7 @@ impl float3 {
 
   #[inline]
   pub fn abs(x: float3) -> float3 {
-    return float3(x.0.abs(), x.1.abs(), x.2.abs());
+    return float3::bitselect(float3::broadcast(0.0), x, int3::broadcast(std::i32::MAX));
   }
 
   #[inline]

@@ -265,9 +265,12 @@ module Bridge
               elsif kind.include?(:float)
                 o.puts("#[inline]", pad: true)
                 o.block("pub fn abs(x: #{name}) -> #{name}") do |o|
-                  result = width.times.map { |i| "x.#{i}.abs()" }.join(", ")
-
-                  o.puts("return #{name}(#{result});")
+                  o.puts("return #{name}::bitselect(#{name}::broadcast(0.0), x, #{bool_name}::broadcast(std::#{TYPES_BY_NAME[bool][:type]}::MAX));")
+                end
+              else
+                o.puts("#[inline]", pad: true)
+                o.block("pub fn abs(x: #{name}) -> #{name}") do |o|
+                  o.puts("return x;")
                 end
               end
 

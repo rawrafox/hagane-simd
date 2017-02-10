@@ -372,6 +372,11 @@ impl uint2 {
   }
 
   #[inline]
+  pub fn abs(x: uint2) -> uint2 {
+    return x;
+  }
+
+  #[inline]
   pub fn max(x: uint2, y: uint2) -> uint2 {
     return uint2::bitselect(x, y, uint2::gt(y, x));
   }

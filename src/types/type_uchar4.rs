@@ -372,6 +372,11 @@ impl uchar4 {
   }
 
   #[inline]
+  pub fn abs(x: uchar4) -> uchar4 {
+    return x;
+  }
+
+  #[inline]
   pub fn max(x: uchar4, y: uchar4) -> uchar4 {
     return uchar4::bitselect(x, y, uchar4::gt(y, x));
   }

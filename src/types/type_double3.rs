@@ -222,7 +222,7 @@ impl double3 {
 
   #[inline]
   pub fn abs(x: double3) -> double3 {
-    return double3(x.0.abs(), x.1.abs(), x.2.abs());
+    return double3::bitselect(double3::broadcast(0.0), x, long3::broadcast(std::i64::MAX));
   }
 
   #[inline]

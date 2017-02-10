@@ -372,6 +372,11 @@ impl ulong4 {
   }
 
   #[inline]
+  pub fn abs(x: ulong4) -> ulong4 {
+    return x;
+  }
+
+  #[inline]
   pub fn max(x: ulong4, y: ulong4) -> ulong4 {
     return ulong4::bitselect(x, y, ulong4::gt(y, x));
   }

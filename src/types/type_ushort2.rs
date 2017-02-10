@@ -372,6 +372,11 @@ impl ushort2 {
   }
 
   #[inline]
+  pub fn abs(x: ushort2) -> ushort2 {
+    return x;
+  }
+
+  #[inline]
   pub fn max(x: ushort2, y: ushort2) -> ushort2 {
     return ushort2::bitselect(x, y, ushort2::gt(y, x));
   }
