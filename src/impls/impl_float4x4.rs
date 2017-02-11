@@ -50,7 +50,7 @@ impl std::ops::Mul<f32> for float4x4 {
   }
 }
 
-impl Dot for float4x4 {
+impl Dot<float4x4> for float4x4 {
   type DotProduct = float4x4;
 
   #[inline]

@@ -18,6 +18,11 @@ impl Vector for char2 {
   type FloatVector = float2;
   type DoubleVector = double2;
 
+  const ZERO: Self = char2(0, 0);
+  const ONE: Self = char2(1, 1);
+  const TWO: Self = char2(2, 2);
+  const THREE: Self = char2(3, 3);
+
   #[inline(always)]
   fn abs(self) -> Self {
     let mask = self >> 7;
@@ -91,7 +96,7 @@ impl Vector for char2 {
   }
 }
 
-impl Dot for char2 {
+impl Dot<char2> for char2 {
   type DotProduct = i8;
   #[inline(always)]
   fn dot(self, other: Self) -> Self::DotProduct {

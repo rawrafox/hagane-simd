@@ -1,4 +1,4 @@
-#![feature(repr_simd, platform_intrinsics)]
+#![feature(repr_simd, platform_intrinsics, associated_consts)]
 
 #![allow(non_camel_case_types)]
 
@@ -118,7 +118,7 @@ declare_matrix!(double2x4, double3x4, double4x4, double4);
 
 pub trait Vector : Sized + Copy + Add<Output=Self> + Sub<Output=Self> + Mul<Output=Self> + Div<Output=Self> {
   type Scalar;
-  type Boolean;
+  type Boolean: Select<Self>;
 
   type CharVector;
   type ShortVector;
@@ -132,6 +132,11 @@ pub trait Vector : Sized + Copy + Add<Output=Self> + Sub<Output=Self> + Mul<Outp
 
   type FloatVector;
   type DoubleVector;
+
+  const ZERO: Self;
+  const ONE: Self;
+  const TWO: Self;
+  const THREE: Self;
 
   #[inline(always)]
   fn extract(self, i: u32) -> Self::Scalar {
@@ -428,7 +433,7 @@ pub fn cross<T: Cross>(x: T, y: T) -> T::CrossProduct {
   return x.cross(y);
 }
 
-pub trait Dot<RHS = Self> {
+pub trait Dot<RHS=Self> {
   type DotProduct;
 
   fn dot(self, rhs: RHS) -> Self::DotProduct;
@@ -441,10 +446,18 @@ pub fn dot<RHS, T: Dot<RHS>>(x: T, y: RHS) -> T::DotProduct {
 
 pub trait Float : Vector {
   fn copysign(self, magnitude: Self) -> Self;
-  fn sign(self) -> Self;
+
+  #[inline(always)]
+  fn sign(self) -> Self {
+    return (self.eq(Self::ZERO) | self.ne(self)).bitselect(Self::ONE.copysign(self), Self::ZERO);
+  }
 
   fn sqrt(self) -> Self;
-  fn recip(self) -> Self;
+  
+  #[inline(always)]
+  fn recip(self) -> Self {
+    return Self::ONE / self;
+  }
 
   #[inline(always)]
   fn rsqrt(self) -> Self {
@@ -461,8 +474,17 @@ pub trait Float : Vector {
     return a + self * (b - a)
   }
 
-  fn step(self, a: Self) -> Self;
-  fn smoothstep(self, a: Self, b: Self) -> Self;
+  #[inline(always)]
+  fn step(self, a: Self) -> Self {
+    return self.lt(a).bitselect(Self::ONE, Self::ZERO);
+  }
+
+  #[inline(always)]
+  fn smoothstep(self, a: Self, b: Self) -> Self {
+    let t = ((self - a) / (b - a)).clamp(Self::ZERO, Self::ONE);
+
+    return t * t * (Self::THREE - Self::TWO * t);
+  }
 
   fn sin(self) -> Self;
   fn cos(self) -> Self;
@@ -538,14 +560,31 @@ pub fn cos<T: Float>(x: T) -> T {
   return x.cos();
 }
 
-pub trait Geometry : Vector {
+pub trait Geometry : Float + Dot<Self> {  
   fn project(self, onto: Self) -> Self;
   fn length(self) -> Self::Scalar;
   fn length_squared(self) -> Self::Scalar;
-  fn norm_one(self) -> Self::Scalar;
-  fn norm_inf(self) -> Self::Scalar;
-  fn distance(self, to: Self) -> Self::Scalar;
-  fn distance_squared(self, to: Self) -> Self::Scalar;
+
+  #[inline(always)]
+  fn norm_one(self) -> Self::Scalar {
+    return self.abs().reduce_add();
+  }
+
+  #[inline(always)]
+  fn norm_inf(self) -> Self::Scalar {
+    return self.abs().reduce_max();
+  }
+
+  #[inline(always)]
+  fn distance(self, to: Self) -> Self::Scalar {
+    return (self - to).length();
+  }
+
+  #[inline(always)]
+  fn distance_squared(self, to: Self) -> Self::Scalar {
+    return (self - to).length_squared();
+  }
+
   fn normalize(self) -> Self;
   fn reflect(self, n: Self) -> Self;
   fn refract(self, n: Self, eta: Self::Scalar) -> Self;

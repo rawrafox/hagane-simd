@@ -18,6 +18,11 @@ impl Vector for ulong3 {
   type FloatVector = float3;
   type DoubleVector = double3;
 
+  const ZERO: Self = ulong3(0, 0, 0);
+  const ONE: Self = ulong3(1, 1, 1);
+  const TWO: Self = ulong3(2, 2, 2);
+  const THREE: Self = ulong3(3, 3, 3);
+
   #[inline(always)]
   fn abs(self) -> Self {
     return self;
@@ -89,7 +94,7 @@ impl Vector for ulong3 {
   }
 }
 
-impl Dot for ulong3 {
+impl Dot<ulong3> for ulong3 {
   type DotProduct = u64;
   #[inline(always)]
   fn dot(self, other: Self) -> Self::DotProduct {

@@ -18,6 +18,11 @@ impl Vector for float3 {
   type FloatVector = float3;
   type DoubleVector = double3;
 
+  const ZERO: Self = float3(0.0, 0.0, 0.0);
+  const ONE: Self = float3(1.0, 1.0, 1.0);
+  const TWO: Self = float3(2.0, 2.0, 2.0);
+  const THREE: Self = float3(3.0, 3.0, 3.0);
+
   #[inline(always)]
   fn abs(self) -> Self {
     return bitselect(int3::broadcast(std::i32::MAX), float3::broadcast(0.0), self);
@@ -100,7 +105,7 @@ impl Cross for float3 {
   }
 }
 
-impl Dot for float3 {
+impl Dot<float3> for float3 {
   type DotProduct = f32;
   #[inline(always)]
   fn dot(self, other: Self) -> Self::DotProduct {
@@ -115,20 +120,8 @@ impl Float for float3 {
   }
 
   #[inline(always)]
-  fn sign(self) -> Self {
-    let (zero, one) = (float3::broadcast(0.0), float3::broadcast(1.0));
-
-    return bitselect(eq(self, zero) | ne(self, self), one.copysign(self), zero);
-  }
-
-  #[inline(always)]
   fn sqrt(self) -> Self {
     return float3(self.0.sqrt(), self.1.sqrt(), self.2.sqrt());
-  }
-
-  #[inline(always)]
-  fn recip(self) -> Self {
-    return 1.0 / self;
   }
 
   #[inline(always)]
@@ -157,13 +150,6 @@ impl Float for float3 {
   }
 
   #[inline(always)]
-  fn smoothstep(self, edge0: Self, edge1: Self) -> Self {
-    let t = clamp((self - edge0) / (edge1 - edge0), float3::broadcast(0.0), float3::broadcast(1.0));
-
-    return t * t * (3.0 - 2.0 * t);
-  }
-
-  #[inline(always)]
   fn sin(self) -> Self {
     return float3(self.0.sin(), self.1.sin(), self.2.sin());
   }
@@ -188,26 +174,6 @@ impl Geometry for float3 {
   #[inline(always)]
   fn length_squared(self) -> Self::Scalar {
     return self.dot(self);
-  }
-
-  #[inline(always)]
-  fn norm_one(self) -> Self::Scalar {
-    return self.abs().reduce_add();
-  }
-
-  #[inline(always)]
-  fn norm_inf(self) -> Self::Scalar {
-    return self.abs().reduce_max();
-  }
-
-  #[inline(always)]
-  fn distance(self, other: Self) -> Self::Scalar {
-    return (self - other).length();
-  }
-
-  #[inline(always)]
-  fn distance_squared(self, other: Self) -> Self::Scalar {
-    return (self - other).length_squared();
   }
 
   #[inline(always)]

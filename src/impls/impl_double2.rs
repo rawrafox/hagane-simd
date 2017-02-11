@@ -18,6 +18,11 @@ impl Vector for double2 {
   type FloatVector = float2;
   type DoubleVector = double2;
 
+  const ZERO: Self = double2(0.0, 0.0);
+  const ONE: Self = double2(1.0, 1.0);
+  const TWO: Self = double2(2.0, 2.0);
+  const THREE: Self = double2(3.0, 3.0);
+
   #[inline(always)]
   fn abs(self) -> Self {
     return bitselect(long2::broadcast(std::i64::MAX), double2::broadcast(0.0), self);
@@ -98,7 +103,7 @@ impl Cross for double2 {
   }
 }
 
-impl Dot for double2 {
+impl Dot<double2> for double2 {
   type DotProduct = f64;
   #[inline(always)]
   fn dot(self, other: Self) -> Self::DotProduct {
@@ -113,20 +118,8 @@ impl Float for double2 {
   }
 
   #[inline(always)]
-  fn sign(self) -> Self {
-    let (zero, one) = (double2::broadcast(0.0), double2::broadcast(1.0));
-
-    return bitselect(eq(self, zero) | ne(self, self), one.copysign(self), zero);
-  }
-
-  #[inline(always)]
   fn sqrt(self) -> Self {
     return double2(self.0.sqrt(), self.1.sqrt());
-  }
-
-  #[inline(always)]
-  fn recip(self) -> Self {
-    return 1.0 / self;
   }
 
   #[inline(always)]
@@ -155,13 +148,6 @@ impl Float for double2 {
   }
 
   #[inline(always)]
-  fn smoothstep(self, edge0: Self, edge1: Self) -> Self {
-    let t = clamp((self - edge0) / (edge1 - edge0), double2::broadcast(0.0), double2::broadcast(1.0));
-
-    return t * t * (3.0 - 2.0 * t);
-  }
-
-  #[inline(always)]
   fn sin(self) -> Self {
     return double2(self.0.sin(), self.1.sin());
   }
@@ -186,26 +172,6 @@ impl Geometry for double2 {
   #[inline(always)]
   fn length_squared(self) -> Self::Scalar {
     return self.dot(self);
-  }
-
-  #[inline(always)]
-  fn norm_one(self) -> Self::Scalar {
-    return self.abs().reduce_add();
-  }
-
-  #[inline(always)]
-  fn norm_inf(self) -> Self::Scalar {
-    return self.abs().reduce_max();
-  }
-
-  #[inline(always)]
-  fn distance(self, other: Self) -> Self::Scalar {
-    return (self - other).length();
-  }
-
-  #[inline(always)]
-  fn distance_squared(self, other: Self) -> Self::Scalar {
-    return (self - other).length_squared();
   }
 
   #[inline(always)]

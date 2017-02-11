@@ -18,6 +18,11 @@ impl Vector for double4 {
   type FloatVector = float4;
   type DoubleVector = double4;
 
+  const ZERO: Self = double4(0.0, 0.0, 0.0, 0.0);
+  const ONE: Self = double4(1.0, 1.0, 1.0, 1.0);
+  const TWO: Self = double4(2.0, 2.0, 2.0, 2.0);
+  const THREE: Self = double4(3.0, 3.0, 3.0, 3.0);
+
   #[inline(always)]
   fn abs(self) -> Self {
     return bitselect(long4::broadcast(std::i64::MAX), double4::broadcast(0.0), self);
@@ -89,7 +94,7 @@ impl Vector for double4 {
   }
 }
 
-impl Dot for double4 {
+impl Dot<double4> for double4 {
   type DotProduct = f64;
   #[inline(always)]
   fn dot(self, other: Self) -> Self::DotProduct {
@@ -104,20 +109,8 @@ impl Float for double4 {
   }
 
   #[inline(always)]
-  fn sign(self) -> Self {
-    let (zero, one) = (double4::broadcast(0.0), double4::broadcast(1.0));
-
-    return bitselect(eq(self, zero) | ne(self, self), one.copysign(self), zero);
-  }
-
-  #[inline(always)]
   fn sqrt(self) -> Self {
     return double4(self.0.sqrt(), self.1.sqrt(), self.2.sqrt(), self.3.sqrt());
-  }
-
-  #[inline(always)]
-  fn recip(self) -> Self {
-    return 1.0 / self;
   }
 
   #[inline(always)]
@@ -146,13 +139,6 @@ impl Float for double4 {
   }
 
   #[inline(always)]
-  fn smoothstep(self, edge0: Self, edge1: Self) -> Self {
-    let t = clamp((self - edge0) / (edge1 - edge0), double4::broadcast(0.0), double4::broadcast(1.0));
-
-    return t * t * (3.0 - 2.0 * t);
-  }
-
-  #[inline(always)]
   fn sin(self) -> Self {
     return double4(self.0.sin(), self.1.sin(), self.2.sin(), self.3.sin());
   }
@@ -177,26 +163,6 @@ impl Geometry for double4 {
   #[inline(always)]
   fn length_squared(self) -> Self::Scalar {
     return self.dot(self);
-  }
-
-  #[inline(always)]
-  fn norm_one(self) -> Self::Scalar {
-    return self.abs().reduce_add();
-  }
-
-  #[inline(always)]
-  fn norm_inf(self) -> Self::Scalar {
-    return self.abs().reduce_max();
-  }
-
-  #[inline(always)]
-  fn distance(self, other: Self) -> Self::Scalar {
-    return (self - other).length();
-  }
-
-  #[inline(always)]
-  fn distance_squared(self, other: Self) -> Self::Scalar {
-    return (self - other).length_squared();
   }
 
   #[inline(always)]

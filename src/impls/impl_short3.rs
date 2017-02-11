@@ -18,6 +18,11 @@ impl Vector for short3 {
   type FloatVector = float3;
   type DoubleVector = double3;
 
+  const ZERO: Self = short3(0, 0, 0);
+  const ONE: Self = short3(1, 1, 1);
+  const TWO: Self = short3(2, 2, 2);
+  const THREE: Self = short3(3, 3, 3);
+
   #[inline(always)]
   fn abs(self) -> Self {
     let mask = self >> 15;
@@ -121,7 +126,7 @@ impl Vector for short3 {
   }
 }
 
-impl Dot for short3 {
+impl Dot<short3> for short3 {
   type DotProduct = i16;
   #[inline(always)]
   fn dot(self, other: Self) -> Self::DotProduct {

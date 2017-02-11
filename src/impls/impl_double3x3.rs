@@ -50,7 +50,7 @@ impl std::ops::Mul<f64> for double3x3 {
   }
 }
 
-impl Dot for double3x3 {
+impl Dot<double3x3> for double3x3 {
   type DotProduct = double3x3;
 
   #[inline]

@@ -61,6 +61,16 @@ module Bridge
             o.puts("type FloatVector = float#{width};", pad: true)
             o.puts("type DoubleVector = double#{width};")
 
+            zero = (["0#{".0" if kind.include?(:float)}"] * width).join(", ")
+            one = (["1#{".0" if kind.include?(:float)}"] * width).join(", ")
+            two = (["2#{".0" if kind.include?(:float)}"] * width).join(", ")
+            three = (["3#{".0" if kind.include?(:float)}"] * width).join(", ")
+
+            o.puts("const ZERO: Self = #{name}(#{zero});", pad: true)
+            o.puts("const ONE: Self = #{name}(#{one});")
+            o.puts("const TWO: Self = #{name}(#{two});")
+            o.puts("const THREE: Self = #{name}(#{three});")
+
             o.puts("#[inline(always)]", pad: true)
             o.block("fn abs(self) -> Self") do |o|
               if kind.include?(:signed)
@@ -185,7 +195,7 @@ module Bridge
             end
           end
 
-          o.block("impl Dot for #{name}", pad: true) do |o|
+          o.block("impl Dot<#{name}> for #{name}", pad: true) do |o|
             o.puts("type DotProduct = #{scalar};", pad: true)
 
             o.puts("#[inline(always)]")
@@ -202,22 +212,10 @@ module Bridge
               end
 
               o.puts("#[inline(always)]", pad: true)
-              o.block("fn sign(self) -> Self") do |o|
-                o.puts("let (zero, one) = (#{name}::broadcast(0.0), #{name}::broadcast(1.0));")
-                o.puts
-                o.puts("return bitselect(eq(self, zero) | ne(self, self), one.copysign(self), zero);")
-              end
-
-              o.puts("#[inline(always)]", pad: true)
               o.block("fn sqrt(self) -> Self") do |o|
                 result = width.times.map { |i| "self.#{i}.sqrt()" }.join(", ")
 
                 o.puts("return #{name}(#{result});")
-              end
-
-              o.puts("#[inline(always)]", pad: true)
-              o.block("fn recip(self) -> Self") do |o|
-                o.puts("return 1.0 / self;")
               end
 
               o.puts("#[inline(always)]", pad: true)
@@ -254,13 +252,6 @@ module Bridge
               end
 
               o.puts("#[inline(always)]", pad: true)
-              o.block("fn smoothstep(self, edge0: Self, edge1: Self) -> Self") do |o|
-                o.puts("let t = clamp((self - edge0) / (edge1 - edge0), #{name}::broadcast(0.0), #{name}::broadcast(1.0));")
-                o.puts
-                o.puts("return t * t * (3.0 - 2.0 * t);")
-              end
-
-              o.puts("#[inline(always)]", pad: true)
               o.block("fn sin(self) -> Self") do |o|
                 result = width.times.map { |i| "self.#{i}.sin()" }.join(", ")
 
@@ -291,26 +282,6 @@ module Bridge
               o.puts("#[inline(always)]", pad: true)
               o.block("fn length_squared(self) -> Self::Scalar") do |o|
                 o.puts("return self.dot(self);")
-              end
-
-              o.puts("#[inline(always)]", pad: true)
-              o.block("fn norm_one(self) -> Self::Scalar") do |o|
-                o.puts("return self.abs().reduce_add();")
-              end
-
-              o.puts("#[inline(always)]", pad: true)
-              o.block("fn norm_inf(self) -> Self::Scalar") do |o|
-                o.puts("return self.abs().reduce_max();")
-              end
-
-              o.puts("#[inline(always)]", pad: true)
-              o.block("fn distance(self, other: Self) -> Self::Scalar") do |o|
-                o.puts("return (self - other).length();")
-              end
-
-              o.puts("#[inline(always)]", pad: true)
-              o.block("fn distance_squared(self, other: Self) -> Self::Scalar") do |o|
-                o.puts("return (self - other).length_squared();")
               end
 
               o.puts("#[inline(always)]", pad: true)
@@ -568,7 +539,7 @@ module Bridge
             end
 
             if kind.include?(:float) && i == j
-              o.block("impl Dot for #{name}", pad: true) do |o|
+              o.block("impl Dot<#{name}> for #{name}", pad: true) do |o|
                 o.puts("type DotProduct = #{name};")
                 o.puts
                 o.puts("#[inline]")
