@@ -162,6 +162,21 @@ impl simd::Vector for double3 {
   }
 
   #[inline(always)]
+  fn reduce_add(self) -> Self::Scalar {
+    return self.0 + self.1 + self.2;
+  }
+
+  #[inline(always)]
+  fn reduce_min(self) -> Self::Scalar {
+    return self.2.min(simd::reduce_min(self.lo()));
+  }
+
+  #[inline(always)]
+  fn reduce_max(self) -> Self::Scalar {
+    return self.2.max(simd::reduce_max(self.lo()));
+  }
+
+  #[inline(always)]
   fn to_char_sat(self) -> char3 {
     return double3::to_char(simd::clamp(self, double3::broadcast(std::i8::MIN as f64), double3::broadcast(std::i8::MAX as f64)));
   }
@@ -352,23 +367,6 @@ impl simd::Geometry for double3 {
   }
 }
 
-impl simd::Reduce for double3 {
-  #[inline(always)]
-  fn reduce_add(self) -> Self::Scalar {
-    return self.0 + self.1 + self.2;
-  }
-
-  #[inline(always)]
-  fn reduce_min(self) -> Self::Scalar {
-    return self.2.min(simd::reduce_min(self.lo()));
-  }
-
-  #[inline(always)]
-  fn reduce_max(self) -> Self::Scalar {
-    return self.2.max(simd::reduce_max(self.lo()));
-  }
-}
-
 impl double3 {
   #[inline]
   pub fn bitcast<T>(x: T) -> double3 {
@@ -380,11 +378,6 @@ impl double3 {
   #[inline]
   pub fn broadcast(x: f64) -> Self {
     return double3(x, x, x);
-  }
-
-  #[inline]
-  pub fn madd(x: double3, y: double3, z: double3) -> double3 {
-    return x * y + z;
   }
 
   #[inline]

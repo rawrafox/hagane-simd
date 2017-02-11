@@ -162,6 +162,21 @@ impl simd::Vector for double2 {
   }
 
   #[inline(always)]
+  fn reduce_add(self) -> Self::Scalar {
+    return self.0 + self.1;
+  }
+
+  #[inline(always)]
+  fn reduce_min(self) -> Self::Scalar {
+    return self.0.min(self.1);
+  }
+
+  #[inline(always)]
+  fn reduce_max(self) -> Self::Scalar {
+    return self.0.max(self.1);
+  }
+
+  #[inline(always)]
   fn to_char_sat(self) -> char2 {
     return double2::to_char(simd::clamp(self, double2::broadcast(std::i8::MIN as f64), double2::broadcast(std::i8::MAX as f64)));
   }
@@ -350,23 +365,6 @@ impl simd::Geometry for double2 {
   }
 }
 
-impl simd::Reduce for double2 {
-  #[inline(always)]
-  fn reduce_add(self) -> Self::Scalar {
-    return self.0 + self.1;
-  }
-
-  #[inline(always)]
-  fn reduce_min(self) -> Self::Scalar {
-    return self.0.min(self.1);
-  }
-
-  #[inline(always)]
-  fn reduce_max(self) -> Self::Scalar {
-    return self.0.max(self.1);
-  }
-}
-
 impl double2 {
   #[inline]
   pub fn bitcast<T>(x: T) -> double2 {
@@ -378,11 +376,6 @@ impl double2 {
   #[inline]
   pub fn broadcast(x: f64) -> Self {
     return double2(x, x);
-  }
-
-  #[inline]
-  pub fn madd(x: double2, y: double2, z: double2) -> double2 {
-    return x * y + z;
   }
 
   #[inline]

@@ -162,6 +162,21 @@ impl simd::Vector for float3 {
   }
 
   #[inline(always)]
+  fn reduce_add(self) -> Self::Scalar {
+    return self.0 + self.1 + self.2;
+  }
+
+  #[inline(always)]
+  fn reduce_min(self) -> Self::Scalar {
+    return self.2.min(simd::reduce_min(self.lo()));
+  }
+
+  #[inline(always)]
+  fn reduce_max(self) -> Self::Scalar {
+    return self.2.max(simd::reduce_max(self.lo()));
+  }
+
+  #[inline(always)]
   fn to_char_sat(self) -> char3 {
     return float3::to_char(simd::clamp(self, float3::broadcast(std::i8::MIN as f32), float3::broadcast(std::i8::MAX as f32)));
   }
@@ -352,23 +367,6 @@ impl simd::Geometry for float3 {
   }
 }
 
-impl simd::Reduce for float3 {
-  #[inline(always)]
-  fn reduce_add(self) -> Self::Scalar {
-    return self.0 + self.1 + self.2;
-  }
-
-  #[inline(always)]
-  fn reduce_min(self) -> Self::Scalar {
-    return self.2.min(simd::reduce_min(self.lo()));
-  }
-
-  #[inline(always)]
-  fn reduce_max(self) -> Self::Scalar {
-    return self.2.max(simd::reduce_max(self.lo()));
-  }
-}
-
 impl float3 {
   #[inline]
   pub fn bitcast<T>(x: T) -> float3 {
@@ -380,11 +378,6 @@ impl float3 {
   #[inline]
   pub fn broadcast(x: f32) -> Self {
     return float3(x, x, x);
-  }
-
-  #[inline]
-  pub fn madd(x: float3, y: float3, z: float3) -> float3 {
-    return x * y + z;
   }
 
   #[inline]

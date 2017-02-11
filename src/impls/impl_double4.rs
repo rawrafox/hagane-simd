@@ -162,6 +162,21 @@ impl simd::Vector for double4 {
   }
 
   #[inline(always)]
+  fn reduce_add(self) -> Self::Scalar {
+    return simd::reduce_add(self.lo() + self.hi());
+  }
+
+  #[inline(always)]
+  fn reduce_min(self) -> Self::Scalar {
+    return simd::reduce_min(simd::min(self.lo(), self.hi()));
+  }
+
+  #[inline(always)]
+  fn reduce_max(self) -> Self::Scalar {
+    return simd::reduce_max(simd::max(self.lo(), self.hi()));
+  }
+
+  #[inline(always)]
   fn to_char_sat(self) -> char4 {
     return double4::to_char(simd::clamp(self, double4::broadcast(std::i8::MIN as f64), double4::broadcast(std::i8::MAX as f64)));
   }
@@ -341,23 +356,6 @@ impl simd::Geometry for double4 {
   }
 }
 
-impl simd::Reduce for double4 {
-  #[inline(always)]
-  fn reduce_add(self) -> Self::Scalar {
-    return simd::reduce_add(self.lo() + self.hi());
-  }
-
-  #[inline(always)]
-  fn reduce_min(self) -> Self::Scalar {
-    return simd::reduce_min(simd::min(self.lo(), self.hi()));
-  }
-
-  #[inline(always)]
-  fn reduce_max(self) -> Self::Scalar {
-    return simd::reduce_max(simd::max(self.lo(), self.hi()));
-  }
-}
-
 impl double4 {
   #[inline]
   pub fn bitcast<T>(x: T) -> double4 {
@@ -369,11 +367,6 @@ impl double4 {
   #[inline]
   pub fn broadcast(x: f64) -> Self {
     return double4(x, x, x, x);
-  }
-
-  #[inline]
-  pub fn madd(x: double4, y: double4, z: double4) -> double4 {
-    return x * y + z;
   }
 
   #[inline]

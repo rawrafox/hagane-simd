@@ -314,6 +314,21 @@ impl simd::Vector for long3 {
   }
 
   #[inline(always)]
+  fn reduce_add(self) -> Self::Scalar {
+    return self.0 + self.1 + self.2;
+  }
+
+  #[inline(always)]
+  fn reduce_min(self) -> Self::Scalar {
+    return std::cmp::min(simd::reduce_min(self.lo()), self.2);
+  }
+
+  #[inline(always)]
+  fn reduce_max(self) -> Self::Scalar {
+    return std::cmp::max(simd::reduce_max(self.lo()), self.2);
+  }
+
+  #[inline(always)]
   fn to_char_sat(self) -> char3 {
     return long3::to_char(simd::clamp(self, long3::broadcast(std::i8::MIN as i64), long3::broadcast(std::i8::MAX as i64)));
   }
@@ -362,32 +377,30 @@ impl simd::Dot for long3 {
   }
 }
 
-impl simd::Logic for long3 {
+impl simd::Integer for long3 {
+  #[inline(always)]
+  fn reduce_and(self) -> Self::Scalar {
+    return self.0 & self.1 & self.2
+  }
+
+  #[inline(always)]
+  fn reduce_or(self) -> Self::Scalar {
+    return self.0 | self.1 | self.2
+  }
+
+  #[inline(always)]
+  fn reduce_xor(self) -> Self::Scalar {
+    return self.0 ^ self.1 ^ self.2
+  }
+
   #[inline(always)]
   fn all(self) -> bool {
-    return (self.0 & self.1 & self.2) & std::i64::MIN != 0;
+    return self.reduce_and() & std::i64::MIN != 0;
   }
 
   #[inline(always)]
   fn any(self) -> bool {
-    return (self.0 | self.1 | self.2) & std::i64::MIN != 0;
-  }
-}
-
-impl simd::Reduce for long3 {
-  #[inline(always)]
-  fn reduce_add(self) -> Self::Scalar {
-    return self.0 + self.1 + self.2;
-  }
-
-  #[inline(always)]
-  fn reduce_min(self) -> Self::Scalar {
-    return std::cmp::min(simd::reduce_min(self.lo()), self.2);
-  }
-
-  #[inline(always)]
-  fn reduce_max(self) -> Self::Scalar {
-    return std::cmp::max(simd::reduce_max(self.lo()), self.2);
+    return self.reduce_or() & std::i64::MIN != 0;
   }
 }
 
@@ -438,11 +451,6 @@ impl long3 {
   #[inline]
   pub fn broadcast(x: i64) -> Self {
     return long3(x, x, x);
-  }
-
-  #[inline]
-  pub fn madd(x: long3, y: long3, z: long3) -> long3 {
-    return x * y + z;
   }
 
   #[inline]

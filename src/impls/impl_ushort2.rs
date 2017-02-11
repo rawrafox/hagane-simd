@@ -313,6 +313,21 @@ impl simd::Vector for ushort2 {
   }
 
   #[inline(always)]
+  fn reduce_add(self) -> Self::Scalar {
+    return self.0 + self.1;
+  }
+
+  #[inline(always)]
+  fn reduce_min(self) -> Self::Scalar {
+    return std::cmp::min(self.0, self.1);
+  }
+
+  #[inline(always)]
+  fn reduce_max(self) -> Self::Scalar {
+    return std::cmp::max(self.0, self.1);
+  }
+
+  #[inline(always)]
   fn to_char_sat(self) -> char2 {
     return ushort2::to_char(simd::min(self, ushort2::broadcast(std::i8::MAX as u16)));
   }
@@ -361,32 +376,30 @@ impl simd::Dot for ushort2 {
   }
 }
 
-impl simd::Logic for ushort2 {
+impl simd::Integer for ushort2 {
+  #[inline(always)]
+  fn reduce_and(self) -> Self::Scalar {
+    return self.0 & self.1
+  }
+
+  #[inline(always)]
+  fn reduce_or(self) -> Self::Scalar {
+    return self.0 | self.1
+  }
+
+  #[inline(always)]
+  fn reduce_xor(self) -> Self::Scalar {
+    return self.0 ^ self.1
+  }
+
   #[inline(always)]
   fn all(self) -> bool {
-    return (self.0 & self.1) & 0x8000 != 0;
+    return self.reduce_and() & 0x8000 != 0;
   }
 
   #[inline(always)]
   fn any(self) -> bool {
-    return (self.0 | self.1) & 0x8000 != 0;
-  }
-}
-
-impl simd::Reduce for ushort2 {
-  #[inline(always)]
-  fn reduce_add(self) -> Self::Scalar {
-    return self.0 + self.1;
-  }
-
-  #[inline(always)]
-  fn reduce_min(self) -> Self::Scalar {
-    return std::cmp::min(self.0, self.1);
-  }
-
-  #[inline(always)]
-  fn reduce_max(self) -> Self::Scalar {
-    return std::cmp::max(self.0, self.1);
+    return self.reduce_or() & 0x8000 != 0;
   }
 }
 
@@ -401,11 +414,6 @@ impl ushort2 {
   #[inline]
   pub fn broadcast(x: u16) -> Self {
     return ushort2(x, x);
-  }
-
-  #[inline]
-  pub fn madd(x: ushort2, y: ushort2, z: ushort2) -> ushort2 {
-    return x * y + z;
   }
 
   #[inline]

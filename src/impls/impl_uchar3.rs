@@ -313,6 +313,21 @@ impl simd::Vector for uchar3 {
   }
 
   #[inline(always)]
+  fn reduce_add(self) -> Self::Scalar {
+    return self.0 + self.1 + self.2;
+  }
+
+  #[inline(always)]
+  fn reduce_min(self) -> Self::Scalar {
+    return std::cmp::min(simd::reduce_min(self.lo()), self.2);
+  }
+
+  #[inline(always)]
+  fn reduce_max(self) -> Self::Scalar {
+    return std::cmp::max(simd::reduce_max(self.lo()), self.2);
+  }
+
+  #[inline(always)]
   fn to_char_sat(self) -> char3 {
     return uchar3::to_char(simd::min(self, uchar3::broadcast(std::i8::MAX as u8)));
   }
@@ -401,32 +416,30 @@ impl simd::Dot for uchar3 {
   }
 }
 
-impl simd::Logic for uchar3 {
+impl simd::Integer for uchar3 {
+  #[inline(always)]
+  fn reduce_and(self) -> Self::Scalar {
+    return self.0 & self.1 & self.2
+  }
+
+  #[inline(always)]
+  fn reduce_or(self) -> Self::Scalar {
+    return self.0 | self.1 | self.2
+  }
+
+  #[inline(always)]
+  fn reduce_xor(self) -> Self::Scalar {
+    return self.0 ^ self.1 ^ self.2
+  }
+
   #[inline(always)]
   fn all(self) -> bool {
-    return (self.0 & self.1 & self.2) & 0x80 != 0;
+    return self.reduce_and() & 0x80 != 0;
   }
 
   #[inline(always)]
   fn any(self) -> bool {
-    return (self.0 | self.1 | self.2) & 0x80 != 0;
-  }
-}
-
-impl simd::Reduce for uchar3 {
-  #[inline(always)]
-  fn reduce_add(self) -> Self::Scalar {
-    return self.0 + self.1 + self.2;
-  }
-
-  #[inline(always)]
-  fn reduce_min(self) -> Self::Scalar {
-    return std::cmp::min(simd::reduce_min(self.lo()), self.2);
-  }
-
-  #[inline(always)]
-  fn reduce_max(self) -> Self::Scalar {
-    return std::cmp::max(simd::reduce_max(self.lo()), self.2);
+    return self.reduce_or() & 0x80 != 0;
   }
 }
 
@@ -441,11 +454,6 @@ impl uchar3 {
   #[inline]
   pub fn broadcast(x: u8) -> Self {
     return uchar3(x, x, x);
-  }
-
-  #[inline]
-  pub fn madd(x: uchar3, y: uchar3, z: uchar3) -> uchar3 {
-    return x * y + z;
   }
 
   #[inline]

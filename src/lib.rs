@@ -122,6 +122,8 @@ declare_matrix!(double2x3, double3x3, double4x3, double3);
 declare_matrix!(double2x4, double3x4, double4x4, double4);
 
 pub mod simd {
+  use std::ops::*;
+
   extern "platform-intrinsic" {
     // fn simd_add<T>(x: T, y: T) -> T;
     // fn simd_sub<T>(x: T, y: T) -> T;
@@ -148,7 +150,7 @@ pub mod simd {
     fn simd_extract<T, E>(x: T, i: u32) -> E;
   }
 
-  pub trait Vector : Sized {
+  pub trait Vector : Sized + Add<Output=Self> + Sub<Output=Self> + Mul<Output=Self> + Div<Output=Self> {
     type Scalar;
     type Boolean;
 
@@ -173,6 +175,11 @@ pub mod simd {
     #[inline(always)]
     fn replace(self, i: u32, value: Self::Scalar) -> Self {
       return unsafe { simd_insert(self, i, value) };
+    }
+
+    #[inline(always)]
+    fn add_mul(self, a: Self, b: Self) -> Self {
+      return a * b + self;
     }
 
     #[inline(always)]
@@ -213,6 +220,10 @@ pub mod simd {
     fn clamp(self, min: Self, max: Self) -> Self  {
       return self.max(min).min(max)
     }
+
+    fn reduce_add(self) -> Self::Scalar;
+    fn reduce_max(self) -> Self::Scalar;
+    fn reduce_min(self) -> Self::Scalar;
 
     #[inline(always)]
     fn to_char(self) -> Self::CharVector {
@@ -333,6 +344,21 @@ pub mod simd {
   #[inline(always)]
   pub fn clamp<T: Vector>(t: T, min: T, max: T) -> T {
     return t.clamp(min, max);
+  }
+
+  #[inline(always)]
+  pub fn reduce_add<T: Vector>(x: T) -> T::Scalar {
+    return x.reduce_add();
+  }
+
+  #[inline(always)]
+  pub fn reduce_max<T: Vector>(x: T) -> T::Scalar {
+    return x.reduce_max();
+  }
+
+  #[inline(always)]
+  pub fn reduce_min<T: Vector>(x: T) -> T::Scalar {
+    return x.reduce_min();
   }
 
   #[inline(always)]
@@ -601,44 +627,42 @@ pub mod simd {
   pub fn refract<T: Geometry>(x: T, n: T, eta: T::Scalar) -> T {
     return x.refract(n, eta);
   }
-
-  pub trait Logic : Vector {
+  
+  pub trait Integer : Vector + BitAnd<Output=Self> + BitOr<Output=Self> + BitXor<Output=Self> {
+    fn reduce_and(self) -> Self::Scalar;
+    fn reduce_or(self) -> Self::Scalar;
+    fn reduce_xor(self) -> Self::Scalar;
+    
     fn all(self) -> bool;
     fn any(self) -> bool;
   }
 
   #[inline(always)]
-  pub fn all<T: Logic>(x: T) -> bool {
+  pub fn reduce_and<T: Integer>(x: T) -> T::Scalar {
+    return x.reduce_and();
+  }
+
+  #[inline(always)]
+  pub fn reduce_or<T: Integer>(x: T) -> T::Scalar {
+    return x.reduce_or();
+  }
+
+  #[inline(always)]
+  pub fn reduce_xor<T: Integer>(x: T) -> T::Scalar {
+    return x.reduce_xor();
+  }
+
+  #[inline(always)]
+  pub fn all<T: Integer>(x: T) -> bool {
     return x.all();
   }
 
   #[inline(always)]
-  pub fn any<T: Logic>(x: T) -> bool {
+  pub fn any<T: Integer>(x: T) -> bool {
     return x.any();
   }
 
-  pub trait Reduce : Vector {
-    fn reduce_add(self) -> Self::Scalar;
-    fn reduce_max(self) -> Self::Scalar;
-    fn reduce_min(self) -> Self::Scalar;
-  }
-
-  #[inline(always)]
-  pub fn reduce_add<T: Reduce>(x: T) -> T::Scalar {
-    return x.reduce_add();
-  }
-
-  #[inline(always)]
-  pub fn reduce_max<T: Reduce>(x: T) -> T::Scalar {
-    return x.reduce_max();
-  }
-
-  #[inline(always)]
-  pub fn reduce_min<T: Reduce>(x: T) -> T::Scalar {
-    return x.reduce_min();
-  }
-
-  pub trait Select<T> : Logic {
+  pub trait Select<T> : Integer {
     fn select(self, a: T, b: T) -> T;
     fn bitselect(self, a: T, b: T) -> T;
   }

@@ -313,6 +313,21 @@ impl simd::Vector for ulong3 {
   }
 
   #[inline(always)]
+  fn reduce_add(self) -> Self::Scalar {
+    return self.0 + self.1 + self.2;
+  }
+
+  #[inline(always)]
+  fn reduce_min(self) -> Self::Scalar {
+    return std::cmp::min(simd::reduce_min(self.lo()), self.2);
+  }
+
+  #[inline(always)]
+  fn reduce_max(self) -> Self::Scalar {
+    return std::cmp::max(simd::reduce_max(self.lo()), self.2);
+  }
+
+  #[inline(always)]
   fn to_char_sat(self) -> char3 {
     return ulong3::to_char(simd::min(self, ulong3::broadcast(std::i8::MAX as u64)));
   }
@@ -361,32 +376,30 @@ impl simd::Dot for ulong3 {
   }
 }
 
-impl simd::Logic for ulong3 {
+impl simd::Integer for ulong3 {
+  #[inline(always)]
+  fn reduce_and(self) -> Self::Scalar {
+    return self.0 & self.1 & self.2
+  }
+
+  #[inline(always)]
+  fn reduce_or(self) -> Self::Scalar {
+    return self.0 | self.1 | self.2
+  }
+
+  #[inline(always)]
+  fn reduce_xor(self) -> Self::Scalar {
+    return self.0 ^ self.1 ^ self.2
+  }
+
   #[inline(always)]
   fn all(self) -> bool {
-    return (self.0 & self.1 & self.2) & 0x8000000000000000 != 0;
+    return self.reduce_and() & 0x8000000000000000 != 0;
   }
 
   #[inline(always)]
   fn any(self) -> bool {
-    return (self.0 | self.1 | self.2) & 0x8000000000000000 != 0;
-  }
-}
-
-impl simd::Reduce for ulong3 {
-  #[inline(always)]
-  fn reduce_add(self) -> Self::Scalar {
-    return self.0 + self.1 + self.2;
-  }
-
-  #[inline(always)]
-  fn reduce_min(self) -> Self::Scalar {
-    return std::cmp::min(simd::reduce_min(self.lo()), self.2);
-  }
-
-  #[inline(always)]
-  fn reduce_max(self) -> Self::Scalar {
-    return std::cmp::max(simd::reduce_max(self.lo()), self.2);
+    return self.reduce_or() & 0x8000000000000000 != 0;
   }
 }
 
@@ -401,11 +414,6 @@ impl ulong3 {
   #[inline]
   pub fn broadcast(x: u64) -> Self {
     return ulong3(x, x, x);
-  }
-
-  #[inline]
-  pub fn madd(x: ulong3, y: ulong3, z: ulong3) -> ulong3 {
-    return x * y + z;
   }
 
   #[inline]

@@ -314,6 +314,21 @@ impl simd::Vector for long2 {
   }
 
   #[inline(always)]
+  fn reduce_add(self) -> Self::Scalar {
+    return self.0 + self.1;
+  }
+
+  #[inline(always)]
+  fn reduce_min(self) -> Self::Scalar {
+    return std::cmp::min(self.0, self.1);
+  }
+
+  #[inline(always)]
+  fn reduce_max(self) -> Self::Scalar {
+    return std::cmp::max(self.0, self.1);
+  }
+
+  #[inline(always)]
   fn to_char_sat(self) -> char2 {
     return long2::to_char(simd::clamp(self, long2::broadcast(std::i8::MIN as i64), long2::broadcast(std::i8::MAX as i64)));
   }
@@ -362,32 +377,30 @@ impl simd::Dot for long2 {
   }
 }
 
-impl simd::Logic for long2 {
+impl simd::Integer for long2 {
+  #[inline(always)]
+  fn reduce_and(self) -> Self::Scalar {
+    return self.0 & self.1
+  }
+
+  #[inline(always)]
+  fn reduce_or(self) -> Self::Scalar {
+    return self.0 | self.1
+  }
+
+  #[inline(always)]
+  fn reduce_xor(self) -> Self::Scalar {
+    return self.0 ^ self.1
+  }
+
   #[inline(always)]
   fn all(self) -> bool {
-    return (self.0 & self.1) & std::i64::MIN != 0;
+    return self.reduce_and() & std::i64::MIN != 0;
   }
 
   #[inline(always)]
   fn any(self) -> bool {
-    return (self.0 | self.1) & std::i64::MIN != 0;
-  }
-}
-
-impl simd::Reduce for long2 {
-  #[inline(always)]
-  fn reduce_add(self) -> Self::Scalar {
-    return self.0 + self.1;
-  }
-
-  #[inline(always)]
-  fn reduce_min(self) -> Self::Scalar {
-    return std::cmp::min(self.0, self.1);
-  }
-
-  #[inline(always)]
-  fn reduce_max(self) -> Self::Scalar {
-    return std::cmp::max(self.0, self.1);
+    return self.reduce_or() & std::i64::MIN != 0;
   }
 }
 
@@ -438,11 +451,6 @@ impl long2 {
   #[inline]
   pub fn broadcast(x: i64) -> Self {
     return long2(x, x);
-  }
-
-  #[inline]
-  pub fn madd(x: long2, y: long2, z: long2) -> long2 {
-    return x * y + z;
   }
 
   #[inline]

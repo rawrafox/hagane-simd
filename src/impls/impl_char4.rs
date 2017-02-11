@@ -314,6 +314,21 @@ impl simd::Vector for char4 {
   }
 
   #[inline(always)]
+  fn reduce_add(self) -> Self::Scalar {
+    return simd::reduce_add(self.lo() + self.hi());
+  }
+
+  #[inline(always)]
+  fn reduce_min(self) -> Self::Scalar {
+    return simd::reduce_min(simd::min(self.lo(), self.hi()));
+  }
+
+  #[inline(always)]
+  fn reduce_max(self) -> Self::Scalar {
+    return simd::reduce_max(simd::max(self.lo(), self.hi()));
+  }
+
+  #[inline(always)]
   fn to_char_sat(self) -> char4 {
     return self;
   }
@@ -362,32 +377,30 @@ impl simd::Dot for char4 {
   }
 }
 
-impl simd::Logic for char4 {
+impl simd::Integer for char4 {
+  #[inline(always)]
+  fn reduce_and(self) -> Self::Scalar {
+    return (self.lo() & self.hi()).reduce_and();
+  }
+
+  #[inline(always)]
+  fn reduce_or(self) -> Self::Scalar {
+    return (self.lo() | self.hi()).reduce_or();
+  }
+
+  #[inline(always)]
+  fn reduce_xor(self) -> Self::Scalar {
+    return (self.lo() ^ self.hi()).reduce_xor();
+  }
+
   #[inline(always)]
   fn all(self) -> bool {
-    return (self.0 & self.1 & self.2 & self.3) & std::i8::MIN != 0;
+    return self.reduce_and() & std::i8::MIN != 0;
   }
 
   #[inline(always)]
   fn any(self) -> bool {
-    return (self.0 | self.1 | self.2 | self.3) & std::i8::MIN != 0;
-  }
-}
-
-impl simd::Reduce for char4 {
-  #[inline(always)]
-  fn reduce_add(self) -> Self::Scalar {
-    return simd::reduce_add(self.lo() + self.hi());
-  }
-
-  #[inline(always)]
-  fn reduce_min(self) -> Self::Scalar {
-    return simd::reduce_min(simd::min(self.lo(), self.hi()));
-  }
-
-  #[inline(always)]
-  fn reduce_max(self) -> Self::Scalar {
-    return simd::reduce_max(simd::max(self.lo(), self.hi()));
+    return self.reduce_or() & std::i8::MIN != 0;
   }
 }
 
@@ -426,11 +439,6 @@ impl char4 {
   #[inline]
   pub fn broadcast(x: i8) -> Self {
     return char4(x, x, x, x);
-  }
-
-  #[inline]
-  pub fn madd(x: char4, y: char4, z: char4) -> char4 {
-    return x * y + z;
   }
 
   #[inline]

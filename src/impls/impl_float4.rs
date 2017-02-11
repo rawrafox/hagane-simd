@@ -162,6 +162,21 @@ impl simd::Vector for float4 {
   }
 
   #[inline(always)]
+  fn reduce_add(self) -> Self::Scalar {
+    return simd::reduce_add(self.lo() + self.hi());
+  }
+
+  #[inline(always)]
+  fn reduce_min(self) -> Self::Scalar {
+    return simd::reduce_min(simd::min(self.lo(), self.hi()));
+  }
+
+  #[inline(always)]
+  fn reduce_max(self) -> Self::Scalar {
+    return simd::reduce_max(simd::max(self.lo(), self.hi()));
+  }
+
+  #[inline(always)]
   fn to_char_sat(self) -> char4 {
     return float4::to_char(simd::clamp(self, float4::broadcast(std::i8::MIN as f32), float4::broadcast(std::i8::MAX as f32)));
   }
@@ -341,23 +356,6 @@ impl simd::Geometry for float4 {
   }
 }
 
-impl simd::Reduce for float4 {
-  #[inline(always)]
-  fn reduce_add(self) -> Self::Scalar {
-    return simd::reduce_add(self.lo() + self.hi());
-  }
-
-  #[inline(always)]
-  fn reduce_min(self) -> Self::Scalar {
-    return simd::reduce_min(simd::min(self.lo(), self.hi()));
-  }
-
-  #[inline(always)]
-  fn reduce_max(self) -> Self::Scalar {
-    return simd::reduce_max(simd::max(self.lo(), self.hi()));
-  }
-}
-
 impl float4 {
   #[inline]
   pub fn bitcast<T>(x: T) -> float4 {
@@ -369,11 +367,6 @@ impl float4 {
   #[inline]
   pub fn broadcast(x: f32) -> Self {
     return float4(x, x, x, x);
-  }
-
-  #[inline]
-  pub fn madd(x: float4, y: float4, z: float4) -> float4 {
-    return x * y + z;
   }
 
   #[inline]

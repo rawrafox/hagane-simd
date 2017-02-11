@@ -227,6 +227,58 @@ module Bridge
               end
             end
 
+            o.puts("#[inline(always)]", pad: true)
+            o.block("fn reduce_add(self) -> Self::Scalar") do |o|
+              case width
+              when 2
+                o.puts("return self.0 + self.1;")
+              when 3
+                o.puts("return self.0 + self.1 + self.2;")
+              else
+                o.puts("return simd::reduce_add(self.lo() + self.hi());")
+              end
+            end
+
+            o.puts("#[inline(always)]", pad: true)
+            o.block("fn reduce_min(self) -> Self::Scalar") do |o|
+              case width
+              when 2
+                if kind.include?(:float)
+                  o.puts("return self.0.min(self.1);")
+                else
+                  o.puts("return std::cmp::min(self.0, self.1);")
+                end
+              when 3
+                if kind.include?(:float)
+                  o.puts("return self.2.min(simd::reduce_min(self.lo()));")
+                else
+                  o.puts("return std::cmp::min(simd::reduce_min(self.lo()), self.2);")
+                end
+              else
+                o.puts("return simd::reduce_min(simd::min(self.lo(), self.hi()));")
+              end
+            end
+
+            o.puts("#[inline(always)]", pad: true)
+            o.block("fn reduce_max(self) -> Self::Scalar") do |o|
+              case width
+              when 2
+                if kind.include?(:float)
+                  o.puts("return self.0.max(self.1);")
+                else
+                  o.puts("return std::cmp::max(self.0, self.1);")
+                end
+              when 3
+                if kind.include?(:float)
+                  o.puts("return self.2.max(simd::reduce_max(self.lo()));")
+                else
+                  o.puts("return std::cmp::max(simd::reduce_max(self.lo()), self.2);")
+                end
+              else
+                o.puts("return simd::reduce_max(simd::max(self.lo(), self.hi()));")
+              end
+            end
+
             self.conversion(o, type, "char", width)
             self.conversion(o, type, "char", width, saturate: true)
             self.conversion(o, type, "uchar", width)
@@ -423,75 +475,53 @@ module Bridge
           end
 
           if kind.include?(:integer)
-            o.block("impl simd::Logic for #{name}", pad: true) do |o|
+            o.block("impl simd::Integer for #{name}", pad: true) do |o|
+              o.puts("#[inline(always)]", pad: true)
+              o.block("fn reduce_and(self) -> Self::Scalar") do |o|
+                case width
+                when 2
+                  o.puts("return self.0 & self.1")
+                when 3
+                  o.puts("return self.0 & self.1 & self.2")
+                else
+                  o.puts("return (self.lo() & self.hi()).reduce_and();")
+                end
+              end
+
+              o.puts("#[inline(always)]", pad: true)
+              o.block("fn reduce_or(self) -> Self::Scalar") do |o|
+                case width
+                when 2
+                  o.puts("return self.0 | self.1")
+                when 3
+                  o.puts("return self.0 | self.1 | self.2")
+                else
+                  o.puts("return (self.lo() | self.hi()).reduce_or();")
+                end
+              end
+
+              o.puts("#[inline(always)]", pad: true)
+              o.block("fn reduce_xor(self) -> Self::Scalar") do |o|
+                case width
+                when 2
+                  o.puts("return self.0 ^ self.1")
+                when 3
+                  o.puts("return self.0 ^ self.1 ^ self.2")
+                else
+                  o.puts("return (self.lo() ^ self.hi()).reduce_xor();")
+                end
+              end
+
               constant = kind.include?(:signed) ? "std::#{scalar}::MIN" : "0x8#{"0" * (attributes.fetch(:size) * 2 - 1)}"
 
               o.puts("#[inline(always)]", pad: true)
               o.block("fn all(self) -> bool") do |o|
-                result = width.times.map { |i| "self.#{i}" }.join(" & ")
-
-                o.puts("return (#{result}) & #{constant} != 0;")
+                o.puts("return self.reduce_and() & #{constant} != 0;")
               end
 
               o.puts("#[inline(always)]", pad: true)
               o.block("fn any(self) -> bool") do |o|
-                result = width.times.map { |i| "self.#{i}" }.join(" | ")
-
-                o.puts("return (#{result}) & #{constant} != 0;")
-              end
-            end
-          end
-
-          o.block("impl simd::Reduce for #{name}", pad: true) do |o|
-            o.puts("#[inline(always)]", pad: true)
-            o.block("fn reduce_add(self) -> Self::Scalar") do |o|
-              case width
-              when 2
-                o.puts("return self.0 + self.1;")
-              when 3
-                o.puts("return self.0 + self.1 + self.2;")
-              else
-                o.puts("return simd::reduce_add(self.lo() + self.hi());")
-              end
-            end
-
-            o.puts("#[inline(always)]", pad: true)
-            o.block("fn reduce_min(self) -> Self::Scalar") do |o|
-              case width
-              when 2
-                if kind.include?(:float)
-                  o.puts("return self.0.min(self.1);")
-                else
-                  o.puts("return std::cmp::min(self.0, self.1);")
-                end
-              when 3
-                if kind.include?(:float)
-                  o.puts("return self.2.min(simd::reduce_min(self.lo()));")
-                else
-                  o.puts("return std::cmp::min(simd::reduce_min(self.lo()), self.2);")
-                end
-              else
-                o.puts("return simd::reduce_min(simd::min(self.lo(), self.hi()));")
-              end
-            end
-
-            o.puts("#[inline(always)]", pad: true)
-            o.block("fn reduce_max(self) -> Self::Scalar") do |o|
-              case width
-              when 2
-                if kind.include?(:float)
-                  o.puts("return self.0.max(self.1);")
-                else
-                  o.puts("return std::cmp::max(self.0, self.1);")
-                end
-              when 3
-                if kind.include?(:float)
-                  o.puts("return self.2.max(simd::reduce_max(self.lo()));")
-                else
-                  o.puts("return std::cmp::max(simd::reduce_max(self.lo()), self.2);")
-                end
-              else
-                o.puts("return simd::reduce_max(simd::max(self.lo(), self.hi()));")
+                o.puts("return self.reduce_or() & #{constant} != 0;")
               end
             end
           end
@@ -529,13 +559,6 @@ module Bridge
             o.puts("#[inline]", pad: true)
             o.block("pub fn broadcast(x: #{scalar}) -> Self") do |o|
               o.puts("return #{name}(#{(["x"] * width).join(", ")});")
-            end
-
-            # Additions
-
-            o.puts("#[inline]", pad: true)
-            o.block("pub fn madd(x: #{name}, y: #{name}, z: #{name}) -> #{name}") do |o|
-              o.puts("return x * y + z;")
             end
 
             # Swizzles

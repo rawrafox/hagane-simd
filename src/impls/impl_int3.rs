@@ -314,6 +314,21 @@ impl simd::Vector for int3 {
   }
 
   #[inline(always)]
+  fn reduce_add(self) -> Self::Scalar {
+    return self.0 + self.1 + self.2;
+  }
+
+  #[inline(always)]
+  fn reduce_min(self) -> Self::Scalar {
+    return std::cmp::min(simd::reduce_min(self.lo()), self.2);
+  }
+
+  #[inline(always)]
+  fn reduce_max(self) -> Self::Scalar {
+    return std::cmp::max(simd::reduce_max(self.lo()), self.2);
+  }
+
+  #[inline(always)]
   fn to_char_sat(self) -> char3 {
     return int3::to_char(simd::clamp(self, int3::broadcast(std::i8::MIN as i32), int3::broadcast(std::i8::MAX as i32)));
   }
@@ -377,32 +392,30 @@ impl simd::Dot for int3 {
   }
 }
 
-impl simd::Logic for int3 {
+impl simd::Integer for int3 {
+  #[inline(always)]
+  fn reduce_and(self) -> Self::Scalar {
+    return self.0 & self.1 & self.2
+  }
+
+  #[inline(always)]
+  fn reduce_or(self) -> Self::Scalar {
+    return self.0 | self.1 | self.2
+  }
+
+  #[inline(always)]
+  fn reduce_xor(self) -> Self::Scalar {
+    return self.0 ^ self.1 ^ self.2
+  }
+
   #[inline(always)]
   fn all(self) -> bool {
-    return (self.0 & self.1 & self.2) & std::i32::MIN != 0;
+    return self.reduce_and() & std::i32::MIN != 0;
   }
 
   #[inline(always)]
   fn any(self) -> bool {
-    return (self.0 | self.1 | self.2) & std::i32::MIN != 0;
-  }
-}
-
-impl simd::Reduce for int3 {
-  #[inline(always)]
-  fn reduce_add(self) -> Self::Scalar {
-    return self.0 + self.1 + self.2;
-  }
-
-  #[inline(always)]
-  fn reduce_min(self) -> Self::Scalar {
-    return std::cmp::min(simd::reduce_min(self.lo()), self.2);
-  }
-
-  #[inline(always)]
-  fn reduce_max(self) -> Self::Scalar {
-    return std::cmp::max(simd::reduce_max(self.lo()), self.2);
+    return self.reduce_or() & std::i32::MIN != 0;
   }
 }
 
@@ -453,11 +466,6 @@ impl int3 {
   #[inline]
   pub fn broadcast(x: i32) -> Self {
     return int3(x, x, x);
-  }
-
-  #[inline]
-  pub fn madd(x: int3, y: int3, z: int3) -> int3 {
-    return x * y + z;
   }
 
   #[inline]

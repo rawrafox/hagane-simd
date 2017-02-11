@@ -314,6 +314,21 @@ impl simd::Vector for char2 {
   }
 
   #[inline(always)]
+  fn reduce_add(self) -> Self::Scalar {
+    return self.0 + self.1;
+  }
+
+  #[inline(always)]
+  fn reduce_min(self) -> Self::Scalar {
+    return std::cmp::min(self.0, self.1);
+  }
+
+  #[inline(always)]
+  fn reduce_max(self) -> Self::Scalar {
+    return std::cmp::max(self.0, self.1);
+  }
+
+  #[inline(always)]
   fn to_char_sat(self) -> char2 {
     return self;
   }
@@ -362,32 +377,30 @@ impl simd::Dot for char2 {
   }
 }
 
-impl simd::Logic for char2 {
+impl simd::Integer for char2 {
+  #[inline(always)]
+  fn reduce_and(self) -> Self::Scalar {
+    return self.0 & self.1
+  }
+
+  #[inline(always)]
+  fn reduce_or(self) -> Self::Scalar {
+    return self.0 | self.1
+  }
+
+  #[inline(always)]
+  fn reduce_xor(self) -> Self::Scalar {
+    return self.0 ^ self.1
+  }
+
   #[inline(always)]
   fn all(self) -> bool {
-    return (self.0 & self.1) & std::i8::MIN != 0;
+    return self.reduce_and() & std::i8::MIN != 0;
   }
 
   #[inline(always)]
   fn any(self) -> bool {
-    return (self.0 | self.1) & std::i8::MIN != 0;
-  }
-}
-
-impl simd::Reduce for char2 {
-  #[inline(always)]
-  fn reduce_add(self) -> Self::Scalar {
-    return self.0 + self.1;
-  }
-
-  #[inline(always)]
-  fn reduce_min(self) -> Self::Scalar {
-    return std::cmp::min(self.0, self.1);
-  }
-
-  #[inline(always)]
-  fn reduce_max(self) -> Self::Scalar {
-    return std::cmp::max(self.0, self.1);
+    return self.reduce_or() & std::i8::MIN != 0;
   }
 }
 
@@ -426,11 +439,6 @@ impl char2 {
   #[inline]
   pub fn broadcast(x: i8) -> Self {
     return char2(x, x);
-  }
-
-  #[inline]
-  pub fn madd(x: char2, y: char2, z: char2) -> char2 {
-    return x * y + z;
   }
 
   #[inline]
