@@ -69,17 +69,9 @@ module Bridge
                 o.puts("fn simd_xor<T>(x: T, y: T) -> T;")
               end
 
-              o.puts("fn simd_eq<T, U>(x: T, y: T) -> U;", pad: true)
-              o.puts("fn simd_ne<T, U>(x: T, y: T) -> U;")
-              o.puts("fn simd_lt<T, U>(x: T, y: T) -> U;")
-              o.puts("fn simd_le<T, U>(x: T, y: T) -> U;")
-              o.puts("fn simd_gt<T, U>(x: T, y: T) -> U;")
-              o.puts("fn simd_ge<T, U>(x: T, y: T) -> U;")
-
               o.puts("fn simd_cast<T, U>(x: T) -> U;", pad: true)
 
-              o.puts("fn simd_insert<T, E>(x: T, i: u32, e: E) -> T;", pad: true)
-              o.puts("fn simd_extract<T, E>(x: T, i: u32) -> E;")
+              o.puts("fn simd_extract<T, E>(x: T, i: u32) -> E;", pad: true)
             end
 
             o.block("impl std::ops::Index<u32> for #{name}", pad: true) do |o|
@@ -208,23 +200,6 @@ module Bridge
             o.block("impl simd::Vector for #{name}", pad: true) do |o|
               o.puts("type Scalar = #{scalar};", pad: true)
               o.puts("type Boolean = #{bool_name};")
-
-              o.puts("#[inline(always)]", pad: true)
-              o.block("fn extract(self, i: u32) -> Self::Scalar") do |o|
-                o.puts("return unsafe { simd_extract(self, i) };")
-              end
-
-              o.puts("#[inline(always)]", pad: true)
-              o.block("fn replace(self, i: u32, x: Self::Scalar) -> Self") do |o|
-                o.puts("return unsafe { simd_insert(self, i, x) };")
-              end
-
-              %w(eq ne lt le gt ge).each do |op|
-                o.puts("#[inline(always)]", pad: true)
-                o.block("fn #{op}(self, other: Self) -> Self::Boolean") do |o|
-                  o.puts("return unsafe { simd_#{op}(self, other) };")
-                end
-              end
 
               o.puts("#[inline(always)]", pad: true)
               o.block("fn abs(self) -> Self") do |o|

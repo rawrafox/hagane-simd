@@ -19,16 +19,8 @@ extern "platform-intrinsic" {
   fn simd_or<T>(x: T, y: T) -> T;
   fn simd_xor<T>(x: T, y: T) -> T;
 
-  fn simd_eq<T, U>(x: T, y: T) -> U;
-  fn simd_ne<T, U>(x: T, y: T) -> U;
-  fn simd_lt<T, U>(x: T, y: T) -> U;
-  fn simd_le<T, U>(x: T, y: T) -> U;
-  fn simd_gt<T, U>(x: T, y: T) -> U;
-  fn simd_ge<T, U>(x: T, y: T) -> U;
-
   fn simd_cast<T, U>(x: T) -> U;
 
-  fn simd_insert<T, E>(x: T, i: u32, e: E) -> T;
   fn simd_extract<T, E>(x: T, i: u32) -> E;
 }
 
@@ -308,46 +300,6 @@ impl PartialEq for uchar2 {
 impl simd::Vector for uchar2 {
   type Scalar = u8;
   type Boolean = char2;
-
-  #[inline(always)]
-  fn extract(self, i: u32) -> Self::Scalar {
-    return unsafe { simd_extract(self, i) };
-  }
-
-  #[inline(always)]
-  fn replace(self, i: u32, x: Self::Scalar) -> Self {
-    return unsafe { simd_insert(self, i, x) };
-  }
-
-  #[inline(always)]
-  fn eq(self, other: Self) -> Self::Boolean {
-    return unsafe { simd_eq(self, other) };
-  }
-
-  #[inline(always)]
-  fn ne(self, other: Self) -> Self::Boolean {
-    return unsafe { simd_ne(self, other) };
-  }
-
-  #[inline(always)]
-  fn lt(self, other: Self) -> Self::Boolean {
-    return unsafe { simd_lt(self, other) };
-  }
-
-  #[inline(always)]
-  fn le(self, other: Self) -> Self::Boolean {
-    return unsafe { simd_le(self, other) };
-  }
-
-  #[inline(always)]
-  fn gt(self, other: Self) -> Self::Boolean {
-    return unsafe { simd_gt(self, other) };
-  }
-
-  #[inline(always)]
-  fn ge(self, other: Self) -> Self::Boolean {
-    return unsafe { simd_ge(self, other) };
-  }
 
   #[inline(always)]
   fn abs(self) -> Self {

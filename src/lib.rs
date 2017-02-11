@@ -145,19 +145,67 @@ pub use type_double4x4::*;
 pub mod objc;
 
 pub mod simd {
+  extern "platform-intrinsic" {
+    // fn simd_add<T>(x: T, y: T) -> T;
+    // fn simd_sub<T>(x: T, y: T) -> T;
+    // fn simd_mul<T>(x: T, y: T) -> T;
+    // fn simd_div<T>(x: T, y: T) -> T;
+    // 
+    // fn simd_shl<T>(x: T, y: T) -> T;
+    // fn simd_shr<T>(x: T, y: T) -> T;
+    // 
+    // fn simd_and<T>(x: T, y: T) -> T;
+    // fn simd_or<T>(x: T, y: T) -> T;
+    // fn simd_xor<T>(x: T, y: T) -> T;
+
+    fn simd_eq<T, U>(x: T, y: T) -> U;
+    fn simd_ne<T, U>(x: T, y: T) -> U;
+    fn simd_lt<T, U>(x: T, y: T) -> U;
+    fn simd_le<T, U>(x: T, y: T) -> U;
+    fn simd_gt<T, U>(x: T, y: T) -> U;
+    fn simd_ge<T, U>(x: T, y: T) -> U;
+
+    // fn simd_cast<T, U>(x: T) -> U;
+
+    fn simd_insert<T, E>(x: T, i: u32, e: E) -> T;
+    fn simd_extract<T, E>(x: T, i: u32) -> E;
+  }
+
   pub trait Vector : Sized {
     type Scalar;
     type Boolean;
 
-    fn extract(self, i: u32) -> Self::Scalar;
-    fn replace(self, i: u32, value: Self::Scalar) -> Self;
+    fn extract(self, i: u32) -> Self::Scalar {
+      return unsafe { simd_extract(self, i) };
+    }
 
-    fn eq(self, other: Self) -> Self::Boolean;
-    fn ne(self, other: Self) -> Self::Boolean;
-    fn lt(self, other: Self) -> Self::Boolean;
-    fn le(self, other: Self) -> Self::Boolean;
-    fn gt(self, other: Self) -> Self::Boolean;
-    fn ge(self, other: Self) -> Self::Boolean;
+    fn replace(self, i: u32, value: Self::Scalar) -> Self {
+      return unsafe { simd_insert(self, i, value) };
+    }
+
+    fn eq(self, other: Self) -> Self::Boolean {
+      return unsafe { simd_eq(self, other) };
+    }
+
+    fn ne(self, other: Self) -> Self::Boolean {
+      return unsafe { simd_ne(self, other) };
+    }
+
+    fn lt(self, other: Self) -> Self::Boolean {
+      return unsafe { simd_lt(self, other) };
+    }
+
+    fn le(self, other: Self) -> Self::Boolean {
+      return unsafe { simd_le(self, other) };
+    }
+
+    fn gt(self, other: Self) -> Self::Boolean {
+      return unsafe { simd_gt(self, other) };
+    }
+
+    fn ge(self, other: Self) -> Self::Boolean {
+      return unsafe { simd_ge(self, other) };
+    }
 
     fn abs(self) -> Self;
     fn max(self, other: Self) -> Self;
@@ -233,6 +281,11 @@ pub mod simd {
     type Output;
 
     fn cross(self, rhs: Self) -> Self::Output;
+  }
+
+  #[inline(always)]
+  pub fn cross<T: Cross>(x: T, y: T) -> T::Output {
+    return x.cross(y);
   }
 
   pub trait Dot<RHS = Self> {
