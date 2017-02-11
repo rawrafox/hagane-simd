@@ -1,6 +1,5 @@
 use std;
 use ::*;
-use ::*;
 
 extern {
   fn __invert_d2(a: double2x2) -> double2x2;

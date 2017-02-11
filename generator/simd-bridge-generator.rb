@@ -221,11 +221,6 @@ module Bridge
               end
 
               o.puts("#[inline(always)]", pad: true)
-              o.block("fn rsqrt(self) -> Self") do |o|
-                o.puts("return self.sqrt().recip();")
-              end
-
-              o.puts("#[inline(always)]", pad: true)
               o.block("fn fract(self) -> Self") do |o|
                 result = width.times.map { |i| "self.#{i}.fract()" }.join(", ")
 
@@ -251,11 +246,6 @@ module Bridge
                 result = width.times.map { |i| "self.#{i}.trunc()" }.join(", ")
 
                 o.puts("return #{name}(#{result});")
-              end
-
-              o.puts("#[inline(always)]", pad: true)
-              o.block("fn mix(self, a: Self, b: Self) -> Self") do |o|
-                o.puts("return a + self * (b - a);")
               end
 
               o.puts("#[inline(always)]", pad: true)
@@ -519,7 +509,6 @@ module Bridge
 
             o.puts("use std;", pad: true)
             o.puts("use ::*;")
-            o.puts("use ::*;") if i == j
 
             if i == j
               if ["f32", "f64"].include?(scalar)

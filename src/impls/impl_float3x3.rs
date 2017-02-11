@@ -1,6 +1,5 @@
 use std;
 use ::*;
-use ::*;
 
 extern {
   fn __invert_f3(a: float3x3) -> float3x3;

@@ -130,11 +130,6 @@ impl Float for float2 {
   }
 
   #[inline(always)]
-  fn rsqrt(self) -> Self {
-    return self.sqrt().recip();
-  }
-
-  #[inline(always)]
   fn fract(self) -> Self {
     return float2(self.0.fract(), self.1.fract());
   }
@@ -152,11 +147,6 @@ impl Float for float2 {
   #[inline(always)]
   fn trunc(self) -> Self {
     return float2(self.0.trunc(), self.1.trunc());
-  }
-
-  #[inline(always)]
-  fn mix(self, a: Self, b: Self) -> Self {
-    return a + self * (b - a);
   }
 
   #[inline(always)]
