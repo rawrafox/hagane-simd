@@ -147,9 +147,17 @@ pub mod objc;
 pub mod simd {
   pub trait Vector : Sized {
     type Scalar;
+    type Boolean;
 
     fn extract(self, i: u32) -> Self::Scalar;
     fn replace(self, i: u32, value: Self::Scalar) -> Self;
+
+    fn eq(self, other: Self) -> Self::Boolean;
+    fn ne(self, other: Self) -> Self::Boolean;
+    fn lt(self, other: Self) -> Self::Boolean;
+    fn le(self, other: Self) -> Self::Boolean;
+    fn gt(self, other: Self) -> Self::Boolean;
+    fn ge(self, other: Self) -> Self::Boolean;
 
     fn abs(self) -> Self;
     fn max(self, other: Self) -> Self;
@@ -169,6 +177,36 @@ pub mod simd {
   #[inline(always)]
   pub fn replace<T: Vector>(x: T, i: u32, value: T::Scalar) -> T {
     return x.replace(i, value);
+  }
+
+  #[inline(always)]
+  pub fn eq<T: Vector>(x: T, y: T) -> T::Boolean {
+    return x.eq(y);
+  }
+
+  #[inline(always)]
+  pub fn ne<T: Vector>(x: T, y: T) -> T::Boolean {
+    return x.ne(y);
+  }
+
+  #[inline(always)]
+  pub fn lt<T: Vector>(x: T, y: T) -> T::Boolean {
+    return x.lt(y);
+  }
+
+  #[inline(always)]
+  pub fn le<T: Vector>(x: T, y: T) -> T::Boolean {
+    return x.le(y);
+  }
+
+  #[inline(always)]
+  pub fn gt<T: Vector>(x: T, y: T) -> T::Boolean {
+    return x.gt(y);
+  }
+
+  #[inline(always)]
+  pub fn ge<T: Vector>(x: T, y: T) -> T::Boolean {
+    return x.ge(y);
   }
 
   #[inline(always)]
@@ -209,13 +247,30 @@ pub mod simd {
   }
 
   pub trait Float : Vector {
+    fn copysign(self, magnitude: Self) -> Self;
     fn sign(self) -> Self;
-    fn mix(self, a: Self, b: Self) -> Self;
+
+    fn sqrt(self) -> Self;
+
     fn recip(self) -> Self;
     fn rsqrt(self) -> Self;
+
     fn fract(self) -> Self;
+    fn ceil(self) -> Self;
+    fn floor(self) -> Self;
+    fn trunc(self) -> Self;
+
+    fn mix(self, a: Self, b: Self) -> Self;
     fn step(self, a: Self) -> Self;
     fn smoothstep(self, a: Self, b: Self) -> Self;
+
+    fn sin(self) -> Self;
+    fn cos(self) -> Self;
+  }
+
+  #[inline(always)]
+  pub fn copysign<T: Float>(sign: T, magnitude: T) -> T {
+    return sign.copysign(magnitude);
   }
 
   #[inline(always)]
@@ -224,8 +279,8 @@ pub mod simd {
   }
 
   #[inline(always)]
-  pub fn mix<T: Float>(t: T, a: T, b: T) -> T {
-    return t.mix(a, b);
+  pub fn sqrt<T: Float>(x: T) -> T {
+    return x.sqrt();
   }
 
   #[inline(always)]
@@ -244,6 +299,26 @@ pub mod simd {
   }
 
   #[inline(always)]
+  pub fn ceil<T: Float>(x: T) -> T {
+    return x.ceil();
+  }
+
+  #[inline(always)]
+  pub fn floor<T: Float>(x: T) -> T {
+    return x.floor();
+  }
+
+  #[inline(always)]
+  pub fn trunc<T: Float>(x: T) -> T {
+    return x.trunc();
+  }
+
+  #[inline(always)]
+  pub fn mix<T: Float>(t: T, a: T, b: T) -> T {
+    return t.mix(a, b);
+  }
+
+  #[inline(always)]
   pub fn step<T: Float>(t: T, a: T) -> T {
     return t.step(a);
   }
@@ -251,6 +326,16 @@ pub mod simd {
   #[inline(always)]
   pub fn smoothstep<T: Float>(t: T, a: T, b: T) -> T {
     return t.smoothstep(a, b);
+  }
+
+  #[inline(always)]
+  pub fn sin<T: Float>(x: T) -> T {
+    return x.sin();
+  }
+
+  #[inline(always)]
+  pub fn cos<T: Float>(x: T) -> T {
+    return x.cos();
   }
 
   pub trait Geometry : Vector {

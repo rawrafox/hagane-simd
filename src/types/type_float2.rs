@@ -145,17 +145,19 @@ impl std::ops::Div<float2> for f32 {
 impl PartialEq for float2 {
   #[inline]
   fn eq(&self, other: &Self) -> bool {
-    return simd::all(float2::eq(*self, *other));
+    return simd::all(simd::eq(*self, *other));
   }
 
   #[inline]
   fn ne(&self, other: &Self) -> bool {
-    return simd::all(float2::ne(*self, *other));
+    return simd::all(simd::ne(*self, *other));
   }
 }
 
 impl simd::Vector for float2 {
   type Scalar = f32;
+  type Boolean = int2;
+
   #[inline(always)]
   fn extract(self, i: u32) -> Self::Scalar {
     return unsafe { simd_extract(self, i) };
@@ -164,6 +166,36 @@ impl simd::Vector for float2 {
   #[inline(always)]
   fn replace(self, i: u32, x: Self::Scalar) -> Self {
     return unsafe { simd_insert(self, i, x) };
+  }
+
+  #[inline(always)]
+  fn eq(self, other: Self) -> Self::Boolean {
+    return unsafe { simd_eq(self, other) };
+  }
+
+  #[inline(always)]
+  fn ne(self, other: Self) -> Self::Boolean {
+    return unsafe { simd_ne(self, other) };
+  }
+
+  #[inline(always)]
+  fn lt(self, other: Self) -> Self::Boolean {
+    return unsafe { simd_lt(self, other) };
+  }
+
+  #[inline(always)]
+  fn le(self, other: Self) -> Self::Boolean {
+    return unsafe { simd_le(self, other) };
+  }
+
+  #[inline(always)]
+  fn gt(self, other: Self) -> Self::Boolean {
+    return unsafe { simd_gt(self, other) };
+  }
+
+  #[inline(always)]
+  fn ge(self, other: Self) -> Self::Boolean {
+    return unsafe { simd_ge(self, other) };
   }
 
   #[inline(always)]
@@ -193,15 +225,20 @@ impl simd::Dot for float2 {
 
 impl simd::Float for float2 {
   #[inline(always)]
-  fn sign(self) -> Self {
-    let (zero, one) = (float2::broadcast(0.0), float2::broadcast(1.0));
-
-    return simd::bitselect(float2::eq(self, zero) | float2::ne(self, self), float2::copysign(one, self), zero);
+  fn copysign(self, magnitude: Self) -> Self {
+    return simd::bitselect(int2::broadcast(std::i32::MAX), magnitude, self);
   }
 
   #[inline(always)]
-  fn mix(self, a: Self, b: Self) -> Self {
-    return a + self * (b - a);
+  fn sign(self) -> Self {
+    let (zero, one) = (float2::broadcast(0.0), float2::broadcast(1.0));
+
+    return simd::bitselect(simd::eq(self, zero) | simd::ne(self, self), one.copysign(self), zero);
+  }
+
+  #[inline(always)]
+  fn sqrt(self) -> Self {
+    return float2(self.0.sqrt(), self.1.sqrt());
   }
 
   #[inline(always)]
@@ -211,7 +248,7 @@ impl simd::Float for float2 {
 
   #[inline(always)]
   fn rsqrt(self) -> Self {
-    return 1.0 / float2::sqrt(self);
+    return self.sqrt().recip();
   }
 
   #[inline(always)]
@@ -220,8 +257,28 @@ impl simd::Float for float2 {
   }
 
   #[inline(always)]
+  fn ceil(self) -> Self {
+    return float2(self.0.ceil(), self.1.ceil());
+  }
+
+  #[inline(always)]
+  fn floor(self) -> Self {
+    return float2(self.0.floor(), self.1.floor());
+  }
+
+  #[inline(always)]
+  fn trunc(self) -> Self {
+    return float2(self.0.trunc(), self.1.trunc());
+  }
+
+  #[inline(always)]
+  fn mix(self, a: Self, b: Self) -> Self {
+    return a + self * (b - a);
+  }
+
+  #[inline(always)]
   fn step(self, edge: Self) -> Self {
-    return simd::bitselect(float2::lt(self, edge), float2::broadcast(1.0), float2::broadcast(0.0));
+    return simd::bitselect(simd::lt(self, edge), float2::broadcast(1.0), float2::broadcast(0.0));
   }
 
   #[inline(always)]
@@ -229,6 +286,16 @@ impl simd::Float for float2 {
     let t = simd::clamp((self - edge0) / (edge1 - edge0), float2::broadcast(0.0), float2::broadcast(1.0));
 
     return t * t * (3.0 - 2.0 * t);
+  }
+
+  #[inline(always)]
+  fn sin(self) -> Self {
+    return float2(self.0.sin(), self.1.sin());
+  }
+
+  #[inline(always)]
+  fn cos(self) -> Self {
+    return float2(self.0.cos(), self.1.cos());
   }
 }
 
@@ -263,73 +330,8 @@ impl float2 {
   }
 
   #[inline]
-  pub fn eq(x: float2, y: float2) -> int2 {
-    return unsafe { simd_eq(x, y) };
-  }
-
-  #[inline]
-  pub fn ne(x: float2, y: float2) -> int2 {
-    return unsafe { simd_ne(x, y) };
-  }
-
-  #[inline]
-  pub fn lt(x: float2, y: float2) -> int2 {
-    return unsafe { simd_lt(x, y) };
-  }
-
-  #[inline]
-  pub fn le(x: float2, y: float2) -> int2 {
-    return unsafe { simd_le(x, y) };
-  }
-
-  #[inline]
-  pub fn gt(x: float2, y: float2) -> int2 {
-    return unsafe { simd_gt(x, y) };
-  }
-
-  #[inline]
-  pub fn ge(x: float2, y: float2) -> int2 {
-    return unsafe { simd_ge(x, y) };
-  }
-
-  #[inline]
   pub fn madd(x: float2, y: float2, z: float2) -> float2 {
     return x * y + z;
-  }
-
-  #[inline]
-  pub fn copysign(x: float2, y: float2) -> float2 {
-    return simd::bitselect(int2::broadcast(std::i32::MAX), y, x);
-  }
-
-  #[inline]
-  pub fn sqrt(x: float2) -> float2 {
-    return float2(x.0.sqrt(), x.1.sqrt());
-  }
-
-  #[inline]
-  pub fn ceil(x: float2) -> float2 {
-    return float2(x.0.ceil(), x.1.ceil());
-  }
-
-  #[inline]
-  pub fn floor(x: float2) -> float2 {
-    return float2(x.0.floor(), x.1.floor());
-  }
-
-  #[inline]
-  pub fn trunc(x: float2) -> float2 {
-    return float2(x.0.trunc(), x.1.trunc());
-  }
-
-  #[inline]
-  pub fn sin(x: float2) -> float2 {
-    return float2(x.0.sin(), x.1.sin());
-  }
-
-  #[inline]
-  pub fn cos(x: float2) -> float2 {
-    return float2(x.0.cos(), x.1.cos());
   }
 
   #[inline]

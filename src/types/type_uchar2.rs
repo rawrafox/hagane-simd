@@ -296,17 +296,19 @@ impl std::ops::Not for uchar2 {
 impl PartialEq for uchar2 {
   #[inline]
   fn eq(&self, other: &Self) -> bool {
-    return simd::all(uchar2::eq(*self, *other));
+    return simd::all(simd::eq(*self, *other));
   }
 
   #[inline]
   fn ne(&self, other: &Self) -> bool {
-    return simd::all(uchar2::ne(*self, *other));
+    return simd::all(simd::ne(*self, *other));
   }
 }
 
 impl simd::Vector for uchar2 {
   type Scalar = u8;
+  type Boolean = char2;
+
   #[inline(always)]
   fn extract(self, i: u32) -> Self::Scalar {
     return unsafe { simd_extract(self, i) };
@@ -318,18 +320,48 @@ impl simd::Vector for uchar2 {
   }
 
   #[inline(always)]
+  fn eq(self, other: Self) -> Self::Boolean {
+    return unsafe { simd_eq(self, other) };
+  }
+
+  #[inline(always)]
+  fn ne(self, other: Self) -> Self::Boolean {
+    return unsafe { simd_ne(self, other) };
+  }
+
+  #[inline(always)]
+  fn lt(self, other: Self) -> Self::Boolean {
+    return unsafe { simd_lt(self, other) };
+  }
+
+  #[inline(always)]
+  fn le(self, other: Self) -> Self::Boolean {
+    return unsafe { simd_le(self, other) };
+  }
+
+  #[inline(always)]
+  fn gt(self, other: Self) -> Self::Boolean {
+    return unsafe { simd_gt(self, other) };
+  }
+
+  #[inline(always)]
+  fn ge(self, other: Self) -> Self::Boolean {
+    return unsafe { simd_ge(self, other) };
+  }
+
+  #[inline(always)]
   fn abs(self) -> Self {
     return self;
   }
 
   #[inline(always)]
   fn max(self, other: Self) -> Self {
-    return simd::bitselect(uchar2::gt(other, self), self, other);
+    return simd::bitselect(simd::gt(other, self), self, other);
   }
 
   #[inline(always)]
   fn min(self, other: Self) -> Self {
-    return simd::bitselect(uchar2::lt(other, self), self, other);
+    return simd::bitselect(simd::lt(other, self), self, other);
   }
 }
 
@@ -382,36 +414,6 @@ impl uchar2 {
   #[inline]
   pub fn broadcast(x: u8) -> Self {
     return uchar2(x, x);
-  }
-
-  #[inline]
-  pub fn eq(x: uchar2, y: uchar2) -> char2 {
-    return unsafe { simd_eq(x, y) };
-  }
-
-  #[inline]
-  pub fn ne(x: uchar2, y: uchar2) -> char2 {
-    return unsafe { simd_ne(x, y) };
-  }
-
-  #[inline]
-  pub fn lt(x: uchar2, y: uchar2) -> char2 {
-    return unsafe { simd_lt(x, y) };
-  }
-
-  #[inline]
-  pub fn le(x: uchar2, y: uchar2) -> char2 {
-    return unsafe { simd_le(x, y) };
-  }
-
-  #[inline]
-  pub fn gt(x: uchar2, y: uchar2) -> char2 {
-    return unsafe { simd_gt(x, y) };
-  }
-
-  #[inline]
-  pub fn ge(x: uchar2, y: uchar2) -> char2 {
-    return unsafe { simd_ge(x, y) };
   }
 
   #[inline]

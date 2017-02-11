@@ -78,3 +78,38 @@ fn smoothstep() {
   assert_eq!(simd::smoothstep(double3(-1.0, 2.0, 0.0), double3(-1.0, -2.0, -3.0), double3(1.0, 2.0, 3.0)), double3(0.0, 1.0, 0.5));
   assert_eq!(simd::smoothstep(double4(-1.0, 2.0, 0.0, 2.0), double4(-1.0, -2.0, -3.0, -4.0), double4(1.0, 2.0, 3.0, 4.0)), double4(0.0, 1.0, 0.5, 0.84375));
 }
+
+#[test]
+fn copysign() {
+  assert_eq!(simd::copysign(float2(10.0, -3.0), float2(-2.0, 4.0)), float2(-10.0, 3.0));
+  assert_eq!(simd::copysign(float3(10.0, -3.0, 2.0), float3(-2.0, 4.0, 3.0)), float3(-10.0, 3.0, 2.0));
+  assert_eq!(simd::copysign(float4(10.0, -3.0, 2.0, -3.0), float4(-2.0, 4.0, 3.0, -4.0)), float4(-10.0, 3.0, 2.0, -3.0));
+}
+
+#[test]
+fn sqrt() {
+  assert_eq!(simd::sqrt(float2(100.0, 4.0)), float2(10.0, 2.0));
+  assert_eq!(simd::sqrt(float3(100.0, 4.0, 1.0)), float3(10.0, 2.0, 1.0));
+  assert_eq!(simd::sqrt(float4(100.0, 4.0, 1.0, 9.0)), float4(10.0, 2.0, 1.0, 3.0));
+}
+
+#[test]
+fn ceil() {
+  assert_eq!(simd::ceil(float2(100.1, -4.4)), float2(101.0, -4.0));
+  assert_eq!(simd::ceil(float3(100.1, -4.4, 1.9)), float3(101.0, -4.0, 2.0));
+  assert_eq!(simd::ceil(float4(100.1, -4.4, 1.9, 9.0)), float4(101.0, -4.0, 2.0, 9.0));
+}
+
+#[test]
+fn floor() {
+  assert_eq!(simd::floor(float2(100.1, -4.4)), float2(100.0, -5.0));
+  assert_eq!(simd::floor(float3(100.1, -4.4, 1.9)), float3(100.0, -5.0, 1.0));
+  assert_eq!(simd::floor(float4(100.1, -4.4, 1.9, 9.0)), float4(100.0, -5.0, 1.0, 9.0));
+}
+
+#[test]
+fn trunc() {
+  assert_eq!(simd::trunc(float2(100.1, -4.4)), float2(100.0, -4.0));
+  assert_eq!(simd::trunc(float3(100.1, -4.4, 1.9)), float3(100.0, -4.0, 1.0));
+  assert_eq!(simd::trunc(float4(100.1, -4.4, 1.9, 9.0)), float4(100.0, -4.0, 1.0, 9.0));
+}

@@ -196,17 +196,18 @@ module Bridge
             o.block("impl PartialEq for #{name}", pad: true) do |o|
               o.puts("#[inline]", pad: true)
               o.block("fn eq(&self, other: &Self) -> bool") do |o|
-                o.puts("return simd::all(#{name}::eq(*self, *other));")
+                o.puts("return simd::all(simd::eq(*self, *other));")
               end
 
               o.puts("#[inline]", pad: true)
               o.block("fn ne(&self, other: &Self) -> bool") do |o|
-                o.puts("return simd::all(#{name}::ne(*self, *other));")
+                o.puts("return simd::all(simd::ne(*self, *other));")
               end
             end
 
             o.block("impl simd::Vector for #{name}", pad: true) do |o|
-              o.puts("type Scalar = #{scalar};")
+              o.puts("type Scalar = #{scalar};", pad: true)
+              o.puts("type Boolean = #{bool_name};")
 
               o.puts("#[inline(always)]", pad: true)
               o.block("fn extract(self, i: u32) -> Self::Scalar") do |o|
@@ -216,6 +217,13 @@ module Bridge
               o.puts("#[inline(always)]", pad: true)
               o.block("fn replace(self, i: u32, x: Self::Scalar) -> Self") do |o|
                 o.puts("return unsafe { simd_insert(self, i, x) };")
+              end
+
+              %w(eq ne lt le gt ge).each do |op|
+                o.puts("#[inline(always)]", pad: true)
+                o.block("fn #{op}(self, other: Self) -> Self::Boolean") do |o|
+                  o.puts("return unsafe { simd_#{op}(self, other) };")
+                end
               end
 
               o.puts("#[inline(always)]", pad: true)
@@ -238,7 +246,7 @@ module Bridge
 
                   o.puts("return #{name}(#{result});")
                 else
-                  o.puts("return simd::bitselect(#{name}::gt(other, self), self, other);")
+                  o.puts("return simd::bitselect(simd::gt(other, self), self, other);")
                 end
               end
 
@@ -249,7 +257,7 @@ module Bridge
 
                   o.puts("return #{name}(#{result});")
                 else
-                  o.puts("return simd::bitselect(#{name}::lt(other, self), self, other);")
+                  o.puts("return simd::bitselect(simd::lt(other, self), self, other);")
                 end
               end
             end
@@ -266,15 +274,22 @@ module Bridge
             if kind.include?(:float)
               o.block("impl simd::Float for #{name}", pad: true) do |o|
                 o.puts("#[inline(always)]", pad: true)
-                o.block("fn sign(self) -> Self") do |o|
-                  o.puts("let (zero, one) = (#{name}::broadcast(0.0), #{name}::broadcast(1.0));")
-                  o.puts
-                  o.puts("return simd::bitselect(#{name}::eq(self, zero) | #{name}::ne(self, self), #{name}::copysign(one, self), zero);")
+                o.block("fn copysign(self, magnitude: Self) -> Self") do |o|
+                  o.puts("return simd::bitselect(#{bool_name}::broadcast(std::#{TYPES_BY_NAME[bool][:type]}::MAX), magnitude, self);")
                 end
 
                 o.puts("#[inline(always)]", pad: true)
-                o.block("fn mix(self, a: Self, b: Self) -> Self") do |o|
-                  o.puts("return a + self * (b - a);")
+                o.block("fn sign(self) -> Self") do |o|
+                  o.puts("let (zero, one) = (#{name}::broadcast(0.0), #{name}::broadcast(1.0));")
+                  o.puts
+                  o.puts("return simd::bitselect(simd::eq(self, zero) | simd::ne(self, self), one.copysign(self), zero);")
+                end
+
+                o.puts("#[inline(always)]", pad: true)
+                o.block("fn sqrt(self) -> Self") do |o|
+                  result = width.times.map { |i| "self.#{i}.sqrt()" }.join(", ")
+
+                  o.puts("return #{name}(#{result});")
                 end
 
                 o.puts("#[inline(always)]", pad: true)
@@ -284,7 +299,7 @@ module Bridge
 
                 o.puts("#[inline(always)]", pad: true)
                 o.block("fn rsqrt(self) -> Self") do |o|
-                  o.puts("return 1.0 / #{name}::sqrt(self);")
+                  o.puts("return self.sqrt().recip();")
                 end
 
                 o.puts("#[inline(always)]", pad: true)
@@ -295,8 +310,34 @@ module Bridge
                 end
 
                 o.puts("#[inline(always)]", pad: true)
+                o.block("fn ceil(self) -> Self") do |o|
+                  result = width.times.map { |i| "self.#{i}.ceil()" }.join(", ")
+
+                  o.puts("return #{name}(#{result});")
+                end
+
+                o.puts("#[inline(always)]", pad: true)
+                o.block("fn floor(self) -> Self") do |o|
+                  result = width.times.map { |i| "self.#{i}.floor()" }.join(", ")
+
+                  o.puts("return #{name}(#{result});")
+                end
+
+                o.puts("#[inline(always)]", pad: true)
+                o.block("fn trunc(self) -> Self") do |o|
+                  result = width.times.map { |i| "self.#{i}.trunc()" }.join(", ")
+
+                  o.puts("return #{name}(#{result});")
+                end
+
+                o.puts("#[inline(always)]", pad: true)
+                o.block("fn mix(self, a: Self, b: Self) -> Self") do |o|
+                  o.puts("return a + self * (b - a);")
+                end
+
+                o.puts("#[inline(always)]", pad: true)
                 o.block("fn step(self, edge: Self) -> Self") do |o|
-                  o.puts("return simd::bitselect(#{name}::lt(self, edge), #{name}::broadcast(1.0), #{name}::broadcast(0.0));")
+                  o.puts("return simd::bitselect(simd::lt(self, edge), #{name}::broadcast(1.0), #{name}::broadcast(0.0));")
                 end
 
                 o.puts("#[inline(always)]", pad: true)
@@ -304,6 +345,20 @@ module Bridge
                   o.puts("let t = simd::clamp((self - edge0) / (edge1 - edge0), #{name}::broadcast(0.0), #{name}::broadcast(1.0));")
                   o.puts
                   o.puts("return t * t * (3.0 - 2.0 * t);")
+                end
+
+                o.puts("#[inline(always)]", pad: true)
+                o.block("fn sin(self) -> Self") do |o|
+                  result = width.times.map { |i| "self.#{i}.sin()" }.join(", ")
+
+                  o.puts("return #{name}(#{result});")
+                end
+
+                o.puts("#[inline(always)]", pad: true)
+                o.block("fn cos(self) -> Self") do |o|
+                  result = width.times.map { |i| "self.#{i}.cos()" }.join(", ")
+
+                  o.puts("return #{name}(#{result});")
                 end
               end
             end
@@ -417,80 +472,11 @@ module Bridge
                 o.puts("return #{name}(#{(["x"] * width).join(", ")});")
               end
 
-              # Comparison
-
-              %w(eq ne lt le gt ge).each do |op|
-                o.puts("#[inline]", pad: true)
-                o.block("pub fn #{op}(x: #{name}, y: #{name}) -> #{bool_name}") do |o|
-                  o.puts("return unsafe { simd_#{op}(x, y) };")
-                end
-              end
-
               # Additions
 
               o.puts("#[inline]", pad: true)
               o.block("pub fn madd(x: #{name}, y: #{name}, z: #{name}) -> #{name}") do |o|
                 o.puts("return x * y + z;")
-              end
-
-              # Math
-
-              if kind.include?(:float)
-                o.puts("#[inline]", pad: true)
-                o.block("pub fn copysign(x: #{name}, y: #{name}) -> #{name}") do |o|
-                  o.puts("return simd::bitselect(#{bool_name}::broadcast(std::#{TYPES_BY_NAME[bool][:type]}::MAX), y, x);")
-                end
-
-                o.puts("#[inline]", pad: true)
-                o.block("pub fn sqrt(x: #{name}) -> #{name}") do |o|
-                  result = width.times.map { |i| "x.#{i}.sqrt()" }.join(", ")
-
-                  o.puts("return #{name}(#{result});")
-                end
-
-                o.puts("#[inline]", pad: true)
-                o.block("pub fn ceil(x: #{name}) -> #{name}") do |o|
-                  result = width.times.map { |i| "x.#{i}.ceil()" }.join(", ")
-
-                  o.puts("return #{name}(#{result});")
-                end
-
-                o.puts("#[inline]", pad: true)
-                o.block("pub fn floor(x: #{name}) -> #{name}") do |o|
-                  result = width.times.map { |i| "x.#{i}.floor()" }.join(", ")
-
-                  o.puts("return #{name}(#{result});")
-                end
-
-                # TODO: Blocked by libstd
-                # o.puts("#[inline]", pad: true)
-                # o.block("pub fn rint(x: #{name}) -> #{name}") do |o|
-                #   result = width.times.map { |i| "x.#{i}.rint()" }.join(", ")
-                #
-                #   o.puts("return #{name}(#{result});")
-                # end
-
-                o.puts("#[inline]", pad: true)
-                o.block("pub fn trunc(x: #{name}) -> #{name}") do |o|
-                  result = width.times.map { |i| "x.#{i}.trunc()" }.join(", ")
-
-                  o.puts("return #{name}(#{result});")
-                end
-
-                o.puts("#[inline]", pad: true)
-                o.block("pub fn sin(x: #{name}) -> #{name}") do |o|
-                  result = width.times.map { |i| "x.#{i}.sin()" }.join(", ")
-
-                  o.puts("return #{name}(#{result});")
-                end
-
-                o.puts("#[inline]", pad: true)
-                o.block("pub fn cos(x: #{name}) -> #{name}") do |o|
-                  result = width.times.map { |i| "x.#{i}.cos()" }.join(", ")
-
-                  o.puts("return #{name}(#{result});")
-                end
-
               end
 
               # Geometry
