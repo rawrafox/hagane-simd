@@ -49,43 +49,10 @@ module Bridge
             if kind.include?(:integer)
               o.puts("fn simd_shl<T>(x: T, y: T) -> T;", pad: true)
               o.puts("fn simd_shr<T>(x: T, y: T) -> T;")
-
-              o.puts("fn simd_and<T>(x: T, y: T) -> T;", pad: true)
-              o.puts("fn simd_or<T>(x: T, y: T) -> T;")
-              o.puts("fn simd_xor<T>(x: T, y: T) -> T;")
             end
           end
 
           if kind.include?(:integer)
-            %w(and or xor).each do |op|
-              o.block("impl std::ops::Bit#{op.capitalize} for #{name}", pad: true) do |o|
-                o.puts("type Output = Self;")
-                o.puts
-                o.puts("#[inline]")
-                o.block("fn bit#{op}(self, other: Self) -> Self") do |o|
-                  o.puts("return unsafe { simd_#{op}(self, other) };")
-                end
-              end
-
-              o.block("impl std::ops::Bit#{op.capitalize}<#{scalar}> for #{name}", pad: true) do |o|
-                o.puts("type Output = Self;")
-                o.puts
-                o.puts("#[inline]")
-                o.block("fn bit#{op}(self, other: #{scalar}) -> Self") do |o|
-                  o.puts("return unsafe { simd_#{op}(self, #{name}::broadcast(other)) };")
-                end
-              end
-
-              o.block("impl std::ops::Bit#{op.capitalize}<#{name}> for #{scalar}", pad: true) do |o|
-                o.puts("type Output = #{name};")
-                o.puts
-                o.puts("#[inline]")
-                o.block("fn bit#{op}(self, other: #{name}) -> #{name}") do |o|
-                  o.puts("return unsafe { simd_#{op}(#{name}::broadcast(self), other) };")
-                end
-              end
-            end
-
             %w(shl shr).each do |op|
               o.block("impl std::ops::#{op.capitalize}<#{name}> for #{name}", pad: true) do |o|
                 o.puts("type Output = Self;")

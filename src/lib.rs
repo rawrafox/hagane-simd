@@ -74,34 +74,34 @@ extern "platform-intrinsic" {
 
   // fn simd_shl<T>(x: T, y: T) -> T;
   // fn simd_shr<T>(x: T, y: T) -> T;
-  // 
-  // fn simd_and<T>(x: T, y: T) -> T;
-  // fn simd_or<T>(x: T, y: T) -> T;
-  // fn simd_xor<T>(x: T, y: T) -> T;
+
+  fn simd_and<T>(x: T, y: T) -> T;
+  fn simd_or<T>(x: T, y: T) -> T;
+  fn simd_xor<T>(x: T, y: T) -> T;
 }
 
 macro_rules! declare_vector {
-  ($name2:ident, $name3:ident, $name4:ident, $scalar:ty) => (
+  ($name2:ident, $name3:ident, $name4:ident, $scalar:ty, $kind:ident) => (
     #[repr(C)]
     #[repr(simd)]
     #[derive(Copy, Clone, Debug)]
     pub struct $name2(pub $scalar, pub $scalar);
     
-    impl_vector!($name2, $scalar);
+    impl_vector!($name2, $scalar, $kind);
 
     #[repr(C)]
     #[repr(simd)]
     #[derive(Copy, Clone, Debug)]
     pub struct $name3(pub $scalar, pub $scalar, pub $scalar);
 
-    impl_vector!($name3, $scalar);
+    impl_vector!($name3, $scalar, $kind);
 
     #[repr(C)]
     #[repr(simd)]
     #[derive(Copy, Clone, Debug)]
     pub struct $name4(pub $scalar, pub $scalar, pub $scalar, pub $scalar);
 
-    impl_vector!($name4, $scalar);
+    impl_vector!($name4, $scalar, $kind);
   );
 }
 
@@ -137,7 +137,14 @@ macro_rules! impl_trait {
 }
 
 macro_rules! impl_vector {
-  ($vector:ident, $scalar:ty) => {
+  ($vector:ident, $scalar:ty, integer) => {
+    impl_vector!($vector, $scalar, float);
+    
+    impl_trait!($vector, $scalar, simd_and, BitAnd, bitand);
+    impl_trait!($vector, $scalar, simd_or, BitOr, bitor);
+    impl_trait!($vector, $scalar, simd_xor, BitXor, bitxor);
+  };
+  ($vector:ident, $scalar:ty, float) => {
     impl_trait!($vector, $scalar, simd_add, Add, add);
     impl_trait!($vector, $scalar, simd_sub, Sub, sub);
     impl_trait!($vector, $scalar, simd_mul, Mul, mul);
@@ -161,19 +168,19 @@ macro_rules! declare_matrix {
   );
 }
 
-declare_vector!(char2, char3, char4, i8);
-declare_vector!(short2, short3, short4, i16);
-declare_vector!(int2, int3, int4, i32);
-declare_vector!(long2, long3, long4, i64);
+declare_vector!(char2, char3, char4, i8, integer);
+declare_vector!(short2, short3, short4, i16, integer);
+declare_vector!(int2, int3, int4, i32, integer);
+declare_vector!(long2, long3, long4, i64, integer);
 
-declare_vector!(uchar2, uchar3, uchar4, u8);
-declare_vector!(ushort2, ushort3, ushort4, u16);
-declare_vector!(uint2, uint3, uint4, u32);
-declare_vector!(ulong2, ulong3, ulong4, u64);
+declare_vector!(uchar2, uchar3, uchar4, u8, integer);
+declare_vector!(ushort2, ushort3, ushort4, u16, integer);
+declare_vector!(uint2, uint3, uint4, u32, integer);
+declare_vector!(ulong2, ulong3, ulong4, u64, integer);
 
-// TODO: declare_vector!(half2, half3, half4, f16);
-declare_vector!(float2, float3, float4, f32);
-declare_vector!(double2, double3, double4, f64);
+// TODO: declare_vector!(half2, half3, half4, f16, float);
+declare_vector!(float2, float3, float4, f32, float);
+declare_vector!(double2, double3, double4, f64, float);
 
 declare_matrix!(float2x2, float3x2, float4x2, float2);
 declare_matrix!(float2x3, float3x3, float4x3, float3);
