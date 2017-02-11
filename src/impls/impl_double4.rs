@@ -1,20 +1,7 @@
 use std;
 use ::*;
-use ::simd::*;
 
 extern "platform-intrinsic" {
-}
-
-impl PartialEq for double4 {
-  #[inline]
-  fn eq(&self, other: &Self) -> bool {
-    return simd::eq(*self, *other).all();
-  }
-
-  #[inline]
-  fn ne(&self, other: &Self) -> bool {
-    return simd::ne(*self, *other).all();
-  }
 }
 
 impl simd::Vector for double4 {

@@ -66,6 +66,8 @@ use std::ops::*;
 
 pub mod objc;
 
+use simd::*;
+
 extern "platform-intrinsic" {
   fn simd_add<T>(x: T, y: T) -> T;
   fn simd_sub<T>(x: T, y: T) -> T;
@@ -81,12 +83,12 @@ extern "platform-intrinsic" {
 }
 
 macro_rules! declare_vector {
-  ($name2:ident, $name3:ident, $name4:ident, $scalar:ty, $kind:ident) => (
+  ($name2:ident, $name3:ident, $name4:ident, $scalar:ident, $kind:ident) => (
     #[repr(C)]
     #[repr(simd)]
     #[derive(Copy, Clone, Debug)]
     pub struct $name2(pub $scalar, pub $scalar);
-    
+
     impl_vector!($name2, $scalar, $kind);
 
     #[repr(C)]
@@ -106,7 +108,7 @@ macro_rules! declare_vector {
 }
 
 macro_rules! impl_trait {
-  ($vector:ident, $scalar:ty, $intrinsic:ident, $trait_name:ident, $fn_name:ident) => {
+  ($vector:ident, $scalar:ident, $intrinsic:ident, $trait_name:ident, $fn_name:ident) => {
     impl $trait_name for $vector {
       type Output = Self;
 
@@ -137,18 +139,54 @@ macro_rules! impl_trait {
 }
 
 macro_rules! impl_vector {
-  ($vector:ident, $scalar:ty, integer) => {
+  ($vector:ident, $scalar:ident, integer) => {
     impl_vector!($vector, $scalar, float);
-    
+
     impl_trait!($vector, $scalar, simd_and, BitAnd, bitand);
     impl_trait!($vector, $scalar, simd_or, BitOr, bitor);
     impl_trait!($vector, $scalar, simd_xor, BitXor, bitxor);
   };
-  ($vector:ident, $scalar:ty, float) => {
+  ($vector:ident, $scalar:ident, signed) => {
+    impl_vector!($vector, $scalar, integer);
+
+    impl std::ops::Not for $vector {
+      type Output = Self;
+
+      #[inline]
+      fn not(self) -> Self {
+        return self ^ -1;
+      }
+    }
+  };
+  ($vector:ident, $scalar:ident, unsigned) => {
+    impl_vector!($vector, $scalar, integer);
+
+    impl std::ops::Not for $vector {
+      type Output = Self;
+
+      #[inline]
+      fn not(self) -> Self {
+        return self ^ std::$scalar::MAX;
+      }
+    }
+  };
+  ($vector:ident, $scalar:ident, float) => {
     impl_trait!($vector, $scalar, simd_add, Add, add);
     impl_trait!($vector, $scalar, simd_sub, Sub, sub);
     impl_trait!($vector, $scalar, simd_mul, Mul, mul);
     impl_trait!($vector, $scalar, simd_div, Div, div);
+
+    impl PartialEq for $vector {
+      #[inline]
+      fn eq(&self, other: &Self) -> bool {
+        return simd::eq(*self, *other).all();
+      }
+
+      #[inline]
+      fn ne(&self, other: &Self) -> bool {
+        return simd::ne(*self, *other).all();
+      }
+    }
   }
 }
 
@@ -168,15 +206,15 @@ macro_rules! declare_matrix {
   );
 }
 
-declare_vector!(char2, char3, char4, i8, integer);
-declare_vector!(short2, short3, short4, i16, integer);
-declare_vector!(int2, int3, int4, i32, integer);
-declare_vector!(long2, long3, long4, i64, integer);
+declare_vector!(char2, char3, char4, i8, signed);
+declare_vector!(short2, short3, short4, i16, signed);
+declare_vector!(int2, int3, int4, i32, signed);
+declare_vector!(long2, long3, long4, i64, signed);
 
-declare_vector!(uchar2, uchar3, uchar4, u8, integer);
-declare_vector!(ushort2, ushort3, ushort4, u16, integer);
-declare_vector!(uint2, uint3, uint4, u32, integer);
-declare_vector!(ulong2, ulong3, ulong4, u64, integer);
+declare_vector!(uchar2, uchar3, uchar4, u8, unsigned);
+declare_vector!(ushort2, ushort3, ushort4, u16, unsigned);
+declare_vector!(uint2, uint3, uint4, u32, unsigned);
+declare_vector!(ulong2, ulong3, ulong4, u64, unsigned);
 
 // TODO: declare_vector!(half2, half3, half4, f16, float);
 declare_vector!(float2, float3, float4, f32, float);
@@ -696,12 +734,12 @@ pub mod simd {
   pub fn refract<T: Geometry>(x: T, n: T, eta: T::Scalar) -> T {
     return x.refract(n, eta);
   }
-  
+
   pub trait Integer : Vector + BitAnd<Output=Self> + BitOr<Output=Self> + BitXor<Output=Self> {
     fn reduce_and(self) -> Self::Scalar;
     fn reduce_or(self) -> Self::Scalar;
     fn reduce_xor(self) -> Self::Scalar;
-    
+
     fn all(self) -> bool;
     fn any(self) -> bool;
   }

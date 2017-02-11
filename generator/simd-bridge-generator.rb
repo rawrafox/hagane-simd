@@ -43,7 +43,6 @@ module Bridge
 
           o.puts("use std;", pad: true)
           o.puts("use ::*;")
-          o.puts("use ::simd::*;")
 
           o.block("extern \"platform-intrinsic\"", pad: true) do
             if kind.include?(:integer)
@@ -80,31 +79,6 @@ module Bridge
                   o.puts("return unsafe { simd_#{op}(#{name}::broadcast(self), other) };")
                 end
               end
-            end
-
-            o.block("impl std::ops::Not for #{name}", pad: true) do |o|
-              o.puts("type Output = Self;")
-              o.puts
-              o.puts("#[inline]")
-              o.block("fn not(self) -> Self") do |o|
-                if kind.include?(:unsigned)
-                  o.puts("return self ^ std::#{scalar}::MAX;")
-                else
-                  o.puts("return self ^ -1;")
-                end
-              end
-            end
-          end
-
-          o.block("impl PartialEq for #{name}", pad: true) do |o|
-            o.puts("#[inline]", pad: true)
-            o.block("fn eq(&self, other: &Self) -> bool") do |o|
-              o.puts("return simd::eq(*self, *other).all();")
-            end
-
-            o.puts("#[inline]", pad: true)
-            o.block("fn ne(&self, other: &Self) -> bool") do |o|
-              o.puts("return simd::ne(*self, *other).all();")
             end
           end
 

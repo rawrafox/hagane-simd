@@ -1,6 +1,5 @@
 use std;
 use ::*;
-use ::simd::*;
 
 extern "platform-intrinsic" {
   fn simd_shl<T>(x: T, y: T) -> T;
@@ -58,27 +57,6 @@ impl std::ops::Shr<uchar2> for u8 {
   #[inline]
   fn shr(self, other: uchar2) -> uchar2 {
     return unsafe { simd_shr(uchar2::broadcast(self), other) };
-  }
-}
-
-impl std::ops::Not for uchar2 {
-  type Output = Self;
-
-  #[inline]
-  fn not(self) -> Self {
-    return self ^ std::u8::MAX;
-  }
-}
-
-impl PartialEq for uchar2 {
-  #[inline]
-  fn eq(&self, other: &Self) -> bool {
-    return simd::eq(*self, *other).all();
-  }
-
-  #[inline]
-  fn ne(&self, other: &Self) -> bool {
-    return simd::ne(*self, *other).all();
   }
 }
 
