@@ -3,125 +3,12 @@ use ::*;
 use ::simd::*;
 
 extern "platform-intrinsic" {
-  fn simd_add<T>(x: T, y: T) -> T;
-  fn simd_sub<T>(x: T, y: T) -> T;
-  fn simd_mul<T>(x: T, y: T) -> T;
-  fn simd_div<T>(x: T, y: T) -> T;
-
   fn simd_shl<T>(x: T, y: T) -> T;
   fn simd_shr<T>(x: T, y: T) -> T;
 
   fn simd_and<T>(x: T, y: T) -> T;
   fn simd_or<T>(x: T, y: T) -> T;
   fn simd_xor<T>(x: T, y: T) -> T;
-}
-
-impl std::ops::Add for ulong3 {
-  type Output = Self;
-
-  #[inline]
-  fn add(self, other: Self) -> Self {
-    return unsafe { simd_add(self, other) };
-  }
-}
-
-impl std::ops::Add<u64> for ulong3 {
-  type Output = Self;
-
-  #[inline]
-  fn add(self, other: u64) -> Self {
-    return unsafe { simd_add(self, ulong3::broadcast(other)) };
-  }
-}
-
-impl std::ops::Add<ulong3> for u64 {
-  type Output = ulong3;
-
-  #[inline]
-  fn add(self, other: ulong3) -> ulong3 {
-    return unsafe { simd_add(ulong3::broadcast(self), other) };
-  }
-}
-
-impl std::ops::Sub for ulong3 {
-  type Output = Self;
-
-  #[inline]
-  fn sub(self, other: Self) -> Self {
-    return unsafe { simd_sub(self, other) };
-  }
-}
-
-impl std::ops::Sub<u64> for ulong3 {
-  type Output = Self;
-
-  #[inline]
-  fn sub(self, other: u64) -> Self {
-    return unsafe { simd_sub(self, ulong3::broadcast(other)) };
-  }
-}
-
-impl std::ops::Sub<ulong3> for u64 {
-  type Output = ulong3;
-
-  #[inline]
-  fn sub(self, other: ulong3) -> ulong3 {
-    return unsafe { simd_sub(ulong3::broadcast(self), other) };
-  }
-}
-
-impl std::ops::Mul for ulong3 {
-  type Output = Self;
-
-  #[inline]
-  fn mul(self, other: Self) -> Self {
-    return unsafe { simd_mul(self, other) };
-  }
-}
-
-impl std::ops::Mul<u64> for ulong3 {
-  type Output = Self;
-
-  #[inline]
-  fn mul(self, other: u64) -> Self {
-    return unsafe { simd_mul(self, ulong3::broadcast(other)) };
-  }
-}
-
-impl std::ops::Mul<ulong3> for u64 {
-  type Output = ulong3;
-
-  #[inline]
-  fn mul(self, other: ulong3) -> ulong3 {
-    return unsafe { simd_mul(ulong3::broadcast(self), other) };
-  }
-}
-
-impl std::ops::Div for ulong3 {
-  type Output = Self;
-
-  #[inline]
-  fn div(self, other: Self) -> Self {
-    return unsafe { simd_div(self, other) };
-  }
-}
-
-impl std::ops::Div<u64> for ulong3 {
-  type Output = Self;
-
-  #[inline]
-  fn div(self, other: u64) -> Self {
-    return unsafe { simd_div(self, ulong3::broadcast(other)) };
-  }
-}
-
-impl std::ops::Div<ulong3> for u64 {
-  type Output = ulong3;
-
-  #[inline]
-  fn div(self, other: ulong3) -> ulong3 {
-    return unsafe { simd_div(ulong3::broadcast(self), other) };
-  }
 }
 
 impl std::ops::BitAnd for ulong3 {

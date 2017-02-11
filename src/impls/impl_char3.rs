@@ -3,125 +3,12 @@ use ::*;
 use ::simd::*;
 
 extern "platform-intrinsic" {
-  fn simd_add<T>(x: T, y: T) -> T;
-  fn simd_sub<T>(x: T, y: T) -> T;
-  fn simd_mul<T>(x: T, y: T) -> T;
-  fn simd_div<T>(x: T, y: T) -> T;
-
   fn simd_shl<T>(x: T, y: T) -> T;
   fn simd_shr<T>(x: T, y: T) -> T;
 
   fn simd_and<T>(x: T, y: T) -> T;
   fn simd_or<T>(x: T, y: T) -> T;
   fn simd_xor<T>(x: T, y: T) -> T;
-}
-
-impl std::ops::Add for char3 {
-  type Output = Self;
-
-  #[inline]
-  fn add(self, other: Self) -> Self {
-    return unsafe { simd_add(self, other) };
-  }
-}
-
-impl std::ops::Add<i8> for char3 {
-  type Output = Self;
-
-  #[inline]
-  fn add(self, other: i8) -> Self {
-    return unsafe { simd_add(self, char3::broadcast(other)) };
-  }
-}
-
-impl std::ops::Add<char3> for i8 {
-  type Output = char3;
-
-  #[inline]
-  fn add(self, other: char3) -> char3 {
-    return unsafe { simd_add(char3::broadcast(self), other) };
-  }
-}
-
-impl std::ops::Sub for char3 {
-  type Output = Self;
-
-  #[inline]
-  fn sub(self, other: Self) -> Self {
-    return unsafe { simd_sub(self, other) };
-  }
-}
-
-impl std::ops::Sub<i8> for char3 {
-  type Output = Self;
-
-  #[inline]
-  fn sub(self, other: i8) -> Self {
-    return unsafe { simd_sub(self, char3::broadcast(other)) };
-  }
-}
-
-impl std::ops::Sub<char3> for i8 {
-  type Output = char3;
-
-  #[inline]
-  fn sub(self, other: char3) -> char3 {
-    return unsafe { simd_sub(char3::broadcast(self), other) };
-  }
-}
-
-impl std::ops::Mul for char3 {
-  type Output = Self;
-
-  #[inline]
-  fn mul(self, other: Self) -> Self {
-    return unsafe { simd_mul(self, other) };
-  }
-}
-
-impl std::ops::Mul<i8> for char3 {
-  type Output = Self;
-
-  #[inline]
-  fn mul(self, other: i8) -> Self {
-    return unsafe { simd_mul(self, char3::broadcast(other)) };
-  }
-}
-
-impl std::ops::Mul<char3> for i8 {
-  type Output = char3;
-
-  #[inline]
-  fn mul(self, other: char3) -> char3 {
-    return unsafe { simd_mul(char3::broadcast(self), other) };
-  }
-}
-
-impl std::ops::Div for char3 {
-  type Output = Self;
-
-  #[inline]
-  fn div(self, other: Self) -> Self {
-    return unsafe { simd_div(self, other) };
-  }
-}
-
-impl std::ops::Div<i8> for char3 {
-  type Output = Self;
-
-  #[inline]
-  fn div(self, other: i8) -> Self {
-    return unsafe { simd_div(self, char3::broadcast(other)) };
-  }
-}
-
-impl std::ops::Div<char3> for i8 {
-  type Output = char3;
-
-  #[inline]
-  fn div(self, other: char3) -> char3 {
-    return unsafe { simd_div(char3::broadcast(self), other) };
-  }
 }
 
 impl std::ops::BitAnd for char3 {

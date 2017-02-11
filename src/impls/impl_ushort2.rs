@@ -3,125 +3,12 @@ use ::*;
 use ::simd::*;
 
 extern "platform-intrinsic" {
-  fn simd_add<T>(x: T, y: T) -> T;
-  fn simd_sub<T>(x: T, y: T) -> T;
-  fn simd_mul<T>(x: T, y: T) -> T;
-  fn simd_div<T>(x: T, y: T) -> T;
-
   fn simd_shl<T>(x: T, y: T) -> T;
   fn simd_shr<T>(x: T, y: T) -> T;
 
   fn simd_and<T>(x: T, y: T) -> T;
   fn simd_or<T>(x: T, y: T) -> T;
   fn simd_xor<T>(x: T, y: T) -> T;
-}
-
-impl std::ops::Add for ushort2 {
-  type Output = Self;
-
-  #[inline]
-  fn add(self, other: Self) -> Self {
-    return unsafe { simd_add(self, other) };
-  }
-}
-
-impl std::ops::Add<u16> for ushort2 {
-  type Output = Self;
-
-  #[inline]
-  fn add(self, other: u16) -> Self {
-    return unsafe { simd_add(self, ushort2::broadcast(other)) };
-  }
-}
-
-impl std::ops::Add<ushort2> for u16 {
-  type Output = ushort2;
-
-  #[inline]
-  fn add(self, other: ushort2) -> ushort2 {
-    return unsafe { simd_add(ushort2::broadcast(self), other) };
-  }
-}
-
-impl std::ops::Sub for ushort2 {
-  type Output = Self;
-
-  #[inline]
-  fn sub(self, other: Self) -> Self {
-    return unsafe { simd_sub(self, other) };
-  }
-}
-
-impl std::ops::Sub<u16> for ushort2 {
-  type Output = Self;
-
-  #[inline]
-  fn sub(self, other: u16) -> Self {
-    return unsafe { simd_sub(self, ushort2::broadcast(other)) };
-  }
-}
-
-impl std::ops::Sub<ushort2> for u16 {
-  type Output = ushort2;
-
-  #[inline]
-  fn sub(self, other: ushort2) -> ushort2 {
-    return unsafe { simd_sub(ushort2::broadcast(self), other) };
-  }
-}
-
-impl std::ops::Mul for ushort2 {
-  type Output = Self;
-
-  #[inline]
-  fn mul(self, other: Self) -> Self {
-    return unsafe { simd_mul(self, other) };
-  }
-}
-
-impl std::ops::Mul<u16> for ushort2 {
-  type Output = Self;
-
-  #[inline]
-  fn mul(self, other: u16) -> Self {
-    return unsafe { simd_mul(self, ushort2::broadcast(other)) };
-  }
-}
-
-impl std::ops::Mul<ushort2> for u16 {
-  type Output = ushort2;
-
-  #[inline]
-  fn mul(self, other: ushort2) -> ushort2 {
-    return unsafe { simd_mul(ushort2::broadcast(self), other) };
-  }
-}
-
-impl std::ops::Div for ushort2 {
-  type Output = Self;
-
-  #[inline]
-  fn div(self, other: Self) -> Self {
-    return unsafe { simd_div(self, other) };
-  }
-}
-
-impl std::ops::Div<u16> for ushort2 {
-  type Output = Self;
-
-  #[inline]
-  fn div(self, other: u16) -> Self {
-    return unsafe { simd_div(self, ushort2::broadcast(other)) };
-  }
-}
-
-impl std::ops::Div<ushort2> for u16 {
-  type Output = ushort2;
-
-  #[inline]
-  fn div(self, other: ushort2) -> ushort2 {
-    return unsafe { simd_div(ushort2::broadcast(self), other) };
-  }
 }
 
 impl std::ops::BitAnd for ushort2 {

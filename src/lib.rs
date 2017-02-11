@@ -2,6 +2,8 @@
 
 #![allow(non_camel_case_types)]
 
+use std::ops::*;
+
 #[path = "impls/impl_char2.rs"] mod impl_char2;
 #[path = "impls/impl_char3.rs"] mod impl_char3;
 #[path = "impls/impl_char4.rs"] mod impl_char4;
@@ -64,23 +66,83 @@
 
 pub mod objc;
 
+extern "platform-intrinsic" {
+  fn simd_add<T>(x: T, y: T) -> T;
+  fn simd_sub<T>(x: T, y: T) -> T;
+  fn simd_mul<T>(x: T, y: T) -> T;
+  fn simd_div<T>(x: T, y: T) -> T;
+
+  // fn simd_shl<T>(x: T, y: T) -> T;
+  // fn simd_shr<T>(x: T, y: T) -> T;
+  // 
+  // fn simd_and<T>(x: T, y: T) -> T;
+  // fn simd_or<T>(x: T, y: T) -> T;
+  // fn simd_xor<T>(x: T, y: T) -> T;
+}
+
 macro_rules! declare_vector {
   ($name2:ident, $name3:ident, $name4:ident, $scalar:ty) => (
     #[repr(C)]
     #[repr(simd)]
     #[derive(Copy, Clone, Debug)]
     pub struct $name2(pub $scalar, pub $scalar);
+    
+    impl_vector!($name2, $scalar);
 
     #[repr(C)]
     #[repr(simd)]
     #[derive(Copy, Clone, Debug)]
     pub struct $name3(pub $scalar, pub $scalar, pub $scalar);
 
+    impl_vector!($name3, $scalar);
+
     #[repr(C)]
     #[repr(simd)]
     #[derive(Copy, Clone, Debug)]
     pub struct $name4(pub $scalar, pub $scalar, pub $scalar, pub $scalar);
+
+    impl_vector!($name4, $scalar);
   );
+}
+
+macro_rules! impl_trait {
+  ($vector:ident, $scalar:ty, $intrinsic:ident, $trait_name:ident, $fn_name:ident) => {
+    impl $trait_name for $vector {
+      type Output = Self;
+
+      #[inline]
+      fn $fn_name(self, other: Self) -> Self {
+        return unsafe { $intrinsic(self, other) };
+      }
+    }
+
+    impl $trait_name<$scalar> for $vector {
+      type Output = Self;
+
+      #[inline]
+      fn $fn_name(self, other: $scalar) -> Self {
+        return unsafe { $intrinsic(self, $vector::broadcast(other)) };
+      }
+    }
+
+    impl $trait_name<$vector> for $scalar {
+      type Output = $vector;
+
+      #[inline]
+      fn $fn_name(self, other: $vector) -> $vector {
+        return unsafe { $intrinsic($vector::broadcast(self), other) };
+      }
+    }
+  }
+}
+
+macro_rules! impl_vector {
+  ($vector:ident, $scalar:ty) => {
+    impl_trait!($vector, $scalar, simd_add, Add, add);
+    impl_trait!($vector, $scalar, simd_sub, Sub, sub);
+    impl_trait!($vector, $scalar, simd_mul, Mul, mul);
+    impl_trait!($vector, $scalar, simd_div, Div, div);
+  }
 }
 
 macro_rules! declare_matrix {

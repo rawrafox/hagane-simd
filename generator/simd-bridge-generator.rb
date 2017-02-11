@@ -46,11 +46,6 @@ module Bridge
           o.puts("use ::simd::*;")
 
           o.block("extern \"platform-intrinsic\"", pad: true) do
-            o.puts("fn simd_add<T>(x: T, y: T) -> T;", pad: true)
-            o.puts("fn simd_sub<T>(x: T, y: T) -> T;")
-            o.puts("fn simd_mul<T>(x: T, y: T) -> T;")
-            o.puts("fn simd_div<T>(x: T, y: T) -> T;")
-
             if kind.include?(:integer)
               o.puts("fn simd_shl<T>(x: T, y: T) -> T;", pad: true)
               o.puts("fn simd_shr<T>(x: T, y: T) -> T;")
@@ -58,35 +53,6 @@ module Bridge
               o.puts("fn simd_and<T>(x: T, y: T) -> T;", pad: true)
               o.puts("fn simd_or<T>(x: T, y: T) -> T;")
               o.puts("fn simd_xor<T>(x: T, y: T) -> T;")
-            end
-          end
-
-          %w(add sub mul div).each do |op|
-            o.block("impl std::ops::#{op.capitalize} for #{name}", pad: true) do |o|
-              o.puts("type Output = Self;")
-              o.puts
-              o.puts("#[inline]")
-              o.block("fn #{op}(self, other: Self) -> Self") do |o|
-                o.puts("return unsafe { simd_#{op}(self, other) };")
-              end
-            end
-
-            o.block("impl std::ops::#{op.capitalize}<#{scalar}> for #{name}", pad: true) do |o|
-              o.puts("type Output = Self;")
-              o.puts
-              o.puts("#[inline]")
-              o.block("fn #{op}(self, other: #{scalar}) -> Self") do |o|
-                o.puts("return unsafe { simd_#{op}(self, #{name}::broadcast(other)) };")
-              end
-            end
-
-            o.block("impl std::ops::#{op.capitalize}<#{name}> for #{scalar}", pad: true) do |o|
-              o.puts("type Output = #{name};")
-              o.puts
-              o.puts("#[inline]")
-              o.block("fn #{op}(self, other: #{name}) -> #{name}") do |o|
-                o.puts("return unsafe { simd_#{op}(#{name}::broadcast(self), other) };")
-              end
             end
           end
 
