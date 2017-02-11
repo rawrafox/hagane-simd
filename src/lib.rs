@@ -4,65 +4,65 @@
 
 use std::ops::*;
 
-#[path = "impls/impl_char2.rs"] mod impl_char2;
-#[path = "impls/impl_char3.rs"] mod impl_char3;
-#[path = "impls/impl_char4.rs"] mod impl_char4;
+#[path = "vector/vector_char2.rs"] mod vector_char2;
+#[path = "vector/vector_char3.rs"] mod vector_char3;
+#[path = "vector/vector_char4.rs"] mod vector_char4;
 
-#[path = "impls/impl_uchar2.rs"] mod impl_uchar2;
-#[path = "impls/impl_uchar3.rs"] mod impl_uchar3;
-#[path = "impls/impl_uchar4.rs"] mod impl_uchar4;
+#[path = "vector/vector_uchar2.rs"] mod vector_uchar2;
+#[path = "vector/vector_uchar3.rs"] mod vector_uchar3;
+#[path = "vector/vector_uchar4.rs"] mod vector_uchar4;
 
-#[path = "impls/impl_short2.rs"] mod impl_short2;
-#[path = "impls/impl_short3.rs"] mod impl_short3;
-#[path = "impls/impl_short4.rs"] mod impl_short4;
+#[path = "vector/vector_short2.rs"] mod vector_short2;
+#[path = "vector/vector_short3.rs"] mod vector_short3;
+#[path = "vector/vector_short4.rs"] mod vector_short4;
 
-#[path = "impls/impl_ushort2.rs"] mod impl_ushort2;
-#[path = "impls/impl_ushort3.rs"] mod impl_ushort3;
-#[path = "impls/impl_ushort4.rs"] mod impl_ushort4;
+#[path = "vector/vector_ushort2.rs"] mod vector_ushort2;
+#[path = "vector/vector_ushort3.rs"] mod vector_ushort3;
+#[path = "vector/vector_ushort4.rs"] mod vector_ushort4;
 
-#[path = "impls/impl_int2.rs"] mod impl_int2;
-#[path = "impls/impl_int3.rs"] mod impl_int3;
-#[path = "impls/impl_int4.rs"] mod impl_int4;
+#[path = "vector/vector_int2.rs"] mod vector_int2;
+#[path = "vector/vector_int3.rs"] mod vector_int3;
+#[path = "vector/vector_int4.rs"] mod vector_int4;
 
-#[path = "impls/impl_uint2.rs"] mod impl_uint2;
-#[path = "impls/impl_uint3.rs"] mod impl_uint3;
-#[path = "impls/impl_uint4.rs"] mod impl_uint4;
+#[path = "vector/vector_uint2.rs"] mod vector_uint2;
+#[path = "vector/vector_uint3.rs"] mod vector_uint3;
+#[path = "vector/vector_uint4.rs"] mod vector_uint4;
 
-#[path = "impls/impl_float2.rs"] mod impl_float2;
-#[path = "impls/impl_float3.rs"] mod impl_float3;
-#[path = "impls/impl_float4.rs"] mod impl_float4;
+#[path = "vector/vector_float2.rs"] mod vector_float2;
+#[path = "vector/vector_float3.rs"] mod vector_float3;
+#[path = "vector/vector_float4.rs"] mod vector_float4;
 
-#[path = "impls/impl_long2.rs"] mod impl_long2;
-#[path = "impls/impl_long3.rs"] mod impl_long3;
-#[path = "impls/impl_long4.rs"] mod impl_long4;
+#[path = "vector/vector_long2.rs"] mod vector_long2;
+#[path = "vector/vector_long3.rs"] mod vector_long3;
+#[path = "vector/vector_long4.rs"] mod vector_long4;
 
-#[path = "impls/impl_ulong2.rs"] mod impl_ulong2;
-#[path = "impls/impl_ulong3.rs"] mod impl_ulong3;
-#[path = "impls/impl_ulong4.rs"] mod impl_ulong4;
+#[path = "vector/vector_ulong2.rs"] mod vector_ulong2;
+#[path = "vector/vector_ulong3.rs"] mod vector_ulong3;
+#[path = "vector/vector_ulong4.rs"] mod vector_ulong4;
 
-#[path = "impls/impl_double2.rs"] mod impl_double2;
-#[path = "impls/impl_double3.rs"] mod impl_double3;
-#[path = "impls/impl_double4.rs"] mod impl_double4;
+#[path = "vector/vector_double2.rs"] mod vector_double2;
+#[path = "vector/vector_double3.rs"] mod vector_double3;
+#[path = "vector/vector_double4.rs"] mod vector_double4;
 
-#[path = "impls/impl_float2x2.rs"] mod impl_float2x2;
-#[path = "impls/impl_float3x2.rs"] mod impl_float3x2;
-#[path = "impls/impl_float4x2.rs"] mod impl_float4x2;
-#[path = "impls/impl_float2x3.rs"] mod impl_float2x3;
-#[path = "impls/impl_float3x3.rs"] mod impl_float3x3;
-#[path = "impls/impl_float4x3.rs"] mod impl_float4x3;
-#[path = "impls/impl_float2x4.rs"] mod impl_float2x4;
-#[path = "impls/impl_float3x4.rs"] mod impl_float3x4;
-#[path = "impls/impl_float4x4.rs"] mod impl_float4x4;
+#[path = "matrix/matrix_float2x2.rs"] mod matrix_float2x2;
+#[path = "matrix/matrix_float3x2.rs"] mod matrix_float3x2;
+#[path = "matrix/matrix_float4x2.rs"] mod matrix_float4x2;
+#[path = "matrix/matrix_float2x3.rs"] mod matrix_float2x3;
+#[path = "matrix/matrix_float3x3.rs"] mod matrix_float3x3;
+#[path = "matrix/matrix_float4x3.rs"] mod matrix_float4x3;
+#[path = "matrix/matrix_float2x4.rs"] mod matrix_float2x4;
+#[path = "matrix/matrix_float3x4.rs"] mod matrix_float3x4;
+#[path = "matrix/matrix_float4x4.rs"] mod matrix_float4x4;
 
-#[path = "impls/impl_double2x2.rs"] mod impl_double2x2;
-#[path = "impls/impl_double3x2.rs"] mod impl_double3x2;
-#[path = "impls/impl_double4x2.rs"] mod impl_double4x2;
-#[path = "impls/impl_double2x3.rs"] mod impl_double2x3;
-#[path = "impls/impl_double3x3.rs"] mod impl_double3x3;
-#[path = "impls/impl_double4x3.rs"] mod impl_double4x3;
-#[path = "impls/impl_double2x4.rs"] mod impl_double2x4;
-#[path = "impls/impl_double3x4.rs"] mod impl_double3x4;
-#[path = "impls/impl_double4x4.rs"] mod impl_double4x4;
+#[path = "matrix/matrix_double2x2.rs"] mod matrix_double2x2;
+#[path = "matrix/matrix_double3x2.rs"] mod matrix_double3x2;
+#[path = "matrix/matrix_double4x2.rs"] mod matrix_double4x2;
+#[path = "matrix/matrix_double2x3.rs"] mod matrix_double2x3;
+#[path = "matrix/matrix_double3x3.rs"] mod matrix_double3x3;
+#[path = "matrix/matrix_double4x3.rs"] mod matrix_double4x3;
+#[path = "matrix/matrix_double2x4.rs"] mod matrix_double2x4;
+#[path = "matrix/matrix_double3x4.rs"] mod matrix_double3x4;
+#[path = "matrix/matrix_double4x4.rs"] mod matrix_double4x4;
 
 #[macro_use] mod macros;
 

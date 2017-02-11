@@ -457,7 +457,7 @@ module Bridge
             end
           end
 
-          files << ["#{path}/impl_#{name}.rs", io.string]
+          files << ["#{path}/vector/vector_#{name}.rs", io.string]
         end
       end
 
@@ -631,7 +631,7 @@ module Bridge
               # end
             end
 
-            files << ["#{path}/impl_#{name}.rs", io.string]
+            files << ["#{path}/matrix/matrix_#{name}.rs", io.string]
           end
         end
       end
