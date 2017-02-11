@@ -2,147 +2,124 @@
 
 #![allow(non_camel_case_types)]
 
-#[path = "types/type_char1.rs"] mod type_char1;
-#[path = "types/type_char2.rs"] mod type_char2;
-#[path = "types/type_char3.rs"] mod type_char3;
-#[path = "types/type_char4.rs"] mod type_char4;
+#[path = "impls/impl_char2.rs"] mod impl_char2;
+#[path = "impls/impl_char3.rs"] mod impl_char3;
+#[path = "impls/impl_char4.rs"] mod impl_char4;
 
-#[path = "types/type_uchar1.rs"] mod type_uchar1;
-#[path = "types/type_uchar2.rs"] mod type_uchar2;
-#[path = "types/type_uchar3.rs"] mod type_uchar3;
-#[path = "types/type_uchar4.rs"] mod type_uchar4;
+#[path = "impls/impl_uchar2.rs"] mod impl_uchar2;
+#[path = "impls/impl_uchar3.rs"] mod impl_uchar3;
+#[path = "impls/impl_uchar4.rs"] mod impl_uchar4;
 
-#[path = "types/type_short1.rs"] mod type_short1;
-#[path = "types/type_short2.rs"] mod type_short2;
-#[path = "types/type_short3.rs"] mod type_short3;
-#[path = "types/type_short4.rs"] mod type_short4;
+#[path = "impls/impl_short2.rs"] mod impl_short2;
+#[path = "impls/impl_short3.rs"] mod impl_short3;
+#[path = "impls/impl_short4.rs"] mod impl_short4;
 
-#[path = "types/type_ushort1.rs"] mod type_ushort1;
-#[path = "types/type_ushort2.rs"] mod type_ushort2;
-#[path = "types/type_ushort3.rs"] mod type_ushort3;
-#[path = "types/type_ushort4.rs"] mod type_ushort4;
+#[path = "impls/impl_ushort2.rs"] mod impl_ushort2;
+#[path = "impls/impl_ushort3.rs"] mod impl_ushort3;
+#[path = "impls/impl_ushort4.rs"] mod impl_ushort4;
 
-#[path = "types/type_int1.rs"] mod type_int1;
-#[path = "types/type_int2.rs"] mod type_int2;
-#[path = "types/type_int3.rs"] mod type_int3;
-#[path = "types/type_int4.rs"] mod type_int4;
+#[path = "impls/impl_int2.rs"] mod impl_int2;
+#[path = "impls/impl_int3.rs"] mod impl_int3;
+#[path = "impls/impl_int4.rs"] mod impl_int4;
 
-#[path = "types/type_uint1.rs"] mod type_uint1;
-#[path = "types/type_uint2.rs"] mod type_uint2;
-#[path = "types/type_uint3.rs"] mod type_uint3;
-#[path = "types/type_uint4.rs"] mod type_uint4;
+#[path = "impls/impl_uint2.rs"] mod impl_uint2;
+#[path = "impls/impl_uint3.rs"] mod impl_uint3;
+#[path = "impls/impl_uint4.rs"] mod impl_uint4;
 
-#[path = "types/type_float1.rs"] mod type_float1;
-#[path = "types/type_float2.rs"] mod type_float2;
-#[path = "types/type_float3.rs"] mod type_float3;
-#[path = "types/type_float4.rs"] mod type_float4;
+#[path = "impls/impl_float2.rs"] mod impl_float2;
+#[path = "impls/impl_float3.rs"] mod impl_float3;
+#[path = "impls/impl_float4.rs"] mod impl_float4;
 
-#[path = "types/type_long1.rs"] mod type_long1;
-#[path = "types/type_long2.rs"] mod type_long2;
-#[path = "types/type_long3.rs"] mod type_long3;
-#[path = "types/type_long4.rs"] mod type_long4;
+#[path = "impls/impl_long2.rs"] mod impl_long2;
+#[path = "impls/impl_long3.rs"] mod impl_long3;
+#[path = "impls/impl_long4.rs"] mod impl_long4;
 
-#[path = "types/type_ulong1.rs"] mod type_ulong1;
-#[path = "types/type_ulong2.rs"] mod type_ulong2;
-#[path = "types/type_ulong3.rs"] mod type_ulong3;
-#[path = "types/type_ulong4.rs"] mod type_ulong4;
+#[path = "impls/impl_ulong2.rs"] mod impl_ulong2;
+#[path = "impls/impl_ulong3.rs"] mod impl_ulong3;
+#[path = "impls/impl_ulong4.rs"] mod impl_ulong4;
 
-#[path = "types/type_double1.rs"] mod type_double1;
-#[path = "types/type_double2.rs"] mod type_double2;
-#[path = "types/type_double3.rs"] mod type_double3;
-#[path = "types/type_double4.rs"] mod type_double4;
+#[path = "impls/impl_double2.rs"] mod impl_double2;
+#[path = "impls/impl_double3.rs"] mod impl_double3;
+#[path = "impls/impl_double4.rs"] mod impl_double4;
 
-#[path = "types/type_float2x2.rs"] mod type_float2x2;
-#[path = "types/type_float3x2.rs"] mod type_float3x2;
-#[path = "types/type_float4x2.rs"] mod type_float4x2;
-#[path = "types/type_float2x3.rs"] mod type_float2x3;
-#[path = "types/type_float3x3.rs"] mod type_float3x3;
-#[path = "types/type_float4x3.rs"] mod type_float4x3;
-#[path = "types/type_float2x4.rs"] mod type_float2x4;
-#[path = "types/type_float3x4.rs"] mod type_float3x4;
-#[path = "types/type_float4x4.rs"] mod type_float4x4;
+#[path = "impls/impl_float2x2.rs"] mod impl_float2x2;
+#[path = "impls/impl_float3x2.rs"] mod impl_float3x2;
+#[path = "impls/impl_float4x2.rs"] mod impl_float4x2;
+#[path = "impls/impl_float2x3.rs"] mod impl_float2x3;
+#[path = "impls/impl_float3x3.rs"] mod impl_float3x3;
+#[path = "impls/impl_float4x3.rs"] mod impl_float4x3;
+#[path = "impls/impl_float2x4.rs"] mod impl_float2x4;
+#[path = "impls/impl_float3x4.rs"] mod impl_float3x4;
+#[path = "impls/impl_float4x4.rs"] mod impl_float4x4;
 
-#[path = "types/type_double2x2.rs"] mod type_double2x2;
-#[path = "types/type_double3x2.rs"] mod type_double3x2;
-#[path = "types/type_double4x2.rs"] mod type_double4x2;
-#[path = "types/type_double2x3.rs"] mod type_double2x3;
-#[path = "types/type_double3x3.rs"] mod type_double3x3;
-#[path = "types/type_double4x3.rs"] mod type_double4x3;
-#[path = "types/type_double2x4.rs"] mod type_double2x4;
-#[path = "types/type_double3x4.rs"] mod type_double3x4;
-#[path = "types/type_double4x4.rs"] mod type_double4x4;
-
-pub use type_char1::*;
-pub use type_char2::*;
-pub use type_char3::*;
-pub use type_char4::*;
-
-pub use type_uchar1::*;
-pub use type_uchar2::*;
-pub use type_uchar3::*;
-pub use type_uchar4::*;
-
-pub use type_short1::*;
-pub use type_short2::*;
-pub use type_short3::*;
-pub use type_short4::*;
-
-pub use type_ushort1::*;
-pub use type_ushort2::*;
-pub use type_ushort3::*;
-pub use type_ushort4::*;
-
-pub use type_int1::*;
-pub use type_int2::*;
-pub use type_int3::*;
-pub use type_int4::*;
-
-pub use type_uint1::*;
-pub use type_uint2::*;
-pub use type_uint3::*;
-pub use type_uint4::*;
-
-pub use type_float1::*;
-pub use type_float2::*;
-pub use type_float3::*;
-pub use type_float4::*;
-
-pub use type_long1::*;
-pub use type_long2::*;
-pub use type_long3::*;
-pub use type_long4::*;
-
-pub use type_ulong1::*;
-pub use type_ulong2::*;
-pub use type_ulong3::*;
-pub use type_ulong4::*;
-
-pub use type_double1::*;
-pub use type_double2::*;
-pub use type_double3::*;
-pub use type_double4::*;
-
-pub use type_float2x2::*;
-pub use type_float3x2::*;
-pub use type_float4x2::*;
-pub use type_float2x3::*;
-pub use type_float3x3::*;
-pub use type_float4x3::*;
-pub use type_float2x4::*;
-pub use type_float3x4::*;
-pub use type_float4x4::*;
-
-pub use type_double2x2::*;
-pub use type_double3x2::*;
-pub use type_double4x2::*;
-pub use type_double2x3::*;
-pub use type_double3x3::*;
-pub use type_double4x3::*;
-pub use type_double2x4::*;
-pub use type_double3x4::*;
-pub use type_double4x4::*;
+#[path = "impls/impl_double2x2.rs"] mod impl_double2x2;
+#[path = "impls/impl_double3x2.rs"] mod impl_double3x2;
+#[path = "impls/impl_double4x2.rs"] mod impl_double4x2;
+#[path = "impls/impl_double2x3.rs"] mod impl_double2x3;
+#[path = "impls/impl_double3x3.rs"] mod impl_double3x3;
+#[path = "impls/impl_double4x3.rs"] mod impl_double4x3;
+#[path = "impls/impl_double2x4.rs"] mod impl_double2x4;
+#[path = "impls/impl_double3x4.rs"] mod impl_double3x4;
+#[path = "impls/impl_double4x4.rs"] mod impl_double4x4;
 
 pub mod objc;
+
+macro_rules! declare_vector {
+  ($name2:ident, $name3:ident, $name4:ident, $scalar:ty) => (
+    #[repr(C)]
+    #[repr(simd)]
+    #[derive(Copy, Clone, Debug)]
+    pub struct $name2(pub $scalar, pub $scalar);
+
+    #[repr(C)]
+    #[repr(simd)]
+    #[derive(Copy, Clone, Debug)]
+    pub struct $name3(pub $scalar, pub $scalar, pub $scalar);
+
+    #[repr(C)]
+    #[repr(simd)]
+    #[derive(Copy, Clone, Debug)]
+    pub struct $name4(pub $scalar, pub $scalar, pub $scalar, pub $scalar);
+  );
+}
+
+macro_rules! declare_matrix {
+  ($name2:ident, $name3:ident, $name4:ident, $vector:ty) => (
+    #[repr(C)]
+    #[derive(Copy, Clone, Debug)]
+    pub struct $name2(pub $vector, pub $vector);
+
+    #[repr(C)]
+    #[derive(Copy, Clone, Debug)]
+    pub struct $name3(pub $vector, pub $vector, pub $vector);
+    
+    #[repr(C)]
+    #[derive(Copy, Clone, Debug)]
+    pub struct $name4(pub $vector, pub $vector, pub $vector, pub $vector);
+  );
+}
+
+declare_vector!(char2, char3, char4, i8);
+declare_vector!(short2, short3, short4, i16);
+declare_vector!(int2, int3, int4, i32);
+declare_vector!(long2, long3, long4, i64);
+
+declare_vector!(uchar2, uchar3, uchar4, u8);
+declare_vector!(ushort2, ushort3, ushort4, u16);
+declare_vector!(uint2, uint3, uint4, u32);
+declare_vector!(ulong2, ulong3, ulong4, u64);
+
+// TODO: declare_vector!(half2, half3, half4, f16);
+declare_vector!(float2, float3, float4, f32);
+declare_vector!(double2, double3, double4, f64);
+
+declare_matrix!(float2x2, float3x2, float4x2, float2);
+declare_matrix!(float2x3, float3x3, float4x3, float3);
+declare_matrix!(float2x4, float3x4, float4x4, float4);
+
+declare_matrix!(double2x2, double3x2, double4x2, double2);
+declare_matrix!(double2x3, double3x3, double4x3, double3);
+declare_matrix!(double2x4, double3x4, double4x4, double4);
 
 pub mod simd {
   extern "platform-intrinsic" {
@@ -150,10 +127,10 @@ pub mod simd {
     // fn simd_sub<T>(x: T, y: T) -> T;
     // fn simd_mul<T>(x: T, y: T) -> T;
     // fn simd_div<T>(x: T, y: T) -> T;
-    // 
+    //
     // fn simd_shl<T>(x: T, y: T) -> T;
     // fn simd_shr<T>(x: T, y: T) -> T;
-    // 
+    //
     // fn simd_and<T>(x: T, y: T) -> T;
     // fn simd_or<T>(x: T, y: T) -> T;
     // fn simd_xor<T>(x: T, y: T) -> T;
@@ -175,34 +152,42 @@ pub mod simd {
     type Scalar;
     type Boolean;
 
+    #[inline(always)]
     fn extract(self, i: u32) -> Self::Scalar {
       return unsafe { simd_extract(self, i) };
     }
 
+    #[inline(always)]
     fn replace(self, i: u32, value: Self::Scalar) -> Self {
       return unsafe { simd_insert(self, i, value) };
     }
 
+    #[inline(always)]
     fn eq(self, other: Self) -> Self::Boolean {
       return unsafe { simd_eq(self, other) };
     }
 
+    #[inline(always)]
     fn ne(self, other: Self) -> Self::Boolean {
       return unsafe { simd_ne(self, other) };
     }
 
+    #[inline(always)]
     fn lt(self, other: Self) -> Self::Boolean {
       return unsafe { simd_lt(self, other) };
     }
 
+    #[inline(always)]
     fn le(self, other: Self) -> Self::Boolean {
       return unsafe { simd_le(self, other) };
     }
 
+    #[inline(always)]
     fn gt(self, other: Self) -> Self::Boolean {
       return unsafe { simd_gt(self, other) };
     }
 
+    #[inline(always)]
     fn ge(self, other: Self) -> Self::Boolean {
       return unsafe { simd_ge(self, other) };
     }
@@ -278,24 +263,24 @@ pub mod simd {
   }
 
   pub trait Cross : Vector {
-    type Output;
+    type CrossProduct;
 
-    fn cross(self, rhs: Self) -> Self::Output;
+    fn cross(self, rhs: Self) -> Self::CrossProduct;
   }
 
   #[inline(always)]
-  pub fn cross<T: Cross>(x: T, y: T) -> T::Output {
+  pub fn cross<T: Cross>(x: T, y: T) -> T::CrossProduct {
     return x.cross(y);
   }
 
   pub trait Dot<RHS = Self> {
-    type Output;
+    type DotProduct;
 
-    fn dot(self, rhs: RHS) -> Self::Output;
+    fn dot(self, rhs: RHS) -> Self::DotProduct;
   }
 
   #[inline(always)]
-  pub fn dot<RHS, T: Dot<RHS>>(x: T, y: RHS) -> T::Output {
+  pub fn dot<RHS, T: Dot<RHS>>(x: T, y: RHS) -> T::DotProduct {
     return x.dot(y);
   }
 
