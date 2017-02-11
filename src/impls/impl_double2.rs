@@ -150,9 +150,17 @@ impl simd::Vector for double2 {
   }
 }
 
+impl simd::Cross for double2 {
+  type CrossProduct = double3;
+
+  #[inline(always)]
+  fn cross(self, other: Self) -> Self::CrossProduct {
+    return double3(0.0, 0.0, self.0 * other.1 - self.1 * other.0);
+  }
+}
+
 impl simd::Dot for double2 {
   type DotProduct = f64;
-
   #[inline(always)]
   fn dot(self, other: Self) -> Self::DotProduct {
     return simd::reduce_add(self * other);
@@ -271,11 +279,6 @@ impl double2 {
   }
 
   #[inline]
-  pub fn dot(x: double2, y: double2) -> f64 {
-    return simd::reduce_add(x * y);
-  }
-
-  #[inline]
   pub fn project(x: double2, y: double2) -> double2 {
     return simd::dot(x, y) / simd::dot(y, y) * y;
   }
@@ -287,7 +290,7 @@ impl double2 {
 
   #[inline]
   pub fn length_squared(x: double2) -> f64 {
-    return double2::dot(x, x);
+    return simd::dot(x, x);
   }
 
   #[inline]
@@ -316,18 +319,13 @@ impl double2 {
   }
 
   #[inline]
-  pub fn cross(x: double2, y: double2) -> double3 {
-    return double3(0.0, 0.0, x.0 * y.1 - x.1 * y.0);
-  }
-
-  #[inline]
   pub fn reflect(x: double2, n: double2) -> double2 {
-    return x - 2.0 * double2::dot(x, n) * n;
+    return x - 2.0 * simd::dot(x, n) * n;
   }
 
   #[inline]
   pub fn refract(x: double2, n: double2, eta: f64) -> double2 {
-    let dp = double2::dot(x, n);
+    let dp = simd::dot(x, n);
     let k = 1.0 - eta * eta * (1.0 - dp * dp);
     return if k >= 0.0 { eta * x - (eta * dp + k.sqrt()) } else { double2::broadcast(0.0) };
   }

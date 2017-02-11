@@ -152,7 +152,6 @@ impl simd::Vector for double4 {
 
 impl simd::Dot for double4 {
   type DotProduct = f64;
-
   #[inline(always)]
   fn dot(self, other: Self) -> Self::DotProduct {
     return simd::reduce_add(self * other);
@@ -271,11 +270,6 @@ impl double4 {
   }
 
   #[inline]
-  pub fn dot(x: double4, y: double4) -> f64 {
-    return simd::reduce_add(x * y);
-  }
-
-  #[inline]
   pub fn project(x: double4, y: double4) -> double4 {
     return simd::dot(x, y) / simd::dot(y, y) * y;
   }
@@ -287,7 +281,7 @@ impl double4 {
 
   #[inline]
   pub fn length_squared(x: double4) -> f64 {
-    return double4::dot(x, x);
+    return simd::dot(x, x);
   }
 
   #[inline]
@@ -317,12 +311,12 @@ impl double4 {
 
   #[inline]
   pub fn reflect(x: double4, n: double4) -> double4 {
-    return x - 2.0 * double4::dot(x, n) * n;
+    return x - 2.0 * simd::dot(x, n) * n;
   }
 
   #[inline]
   pub fn refract(x: double4, n: double4, eta: f64) -> double4 {
-    let dp = double4::dot(x, n);
+    let dp = simd::dot(x, n);
     let k = 1.0 - eta * eta * (1.0 - dp * dp);
     return if k >= 0.0 { eta * x - (eta * dp + k.sqrt()) } else { double4::broadcast(0.0) };
   }

@@ -304,7 +304,6 @@ impl simd::Vector for int2 {
 
 impl simd::Dot for int2 {
   type DotProduct = i32;
-
   #[inline(always)]
   fn dot(self, other: Self) -> Self::DotProduct {
     return simd::reduce_add(self * other);

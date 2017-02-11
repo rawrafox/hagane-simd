@@ -216,9 +216,26 @@ module Bridge
             end
           end
 
+          if kind.include?(:float) && [2, 3].include?(width)
+            o.block("impl simd::Cross for #{name}", pad: true) do |o|
+              o.puts("type CrossProduct = #{type}3;", pad: true)
+
+              o.puts("#[inline(always)]", pad: true)
+              o.block("fn cross(self, other: Self) -> Self::CrossProduct") do |o|
+                if width == 2
+                  o.puts("return #{type}3(0.0, 0.0, self.0 * other.1 - self.1 * other.0);")
+                else
+                  o.puts("let a = self * #{name}(other.2, other.1, other.0) - #{name}(self.2, self.1, self.0) * other;")
+                  o.puts
+                  o.puts("return #{name}(a.2, a.1, a.0);")
+                end
+              end
+            end
+          end
+
           o.block("impl simd::Dot for #{name}", pad: true) do |o|
-            o.puts("type DotProduct = #{scalar};")
-            o.puts
+            o.puts("type DotProduct = #{scalar};", pad: true)
+
             o.puts("#[inline(always)]")
             o.block("fn dot(self, other: Self) -> Self::DotProduct") do |o|
               o.puts("return simd::reduce_add(self * other);")
@@ -437,11 +454,6 @@ module Bridge
 
             if kind.include?(:float)
               o.puts("#[inline]", pad: true)
-              o.block("pub fn dot(x: #{name}, y: #{name}) -> #{scalar}") do |o|
-                o.puts("return simd::reduce_add(x * y);")
-              end
-
-              o.puts("#[inline]", pad: true)
               o.block("pub fn project(x: #{name}, y: #{name}) -> #{name}") do |o|
                 o.puts("return simd::dot(x, y) / simd::dot(y, y) * y;")
               end
@@ -453,7 +465,7 @@ module Bridge
 
               o.puts("#[inline]", pad: true)
               o.block("pub fn length_squared(x: #{name}) -> #{scalar}") do |o|
-                o.puts("return #{name}::dot(x, x);")
+                o.puts("return simd::dot(x, x);")
               end
 
               o.puts("#[inline]", pad: true)
@@ -481,29 +493,14 @@ module Bridge
                 o.puts("return x * simd::rsqrt(#{name}::broadcast(#{name}::length_squared(x)));")
               end
 
-              case width
-              when 2
-                o.puts("#[inline]", pad: true)
-                o.block("pub fn cross(x: #{name}, y: #{name}) -> #{type}3") do |o|
-                  o.puts("return #{type}3(0.0, 0.0, x.0 * y.1 - x.1 * y.0);")
-                end
-              when 3
-                o.puts("#[inline]", pad: true)
-                o.block("pub fn cross(x: #{name}, y: #{name}) -> #{name}") do |o|
-                  o.puts("let a = x * #{name}(y.2, y.1, y.0) - #{name}(x.2, x.1, x.0) * y;")
-
-                  o.puts("return #{name}(a.2, a.1, a.0);")
-                end
-              end
-
               o.puts("#[inline]", pad: true)
               o.block("pub fn reflect(x: #{name}, n: #{name}) -> #{name}") do |o|
-                o.puts("return x - 2.0 * #{name}::dot(x, n) * n;")
+                o.puts("return x - 2.0 * simd::dot(x, n) * n;")
               end
 
               o.puts("#[inline]", pad: true)
               o.block("pub fn refract(x: #{name}, n: #{name}, eta: #{scalar}) -> #{name}") do |o|
-                o.puts("let dp = #{name}::dot(x, n);")
+                o.puts("let dp = simd::dot(x, n);")
                 o.puts("let k = 1.0 - eta * eta * (1.0 - dp * dp);")
 
                 o.puts("return if k >= 0.0 { eta * x - (eta * dp + k.sqrt()) } else { #{name}::broadcast(0.0) };")

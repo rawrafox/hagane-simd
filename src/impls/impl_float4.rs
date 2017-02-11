@@ -152,7 +152,6 @@ impl simd::Vector for float4 {
 
 impl simd::Dot for float4 {
   type DotProduct = f32;
-
   #[inline(always)]
   fn dot(self, other: Self) -> Self::DotProduct {
     return simd::reduce_add(self * other);
@@ -271,11 +270,6 @@ impl float4 {
   }
 
   #[inline]
-  pub fn dot(x: float4, y: float4) -> f32 {
-    return simd::reduce_add(x * y);
-  }
-
-  #[inline]
   pub fn project(x: float4, y: float4) -> float4 {
     return simd::dot(x, y) / simd::dot(y, y) * y;
   }
@@ -287,7 +281,7 @@ impl float4 {
 
   #[inline]
   pub fn length_squared(x: float4) -> f32 {
-    return float4::dot(x, x);
+    return simd::dot(x, x);
   }
 
   #[inline]
@@ -317,12 +311,12 @@ impl float4 {
 
   #[inline]
   pub fn reflect(x: float4, n: float4) -> float4 {
-    return x - 2.0 * float4::dot(x, n) * n;
+    return x - 2.0 * simd::dot(x, n) * n;
   }
 
   #[inline]
   pub fn refract(x: float4, n: float4, eta: f32) -> float4 {
-    let dp = float4::dot(x, n);
+    let dp = simd::dot(x, n);
     let k = 1.0 - eta * eta * (1.0 - dp * dp);
     return if k >= 0.0 { eta * x - (eta * dp + k.sqrt()) } else { float4::broadcast(0.0) };
   }

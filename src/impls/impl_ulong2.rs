@@ -303,7 +303,6 @@ impl simd::Vector for ulong2 {
 
 impl simd::Dot for ulong2 {
   type DotProduct = u64;
-
   #[inline(always)]
   fn dot(self, other: Self) -> Self::DotProduct {
     return simd::reduce_add(self * other);
