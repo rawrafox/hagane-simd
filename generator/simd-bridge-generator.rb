@@ -44,44 +44,6 @@ module Bridge
           o.puts("use std;", pad: true)
           o.puts("use ::*;")
 
-          o.block("extern \"platform-intrinsic\"", pad: true) do
-            if kind.include?(:integer)
-              o.puts("fn simd_shl<T>(x: T, y: T) -> T;", pad: true)
-              o.puts("fn simd_shr<T>(x: T, y: T) -> T;")
-            end
-          end
-
-          if kind.include?(:integer)
-            %w(shl shr).each do |op|
-              o.block("impl std::ops::#{op.capitalize}<#{name}> for #{name}", pad: true) do |o|
-                o.puts("type Output = Self;")
-                o.puts
-                o.puts("#[inline]")
-                o.block("fn #{op}(self, other: Self) -> Self") do |o|
-                  o.puts("return unsafe { simd_#{op}(self, other) };")
-                end
-              end
-
-              o.block("impl std::ops::#{op.capitalize}<#{scalar}> for #{name}", pad: true) do |o|
-                o.puts("type Output = Self;")
-                o.puts
-                o.puts("#[inline]")
-                o.block("fn #{op}(self, other: #{scalar}) -> Self") do |o|
-                  o.puts("return unsafe { simd_#{op}(self, #{name}::broadcast(other)) };")
-                end
-              end
-
-              o.block("impl std::ops::#{op.capitalize}<#{name}> for #{scalar}", pad: true) do |o|
-                o.puts("type Output = #{name};")
-                o.puts
-                o.puts("#[inline]")
-                o.block("fn #{op}(self, other: #{name}) -> #{name}") do |o|
-                  o.puts("return unsafe { simd_#{op}(#{name}::broadcast(self), other) };")
-                end
-              end
-            end
-          end
-
           o.block("impl simd::Vector for #{name}", pad: true) do |o|
             o.puts("type Scalar = #{scalar};", pad: true)
             o.puts("type Boolean = #{bool_name};")

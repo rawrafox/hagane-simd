@@ -1,65 +1,6 @@
 use std;
 use ::*;
 
-extern "platform-intrinsic" {
-  fn simd_shl<T>(x: T, y: T) -> T;
-  fn simd_shr<T>(x: T, y: T) -> T;
-}
-
-impl std::ops::Shl<uint2> for uint2 {
-  type Output = Self;
-
-  #[inline]
-  fn shl(self, other: Self) -> Self {
-    return unsafe { simd_shl(self, other) };
-  }
-}
-
-impl std::ops::Shl<u32> for uint2 {
-  type Output = Self;
-
-  #[inline]
-  fn shl(self, other: u32) -> Self {
-    return unsafe { simd_shl(self, uint2::broadcast(other)) };
-  }
-}
-
-impl std::ops::Shl<uint2> for u32 {
-  type Output = uint2;
-
-  #[inline]
-  fn shl(self, other: uint2) -> uint2 {
-    return unsafe { simd_shl(uint2::broadcast(self), other) };
-  }
-}
-
-impl std::ops::Shr<uint2> for uint2 {
-  type Output = Self;
-
-  #[inline]
-  fn shr(self, other: Self) -> Self {
-    return unsafe { simd_shr(self, other) };
-  }
-}
-
-impl std::ops::Shr<u32> for uint2 {
-  type Output = Self;
-
-  #[inline]
-  fn shr(self, other: u32) -> Self {
-    return unsafe { simd_shr(self, uint2::broadcast(other)) };
-  }
-}
-
-impl std::ops::Shr<uint2> for u32 {
-  type Output = uint2;
-
-  #[inline]
-  fn shr(self, other: uint2) -> uint2 {
-    return unsafe { simd_shr(uint2::broadcast(self), other) };
-  }
-}
-
 impl simd::Vector for uint2 {
   type Scalar = u32;
   type Boolean = int2;

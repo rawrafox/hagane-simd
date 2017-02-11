@@ -74,8 +74,8 @@ extern "platform-intrinsic" {
   fn simd_mul<T>(x: T, y: T) -> T;
   fn simd_div<T>(x: T, y: T) -> T;
 
-  // fn simd_shl<T>(x: T, y: T) -> T;
-  // fn simd_shr<T>(x: T, y: T) -> T;
+  fn simd_shl<T>(x: T, y: T) -> T;
+  fn simd_shr<T>(x: T, y: T) -> T;
 
   fn simd_and<T>(x: T, y: T) -> T;
   fn simd_or<T>(x: T, y: T) -> T;
@@ -109,7 +109,7 @@ macro_rules! declare_vector {
 
 macro_rules! impl_trait {
   ($vector:ident, $scalar:ident, $intrinsic:ident, $trait_name:ident, $fn_name:ident) => {
-    impl $trait_name for $vector {
+    impl $trait_name<$vector> for $vector {
       type Output = Self;
 
       #[inline]
@@ -145,6 +145,10 @@ macro_rules! impl_vector {
     impl_trait!($vector, $scalar, simd_and, BitAnd, bitand);
     impl_trait!($vector, $scalar, simd_or, BitOr, bitor);
     impl_trait!($vector, $scalar, simd_xor, BitXor, bitxor);
+    
+    impl_trait!($vector, $scalar, simd_shl, Shl, shl);
+    impl_trait!($vector, $scalar, simd_shr, Shr, shr);
+    
   };
   ($vector:ident, $scalar:ident, signed) => {
     impl_vector!($vector, $scalar, integer);

@@ -1,65 +1,6 @@
 use std;
 use ::*;
 
-extern "platform-intrinsic" {
-  fn simd_shl<T>(x: T, y: T) -> T;
-  fn simd_shr<T>(x: T, y: T) -> T;
-}
-
-impl std::ops::Shl<ulong3> for ulong3 {
-  type Output = Self;
-
-  #[inline]
-  fn shl(self, other: Self) -> Self {
-    return unsafe { simd_shl(self, other) };
-  }
-}
-
-impl std::ops::Shl<u64> for ulong3 {
-  type Output = Self;
-
-  #[inline]
-  fn shl(self, other: u64) -> Self {
-    return unsafe { simd_shl(self, ulong3::broadcast(other)) };
-  }
-}
-
-impl std::ops::Shl<ulong3> for u64 {
-  type Output = ulong3;
-
-  #[inline]
-  fn shl(self, other: ulong3) -> ulong3 {
-    return unsafe { simd_shl(ulong3::broadcast(self), other) };
-  }
-}
-
-impl std::ops::Shr<ulong3> for ulong3 {
-  type Output = Self;
-
-  #[inline]
-  fn shr(self, other: Self) -> Self {
-    return unsafe { simd_shr(self, other) };
-  }
-}
-
-impl std::ops::Shr<u64> for ulong3 {
-  type Output = Self;
-
-  #[inline]
-  fn shr(self, other: u64) -> Self {
-    return unsafe { simd_shr(self, ulong3::broadcast(other)) };
-  }
-}
-
-impl std::ops::Shr<ulong3> for u64 {
-  type Output = ulong3;
-
-  #[inline]
-  fn shr(self, other: ulong3) -> ulong3 {
-    return unsafe { simd_shr(ulong3::broadcast(self), other) };
-  }
-}
-
 impl simd::Vector for ulong3 {
   type Scalar = u64;
   type Boolean = long3;

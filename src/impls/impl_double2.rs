@@ -1,9 +1,6 @@
 use std;
 use ::*;
 
-extern "platform-intrinsic" {
-}
-
 impl simd::Vector for double2 {
   type Scalar = f64;
   type Boolean = long2;
