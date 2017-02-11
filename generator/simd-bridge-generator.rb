@@ -43,6 +43,7 @@ module Bridge
 
           o.puts("use std;", pad: true)
           o.puts("use ::*;")
+          o.puts("use ::simd::*;")
 
           o.block("extern \"platform-intrinsic\"", pad: true) do
             o.puts("fn simd_add<T>(x: T, y: T) -> T;", pad: true)
@@ -167,12 +168,12 @@ module Bridge
           o.block("impl PartialEq for #{name}", pad: true) do |o|
             o.puts("#[inline]", pad: true)
             o.block("fn eq(&self, other: &Self) -> bool") do |o|
-              o.puts("return simd::all(simd::eq(*self, *other));")
+              o.puts("return simd::eq(*self, *other).all();")
             end
 
             o.puts("#[inline]", pad: true)
             o.block("fn ne(&self, other: &Self) -> bool") do |o|
-              o.puts("return simd::all(simd::ne(*self, *other));")
+              o.puts("return simd::ne(*self, *other).all();")
             end
           end
 
@@ -334,6 +335,63 @@ module Bridge
             end
           end
 
+          if kind.include?(:float)
+            o.block("impl simd::Geometry for #{name}", pad: true) do |o|
+              o.puts("#[inline(always)]", pad: true)
+              o.block("fn project(self, onto: Self) -> Self") do |o|
+                o.puts("return (self.dot(onto) / onto.dot(onto)) * onto;")
+              end
+
+              o.puts("#[inline(always)]", pad: true)
+              o.block("fn length(self) -> Self::Scalar") do |o|
+                o.puts("return self.length_squared().sqrt();")
+              end
+
+              o.puts("#[inline(always)]", pad: true)
+              o.block("fn length_squared(self) -> Self::Scalar") do |o|
+                o.puts("return self.dot(self);")
+              end
+
+              o.puts("#[inline(always)]", pad: true)
+              o.block("fn norm_one(self) -> Self::Scalar") do |o|
+                o.puts("return self.abs().reduce_add();")
+              end
+
+              o.puts("#[inline(always)]", pad: true)
+              o.block("fn norm_inf(self) -> Self::Scalar") do |o|
+                o.puts("return self.abs().reduce_max();")
+              end
+
+              o.puts("#[inline(always)]", pad: true)
+              o.block("fn distance(self, other: Self) -> Self::Scalar") do |o|
+                o.puts("return (self - other).length();")
+              end
+
+              o.puts("#[inline(always)]", pad: true)
+              o.block("fn distance_squared(self, other: Self) -> Self::Scalar") do |o|
+                o.puts("return (self - other).length_squared();")
+              end
+
+              o.puts("#[inline(always)]", pad: true)
+              o.block("fn normalize(self) -> Self") do |o|
+                o.puts("return self * simd::rsqrt(#{name}::broadcast(self.length_squared()));")
+              end
+
+              o.puts("#[inline(always)]", pad: true)
+              o.block("fn reflect(self, n: Self) -> Self") do |o|
+                o.puts("return self - 2.0 * self.dot(n) * n;")
+              end
+
+              o.puts("#[inline(always)]", pad: true)
+              o.block("fn refract(self, n: Self, eta: Self::Scalar) -> Self") do |o|
+                o.puts("let dp = self.dot(n);", pad: true)
+                o.puts("let k = 1.0 - eta * eta * (1.0 - dp * dp);")
+
+                o.puts("return if k >= 0.0 { eta * self - (eta * dp + k.sqrt()) } else { #{name}::broadcast(0.0) };", pad: true)
+              end
+            end
+          end
+
           if kind.include?(:integer)
             o.block("impl simd::Logic for #{name}", pad: true) do |o|
               constant = kind.include?(:signed) ? "std::#{scalar}::MIN" : "0x8#{"0" * (attributes.fetch(:size) * 2 - 1)}"
@@ -448,86 +506,6 @@ module Bridge
             o.puts("#[inline]", pad: true)
             o.block("pub fn madd(x: #{name}, y: #{name}, z: #{name}) -> #{name}") do |o|
               o.puts("return x * y + z;")
-            end
-
-            # Geometry
-
-            if kind.include?(:float)
-              o.puts("#[inline]", pad: true)
-              o.block("pub fn project(x: #{name}, y: #{name}) -> #{name}") do |o|
-                o.puts("return simd::dot(x, y) / simd::dot(y, y) * y;")
-              end
-
-              o.puts("#[inline]", pad: true)
-              o.block("pub fn length(x: #{name}) -> #{scalar}") do |o|
-                o.puts("return #{name}::length_squared(x).sqrt();")
-              end
-
-              o.puts("#[inline]", pad: true)
-              o.block("pub fn length_squared(x: #{name}) -> #{scalar}") do |o|
-                o.puts("return simd::dot(x, x);")
-              end
-
-              o.puts("#[inline]", pad: true)
-              o.block("pub fn norm_one(x: #{name}) -> #{scalar}") do |o|
-                o.puts("return simd::reduce_add(simd::abs(x));")
-              end
-
-              o.puts("#[inline]", pad: true)
-              o.block("pub fn norm_inf(x: #{name}) -> #{scalar}") do |o|
-                o.puts("return simd::reduce_max(simd::abs(x));")
-              end
-
-              o.puts("#[inline]", pad: true)
-              o.block("pub fn distance(x: #{name}, y: #{name}) -> #{scalar}") do |o|
-                o.puts("return #{name}::length(x - y);")
-              end
-
-              o.puts("#[inline]", pad: true)
-              o.block("pub fn distance_squared(x: #{name}, y: #{name}) -> #{scalar}") do |o|
-                o.puts("return #{name}::length_squared(x - y);")
-              end
-
-              o.puts("#[inline]", pad: true)
-              o.block("pub fn normalize(x: #{name}) -> #{name}") do |o|
-                o.puts("return x * simd::rsqrt(#{name}::broadcast(#{name}::length_squared(x)));")
-              end
-
-              o.puts("#[inline]", pad: true)
-              o.block("pub fn reflect(x: #{name}, n: #{name}) -> #{name}") do |o|
-                o.puts("return x - 2.0 * simd::dot(x, n) * n;")
-              end
-
-              o.puts("#[inline]", pad: true)
-              o.block("pub fn refract(x: #{name}, n: #{name}, eta: #{scalar}) -> #{name}") do |o|
-                o.puts("let dp = simd::dot(x, n);")
-                o.puts("let k = 1.0 - eta * eta * (1.0 - dp * dp);")
-
-                o.puts("return if k >= 0.0 { eta * x - (eta * dp + k.sqrt()) } else { #{name}::broadcast(0.0) };")
-              end
-
-              # TODO: Link these extern functions / implement in Rust
-              # o.puts("#[inline]", pad: true)
-              # o.block("pub fn orient(x: #{name}, y: #{name}) -> #{name}") do |o|
-              #   o.puts("let a = x * float3(y.2, y.1, y.0) - float3(x.2, x.1, x.0) * y;")
-              #
-              #   o.puts("return #{name}(a.2, a.1, a.0);")
-              # end
-              #
-              # case width
-              # when 2
-              #   o.puts("#[inline]", pad: true)
-              #   o.block("pub fn incircle(x: #{name}, y: #{name}) -> #{name}") do |o|
-              #     o.puts("return #{name}(0.0, 0.0, x.0 * y.1 - x.1 * y.0);")
-              #   end
-              # when 3
-              #   o.puts("#[inline]", pad: true)
-              #   o.block("pub fn insphere(x: #{name}, y: #{name}) -> #{name}") do |o|
-              #     o.puts("let a = x * float3(y.2, y.1, y.0) - float3(x.2, x.1, x.0) * y;")
-              #
-              #     o.puts("return #{name}(a.2, a.1, a.0);")
-              #   end
-              # end
             end
 
             # Conversion

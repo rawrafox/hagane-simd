@@ -1,5 +1,6 @@
 use std;
 use ::*;
+use ::simd::*;
 
 extern "platform-intrinsic" {
   fn simd_add<T>(x: T, y: T) -> T;
@@ -272,12 +273,12 @@ impl std::ops::Not for long2 {
 impl PartialEq for long2 {
   #[inline]
   fn eq(&self, other: &Self) -> bool {
-    return simd::all(simd::eq(*self, *other));
+    return simd::eq(*self, *other).all();
   }
 
   #[inline]
   fn ne(&self, other: &Self) -> bool {
-    return simd::all(simd::ne(*self, *other));
+    return simd::ne(*self, *other).all();
   }
 }
 

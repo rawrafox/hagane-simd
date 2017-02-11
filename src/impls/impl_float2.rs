@@ -1,5 +1,6 @@
 use std;
 use ::*;
+use ::simd::*;
 
 extern "platform-intrinsic" {
   fn simd_add<T>(x: T, y: T) -> T;
@@ -121,12 +122,12 @@ impl std::ops::Div<float2> for f32 {
 impl PartialEq for float2 {
   #[inline]
   fn eq(&self, other: &Self) -> bool {
-    return simd::all(simd::eq(*self, *other));
+    return simd::eq(*self, *other).all();
   }
 
   #[inline]
   fn ne(&self, other: &Self) -> bool {
-    return simd::all(simd::ne(*self, *other));
+    return simd::ne(*self, *other).all();
   }
 }
 
@@ -243,6 +244,61 @@ impl simd::Float for float2 {
   }
 }
 
+impl simd::Geometry for float2 {
+  #[inline(always)]
+  fn project(self, onto: Self) -> Self {
+    return (self.dot(onto) / onto.dot(onto)) * onto;
+  }
+
+  #[inline(always)]
+  fn length(self) -> Self::Scalar {
+    return self.length_squared().sqrt();
+  }
+
+  #[inline(always)]
+  fn length_squared(self) -> Self::Scalar {
+    return self.dot(self);
+  }
+
+  #[inline(always)]
+  fn norm_one(self) -> Self::Scalar {
+    return self.abs().reduce_add();
+  }
+
+  #[inline(always)]
+  fn norm_inf(self) -> Self::Scalar {
+    return self.abs().reduce_max();
+  }
+
+  #[inline(always)]
+  fn distance(self, other: Self) -> Self::Scalar {
+    return (self - other).length();
+  }
+
+  #[inline(always)]
+  fn distance_squared(self, other: Self) -> Self::Scalar {
+    return (self - other).length_squared();
+  }
+
+  #[inline(always)]
+  fn normalize(self) -> Self {
+    return self * simd::rsqrt(float2::broadcast(self.length_squared()));
+  }
+
+  #[inline(always)]
+  fn reflect(self, n: Self) -> Self {
+    return self - 2.0 * self.dot(n) * n;
+  }
+
+  #[inline(always)]
+  fn refract(self, n: Self, eta: Self::Scalar) -> Self {
+    let dp = self.dot(n);
+    let k = 1.0 - eta * eta * (1.0 - dp * dp);
+
+    return if k >= 0.0 { eta * self - (eta * dp + k.sqrt()) } else { float2::broadcast(0.0) };
+  }
+}
+
 impl simd::Reduce for float2 {
   #[inline(always)]
   fn reduce_add(self) -> Self::Scalar {
@@ -276,58 +332,6 @@ impl float2 {
   #[inline]
   pub fn madd(x: float2, y: float2, z: float2) -> float2 {
     return x * y + z;
-  }
-
-  #[inline]
-  pub fn project(x: float2, y: float2) -> float2 {
-    return simd::dot(x, y) / simd::dot(y, y) * y;
-  }
-
-  #[inline]
-  pub fn length(x: float2) -> f32 {
-    return float2::length_squared(x).sqrt();
-  }
-
-  #[inline]
-  pub fn length_squared(x: float2) -> f32 {
-    return simd::dot(x, x);
-  }
-
-  #[inline]
-  pub fn norm_one(x: float2) -> f32 {
-    return simd::reduce_add(simd::abs(x));
-  }
-
-  #[inline]
-  pub fn norm_inf(x: float2) -> f32 {
-    return simd::reduce_max(simd::abs(x));
-  }
-
-  #[inline]
-  pub fn distance(x: float2, y: float2) -> f32 {
-    return float2::length(x - y);
-  }
-
-  #[inline]
-  pub fn distance_squared(x: float2, y: float2) -> f32 {
-    return float2::length_squared(x - y);
-  }
-
-  #[inline]
-  pub fn normalize(x: float2) -> float2 {
-    return x * simd::rsqrt(float2::broadcast(float2::length_squared(x)));
-  }
-
-  #[inline]
-  pub fn reflect(x: float2, n: float2) -> float2 {
-    return x - 2.0 * simd::dot(x, n) * n;
-  }
-
-  #[inline]
-  pub fn refract(x: float2, n: float2, eta: f32) -> float2 {
-    let dp = simd::dot(x, n);
-    let k = 1.0 - eta * eta * (1.0 - dp * dp);
-    return if k >= 0.0 { eta * x - (eta * dp + k.sqrt()) } else { float2::broadcast(0.0) };
   }
 
   #[inline]
