@@ -5,7 +5,6 @@ use ::*;
 #[repr(simd)]
 #[derive(Copy, Clone, Debug)]
 pub struct ushort2(pub u16, pub u16);
-pub type vector_ushort2 = ushort2;
 
 extern "platform-intrinsic" {
   fn simd_add<T>(x: T, y: T) -> T;
@@ -297,16 +296,31 @@ impl std::ops::Not for ushort2 {
 impl PartialEq for ushort2 {
   #[inline]
   fn eq(&self, other: &Self) -> bool {
-    return short2::all(ushort2::eq(*self, *other));
+    return simd::all(ushort2::eq(*self, *other));
   }
 
   #[inline]
   fn ne(&self, other: &Self) -> bool {
-    return short2::all(ushort2::ne(*self, *other));
+    return simd::all(ushort2::ne(*self, *other));
   }
 }
 
-impl Dot for ushort2 {
+impl simd::Vector for ushort2 {
+}
+
+impl simd::Logic for ushort2 {
+  #[inline(always)]
+  fn all(self) -> bool {
+    return (self.0 & self.1) & 0x8000 != 0;
+  }
+
+  #[inline(always)]
+  fn any(self) -> bool {
+    return (self.0 | self.1) & 0x8000 != 0;
+  }
+}
+
+impl simd::Dot for ushort2 {
   type Output = u16;
 
   #[inline]
@@ -406,16 +420,6 @@ impl ushort2 {
   #[inline]
   pub fn reduce_max(x: ushort2) -> u16 {
     return std::cmp::max(x.0, x.1);
-  }
-
-  #[inline]
-  pub fn all(x: ushort2) -> bool {
-    return (x.0 & x.1) & 0x8000 != 0;
-  }
-
-  #[inline]
-  pub fn any(x: ushort2) -> bool {
-    return (x.0 | x.1) & 0x8000 != 0;
   }
 
   #[inline]

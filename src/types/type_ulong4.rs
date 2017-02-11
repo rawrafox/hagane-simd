@@ -5,7 +5,6 @@ use ::*;
 #[repr(simd)]
 #[derive(Copy, Clone, Debug)]
 pub struct ulong4(pub u64, pub u64, pub u64, pub u64);
-pub type vector_ulong4 = ulong4;
 
 extern "platform-intrinsic" {
   fn simd_add<T>(x: T, y: T) -> T;
@@ -297,16 +296,31 @@ impl std::ops::Not for ulong4 {
 impl PartialEq for ulong4 {
   #[inline]
   fn eq(&self, other: &Self) -> bool {
-    return long4::all(ulong4::eq(*self, *other));
+    return simd::all(ulong4::eq(*self, *other));
   }
 
   #[inline]
   fn ne(&self, other: &Self) -> bool {
-    return long4::all(ulong4::ne(*self, *other));
+    return simd::all(ulong4::ne(*self, *other));
   }
 }
 
-impl Dot for ulong4 {
+impl simd::Vector for ulong4 {
+}
+
+impl simd::Logic for ulong4 {
+  #[inline(always)]
+  fn all(self) -> bool {
+    return (self.0 & self.1 & self.2 & self.3) & 0x8000000000000000 != 0;
+  }
+
+  #[inline(always)]
+  fn any(self) -> bool {
+    return (self.0 | self.1 | self.2 | self.3) & 0x8000000000000000 != 0;
+  }
+}
+
+impl simd::Dot for ulong4 {
   type Output = u64;
 
   #[inline]
@@ -406,16 +420,6 @@ impl ulong4 {
   #[inline]
   pub fn reduce_max(x: ulong4) -> u64 {
     return ulong2::reduce_max(ulong2::max(x.lo(), x.hi()));
-  }
-
-  #[inline]
-  pub fn all(x: ulong4) -> bool {
-    return (x.0 & x.1 & x.2 & x.3) & 0x8000000000000000 != 0;
-  }
-
-  #[inline]
-  pub fn any(x: ulong4) -> bool {
-    return (x.0 | x.1 | x.2 | x.3) & 0x8000000000000000 != 0;
   }
 
   #[inline]

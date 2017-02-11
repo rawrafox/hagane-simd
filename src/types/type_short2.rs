@@ -5,7 +5,6 @@ use ::*;
 #[repr(simd)]
 #[derive(Copy, Clone, Debug)]
 pub struct short2(pub i16, pub i16);
-pub type vector_short2 = short2;
 
 extern "platform-intrinsic" {
   fn simd_add<T>(x: T, y: T) -> T;
@@ -297,16 +296,31 @@ impl std::ops::Not for short2 {
 impl PartialEq for short2 {
   #[inline]
   fn eq(&self, other: &Self) -> bool {
-    return short2::all(short2::eq(*self, *other));
+    return simd::all(short2::eq(*self, *other));
   }
 
   #[inline]
   fn ne(&self, other: &Self) -> bool {
-    return short2::all(short2::ne(*self, *other));
+    return simd::all(short2::ne(*self, *other));
   }
 }
 
-impl Dot for short2 {
+impl simd::Vector for short2 {
+}
+
+impl simd::Logic for short2 {
+  #[inline(always)]
+  fn all(self) -> bool {
+    return (self.0 & self.1) & std::i16::MIN != 0;
+  }
+
+  #[inline(always)]
+  fn any(self) -> bool {
+    return (self.0 | self.1) & std::i16::MIN != 0;
+  }
+}
+
+impl simd::Dot for short2 {
   type Output = i16;
 
   #[inline]
@@ -407,16 +421,6 @@ impl short2 {
   #[inline]
   pub fn reduce_max(x: short2) -> i16 {
     return std::cmp::max(x.0, x.1);
-  }
-
-  #[inline]
-  pub fn all(x: short2) -> bool {
-    return (x.0 & x.1) & std::i16::MIN != 0;
-  }
-
-  #[inline]
-  pub fn any(x: short2) -> bool {
-    return (x.0 | x.1) & std::i16::MIN != 0;
   }
 
   #[inline]

@@ -5,7 +5,6 @@ use ::*;
 #[repr(simd)]
 #[derive(Copy, Clone, Debug)]
 pub struct char4(pub i8, pub i8, pub i8, pub i8);
-pub type vector_char4 = char4;
 
 extern "platform-intrinsic" {
   fn simd_add<T>(x: T, y: T) -> T;
@@ -297,16 +296,31 @@ impl std::ops::Not for char4 {
 impl PartialEq for char4 {
   #[inline]
   fn eq(&self, other: &Self) -> bool {
-    return char4::all(char4::eq(*self, *other));
+    return simd::all(char4::eq(*self, *other));
   }
 
   #[inline]
   fn ne(&self, other: &Self) -> bool {
-    return char4::all(char4::ne(*self, *other));
+    return simd::all(char4::ne(*self, *other));
   }
 }
 
-impl Dot for char4 {
+impl simd::Vector for char4 {
+}
+
+impl simd::Logic for char4 {
+  #[inline(always)]
+  fn all(self) -> bool {
+    return (self.0 & self.1 & self.2 & self.3) & std::i8::MIN != 0;
+  }
+
+  #[inline(always)]
+  fn any(self) -> bool {
+    return (self.0 | self.1 | self.2 | self.3) & std::i8::MIN != 0;
+  }
+}
+
+impl simd::Dot for char4 {
   type Output = i8;
 
   #[inline]
@@ -407,16 +421,6 @@ impl char4 {
   #[inline]
   pub fn reduce_max(x: char4) -> i8 {
     return char2::reduce_max(char2::max(x.lo(), x.hi()));
-  }
-
-  #[inline]
-  pub fn all(x: char4) -> bool {
-    return (x.0 & x.1 & x.2 & x.3) & std::i8::MIN != 0;
-  }
-
-  #[inline]
-  pub fn any(x: char4) -> bool {
-    return (x.0 | x.1 | x.2 | x.3) & std::i8::MIN != 0;
   }
 
   #[inline]

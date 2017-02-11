@@ -5,7 +5,6 @@ use ::*;
 #[repr(simd)]
 #[derive(Copy, Clone, Debug)]
 pub struct int2(pub i32, pub i32);
-pub type vector_int2 = int2;
 
 extern "platform-intrinsic" {
   fn simd_add<T>(x: T, y: T) -> T;
@@ -297,16 +296,31 @@ impl std::ops::Not for int2 {
 impl PartialEq for int2 {
   #[inline]
   fn eq(&self, other: &Self) -> bool {
-    return int2::all(int2::eq(*self, *other));
+    return simd::all(int2::eq(*self, *other));
   }
 
   #[inline]
   fn ne(&self, other: &Self) -> bool {
-    return int2::all(int2::ne(*self, *other));
+    return simd::all(int2::ne(*self, *other));
   }
 }
 
-impl Dot for int2 {
+impl simd::Vector for int2 {
+}
+
+impl simd::Logic for int2 {
+  #[inline(always)]
+  fn all(self) -> bool {
+    return (self.0 & self.1) & std::i32::MIN != 0;
+  }
+
+  #[inline(always)]
+  fn any(self) -> bool {
+    return (self.0 | self.1) & std::i32::MIN != 0;
+  }
+}
+
+impl simd::Dot for int2 {
   type Output = i32;
 
   #[inline]
@@ -407,16 +421,6 @@ impl int2 {
   #[inline]
   pub fn reduce_max(x: int2) -> i32 {
     return std::cmp::max(x.0, x.1);
-  }
-
-  #[inline]
-  pub fn all(x: int2) -> bool {
-    return (x.0 & x.1) & std::i32::MIN != 0;
-  }
-
-  #[inline]
-  pub fn any(x: int2) -> bool {
-    return (x.0 | x.1) & std::i32::MIN != 0;
   }
 
   #[inline]

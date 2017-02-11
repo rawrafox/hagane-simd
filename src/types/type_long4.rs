@@ -5,7 +5,6 @@ use ::*;
 #[repr(simd)]
 #[derive(Copy, Clone, Debug)]
 pub struct long4(pub i64, pub i64, pub i64, pub i64);
-pub type vector_long4 = long4;
 
 extern "platform-intrinsic" {
   fn simd_add<T>(x: T, y: T) -> T;
@@ -297,16 +296,31 @@ impl std::ops::Not for long4 {
 impl PartialEq for long4 {
   #[inline]
   fn eq(&self, other: &Self) -> bool {
-    return long4::all(long4::eq(*self, *other));
+    return simd::all(long4::eq(*self, *other));
   }
 
   #[inline]
   fn ne(&self, other: &Self) -> bool {
-    return long4::all(long4::ne(*self, *other));
+    return simd::all(long4::ne(*self, *other));
   }
 }
 
-impl Dot for long4 {
+impl simd::Vector for long4 {
+}
+
+impl simd::Logic for long4 {
+  #[inline(always)]
+  fn all(self) -> bool {
+    return (self.0 & self.1 & self.2 & self.3) & std::i64::MIN != 0;
+  }
+
+  #[inline(always)]
+  fn any(self) -> bool {
+    return (self.0 | self.1 | self.2 | self.3) & std::i64::MIN != 0;
+  }
+}
+
+impl simd::Dot for long4 {
   type Output = i64;
 
   #[inline]
@@ -407,16 +421,6 @@ impl long4 {
   #[inline]
   pub fn reduce_max(x: long4) -> i64 {
     return long2::reduce_max(long2::max(x.lo(), x.hi()));
-  }
-
-  #[inline]
-  pub fn all(x: long4) -> bool {
-    return (x.0 & x.1 & x.2 & x.3) & std::i64::MIN != 0;
-  }
-
-  #[inline]
-  pub fn any(x: long4) -> bool {
-    return (x.0 | x.1 | x.2 | x.3) & std::i64::MIN != 0;
   }
 
   #[inline]

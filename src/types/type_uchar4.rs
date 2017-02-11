@@ -5,7 +5,6 @@ use ::*;
 #[repr(simd)]
 #[derive(Copy, Clone, Debug)]
 pub struct uchar4(pub u8, pub u8, pub u8, pub u8);
-pub type vector_uchar4 = uchar4;
 
 extern "platform-intrinsic" {
   fn simd_add<T>(x: T, y: T) -> T;
@@ -297,16 +296,31 @@ impl std::ops::Not for uchar4 {
 impl PartialEq for uchar4 {
   #[inline]
   fn eq(&self, other: &Self) -> bool {
-    return char4::all(uchar4::eq(*self, *other));
+    return simd::all(uchar4::eq(*self, *other));
   }
 
   #[inline]
   fn ne(&self, other: &Self) -> bool {
-    return char4::all(uchar4::ne(*self, *other));
+    return simd::all(uchar4::ne(*self, *other));
   }
 }
 
-impl Dot for uchar4 {
+impl simd::Vector for uchar4 {
+}
+
+impl simd::Logic for uchar4 {
+  #[inline(always)]
+  fn all(self) -> bool {
+    return (self.0 & self.1 & self.2 & self.3) & 0x80 != 0;
+  }
+
+  #[inline(always)]
+  fn any(self) -> bool {
+    return (self.0 | self.1 | self.2 | self.3) & 0x80 != 0;
+  }
+}
+
+impl simd::Dot for uchar4 {
   type Output = u8;
 
   #[inline]
@@ -406,16 +420,6 @@ impl uchar4 {
   #[inline]
   pub fn reduce_max(x: uchar4) -> u8 {
     return uchar2::reduce_max(uchar2::max(x.lo(), x.hi()));
-  }
-
-  #[inline]
-  pub fn all(x: uchar4) -> bool {
-    return (x.0 & x.1 & x.2 & x.3) & 0x80 != 0;
-  }
-
-  #[inline]
-  pub fn any(x: uchar4) -> bool {
-    return (x.0 | x.1 | x.2 | x.3) & 0x80 != 0;
   }
 
   #[inline]

@@ -1,5 +1,6 @@
 use std;
 use ::*;
+use ::simd::*;
 
 #[repr(C)]
 #[derive(Copy, Clone, Debug)]
@@ -54,7 +55,7 @@ impl std::ops::Mul<f32> for float2x2 {
   }
 }
 
-impl Dot for float2x2 {
+impl simd::Dot for float2x2 {
   type Output = float2x2;
 
   #[inline]
@@ -63,7 +64,7 @@ impl Dot for float2x2 {
   }
 }
 
-impl Dot<float2> for float2x2 {
+impl simd::Dot<float2> for float2x2 {
   type Output = float2;
 
   #[inline]

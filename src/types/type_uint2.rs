@@ -5,7 +5,6 @@ use ::*;
 #[repr(simd)]
 #[derive(Copy, Clone, Debug)]
 pub struct uint2(pub u32, pub u32);
-pub type vector_uint2 = uint2;
 
 extern "platform-intrinsic" {
   fn simd_add<T>(x: T, y: T) -> T;
@@ -297,16 +296,31 @@ impl std::ops::Not for uint2 {
 impl PartialEq for uint2 {
   #[inline]
   fn eq(&self, other: &Self) -> bool {
-    return int2::all(uint2::eq(*self, *other));
+    return simd::all(uint2::eq(*self, *other));
   }
 
   #[inline]
   fn ne(&self, other: &Self) -> bool {
-    return int2::all(uint2::ne(*self, *other));
+    return simd::all(uint2::ne(*self, *other));
   }
 }
 
-impl Dot for uint2 {
+impl simd::Vector for uint2 {
+}
+
+impl simd::Logic for uint2 {
+  #[inline(always)]
+  fn all(self) -> bool {
+    return (self.0 & self.1) & 0x80000000 != 0;
+  }
+
+  #[inline(always)]
+  fn any(self) -> bool {
+    return (self.0 | self.1) & 0x80000000 != 0;
+  }
+}
+
+impl simd::Dot for uint2 {
   type Output = u32;
 
   #[inline]
@@ -406,16 +420,6 @@ impl uint2 {
   #[inline]
   pub fn reduce_max(x: uint2) -> u32 {
     return std::cmp::max(x.0, x.1);
-  }
-
-  #[inline]
-  pub fn all(x: uint2) -> bool {
-    return (x.0 & x.1) & 0x80000000 != 0;
-  }
-
-  #[inline]
-  pub fn any(x: uint2) -> bool {
-    return (x.0 | x.1) & 0x80000000 != 0;
   }
 
   #[inline]

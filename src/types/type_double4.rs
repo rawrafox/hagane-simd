@@ -5,7 +5,6 @@ use ::*;
 #[repr(simd)]
 #[derive(Copy, Clone, Debug)]
 pub struct double4(pub f64, pub f64, pub f64, pub f64);
-pub type vector_double4 = double4;
 
 extern "platform-intrinsic" {
   fn simd_add<T>(x: T, y: T) -> T;
@@ -146,16 +145,19 @@ impl std::ops::Div<double4> for f64 {
 impl PartialEq for double4 {
   #[inline]
   fn eq(&self, other: &Self) -> bool {
-    return long4::all(double4::eq(*self, *other));
+    return simd::all(double4::eq(*self, *other));
   }
 
   #[inline]
   fn ne(&self, other: &Self) -> bool {
-    return long4::all(double4::ne(*self, *other));
+    return simd::all(double4::ne(*self, *other));
   }
 }
 
-impl Dot for double4 {
+impl simd::Vector for double4 {
+}
+
+impl simd::Dot for double4 {
   type Output = f64;
 
   #[inline]

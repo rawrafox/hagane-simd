@@ -53,7 +53,6 @@ module Bridge
             o.puts("#[repr(simd)]")
             o.puts("#[derive(Copy, Clone, Debug)]")
             o.puts("pub struct #{name}(#{content});")
-            o.puts("pub type vector_#{name} = #{name};")
 
             o.block("extern \"platform-intrinsic\"", pad: true) do
               o.puts("fn simd_add<T>(x: T, y: T) -> T;", pad: true)
@@ -197,16 +196,39 @@ module Bridge
             o.block("impl PartialEq for #{name}", pad: true) do |o|
               o.puts("#[inline]", pad: true)
               o.block("fn eq(&self, other: &Self) -> bool") do |o|
-                o.puts("return #{bool_name}::all(#{name}::eq(*self, *other));")
+                o.puts("return simd::all(#{name}::eq(*self, *other));")
               end
 
               o.puts("#[inline]", pad: true)
               o.block("fn ne(&self, other: &Self) -> bool") do |o|
-                o.puts("return #{bool_name}::all(#{name}::ne(*self, *other));")
+                o.puts("return simd::all(#{name}::ne(*self, *other));")
               end
             end
 
-            o.block("impl Dot for #{name}", pad: true) do |o|
+            o.block("impl simd::Vector for #{name}", pad: true) do |o|
+            end
+
+            if kind.include?(:integer)
+              o.block("impl simd::Logic for #{name}", pad: true) do |o|
+                constant = kind.include?(:signed) ? "std::#{scalar}::MIN" : "0x8#{"0" * (attributes.fetch(:size) * 2 - 1)}"
+
+                o.puts("#[inline(always)]", pad: true)
+                o.block("fn all(self) -> bool") do |o|
+                  result = width.times.map { |i| "self.#{i}" }.join(" & ")
+
+                  o.puts("return (#{result}) & #{constant} != 0;")
+                end
+
+                o.puts("#[inline(always)]", pad: true)
+                o.block("fn any(self) -> bool") do |o|
+                  result = width.times.map { |i| "self.#{i}" }.join(" | ")
+
+                  o.puts("return (#{result}) & #{constant} != 0;")
+                end
+              end
+            end
+
+            o.block("impl simd::Dot for #{name}", pad: true) do |o|
               o.puts("type Output = #{scalar};")
               o.puts
               o.puts("#[inline]")
@@ -467,24 +489,6 @@ module Bridge
 
               # Logic
 
-              if kind.include?(:integer)
-                constant = kind.include?(:signed) ? "std::#{scalar}::MIN" : "0x8#{"0" * (attributes.fetch(:size) * 2 - 1)}"
-
-                o.puts("#[inline]", pad: true)
-                o.block("pub fn all(x: #{name}) -> bool") do |o|
-                  result = width.times.map { |i| "x.#{i}" }.join(" & ")
-
-                  o.puts("return (#{result}) & #{constant} != 0;")
-                end
-
-                o.puts("#[inline]", pad: true)
-                o.block("pub fn any(x: #{name}) -> bool") do |o|
-                  result = width.times.map { |i| "x.#{i}" }.join(" | ")
-
-                  o.puts("return (#{result}) & #{constant} != 0;")
-                end
-              end
-
               if kind.include?(:float)
                 o.puts("#[inline]", pad: true)
                 o.block("pub fn select(x: #{name}, y: #{name}, z: #{bool_name}) -> #{name}") do |o|
@@ -715,6 +719,7 @@ module Bridge
 
             o.puts("use std;", pad: true)
             o.puts("use ::*;")
+            o.puts("use ::simd::*;") if i == j
 
             o.puts("#[repr(C)]", pad: true)
             o.puts("#[derive(Copy, Clone, Debug)]")
@@ -778,7 +783,7 @@ module Bridge
             end
 
             if kind.include?(:float) && i == j
-              o.block("impl Dot for #{name}", pad: true) do |o|
+              o.block("impl simd::Dot for #{name}", pad: true) do |o|
                 o.puts("type Output = #{name};")
                 o.puts
                 o.puts("#[inline]")
@@ -787,7 +792,7 @@ module Bridge
                 end
               end
 
-              o.block("impl Dot<#{vector_name}> for #{name}", pad: true) do |o|
+              o.block("impl simd::Dot<#{vector_name}> for #{name}", pad: true) do |o|
                 o.puts("type Output = #{vector_name};")
                 o.puts
                 o.puts("#[inline]")
@@ -855,7 +860,7 @@ module Bridge
                 end
               end
 
-              # matrix_multiply is expressed via the `Dot` trait
+              # matrix_multiply is expressed via the `simd::Dot` trait
 
               # TODO: o.puts("#[inline]", pad: true)
               #o.block("pub fn equal(x: #{name}, y: #{name}) -> bool") do |o|
