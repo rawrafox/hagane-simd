@@ -7,42 +7,62 @@ use std::ops::*;
 #[path = "vector/vector_char2.rs"] mod vector_char2;
 #[path = "vector/vector_char3.rs"] mod vector_char3;
 #[path = "vector/vector_char4.rs"] mod vector_char4;
+#[path = "vector/vector_char8.rs"] mod vector_char8;
+#[path = "vector/vector_char16.rs"] mod vector_char16;
 
 #[path = "vector/vector_uchar2.rs"] mod vector_uchar2;
 #[path = "vector/vector_uchar3.rs"] mod vector_uchar3;
 #[path = "vector/vector_uchar4.rs"] mod vector_uchar4;
+#[path = "vector/vector_uchar8.rs"] mod vector_uchar8;
+#[path = "vector/vector_uchar16.rs"] mod vector_uchar16;
 
 #[path = "vector/vector_short2.rs"] mod vector_short2;
 #[path = "vector/vector_short3.rs"] mod vector_short3;
 #[path = "vector/vector_short4.rs"] mod vector_short4;
+#[path = "vector/vector_short8.rs"] mod vector_short8;
+#[path = "vector/vector_short16.rs"] mod vector_short16;
 
 #[path = "vector/vector_ushort2.rs"] mod vector_ushort2;
 #[path = "vector/vector_ushort3.rs"] mod vector_ushort3;
 #[path = "vector/vector_ushort4.rs"] mod vector_ushort4;
+#[path = "vector/vector_ushort8.rs"] mod vector_ushort8;
+#[path = "vector/vector_ushort16.rs"] mod vector_ushort16;
 
 #[path = "vector/vector_int2.rs"] mod vector_int2;
 #[path = "vector/vector_int3.rs"] mod vector_int3;
 #[path = "vector/vector_int4.rs"] mod vector_int4;
+#[path = "vector/vector_int8.rs"] mod vector_int8;
+#[path = "vector/vector_int16.rs"] mod vector_int16;
 
 #[path = "vector/vector_uint2.rs"] mod vector_uint2;
 #[path = "vector/vector_uint3.rs"] mod vector_uint3;
 #[path = "vector/vector_uint4.rs"] mod vector_uint4;
+#[path = "vector/vector_uint8.rs"] mod vector_uint8;
+#[path = "vector/vector_uint16.rs"] mod vector_uint16;
 
 #[path = "vector/vector_float2.rs"] mod vector_float2;
 #[path = "vector/vector_float3.rs"] mod vector_float3;
 #[path = "vector/vector_float4.rs"] mod vector_float4;
+#[path = "vector/vector_float8.rs"] mod vector_float8;
+#[path = "vector/vector_float16.rs"] mod vector_float16;
 
 #[path = "vector/vector_long2.rs"] mod vector_long2;
 #[path = "vector/vector_long3.rs"] mod vector_long3;
 #[path = "vector/vector_long4.rs"] mod vector_long4;
+#[path = "vector/vector_long8.rs"] mod vector_long8;
+#[path = "vector/vector_long16.rs"] mod vector_long16;
 
 #[path = "vector/vector_ulong2.rs"] mod vector_ulong2;
 #[path = "vector/vector_ulong3.rs"] mod vector_ulong3;
 #[path = "vector/vector_ulong4.rs"] mod vector_ulong4;
+#[path = "vector/vector_ulong8.rs"] mod vector_ulong8;
+#[path = "vector/vector_ulong16.rs"] mod vector_ulong16;
 
 #[path = "vector/vector_double2.rs"] mod vector_double2;
 #[path = "vector/vector_double3.rs"] mod vector_double3;
 #[path = "vector/vector_double4.rs"] mod vector_double4;
+#[path = "vector/vector_double8.rs"] mod vector_double8;
+#[path = "vector/vector_double16.rs"] mod vector_double16;
 
 #[path = "matrix/matrix_float2x2.rs"] mod matrix_float2x2;
 #[path = "matrix/matrix_float3x2.rs"] mod matrix_float3x2;
@@ -94,19 +114,19 @@ extern "platform-intrinsic" {
   fn simd_extract<T, E>(x: T, i: u32) -> E;
 }
 
-declare_vector!(char2, char3, char4, i8, signed);
-declare_vector!(short2, short3, short4, i16, signed);
-declare_vector!(int2, int3, int4, i32, signed);
-declare_vector!(long2, long3, long4, i64, signed);
+declare_vector!(char2, char3, char4, char8, char16, i8, signed);
+declare_vector!(short2, short3, short4, short8, short16, i16, signed);
+declare_vector!(int2, int3, int4, int8, int16, i32, signed);
+declare_vector!(long2, long3, long4, long8, long16, i64, signed);
 
-declare_vector!(uchar2, uchar3, uchar4, u8, unsigned);
-declare_vector!(ushort2, ushort3, ushort4, u16, unsigned);
-declare_vector!(uint2, uint3, uint4, u32, unsigned);
-declare_vector!(ulong2, ulong3, ulong4, u64, unsigned);
+declare_vector!(uchar2, uchar3, uchar4, uchar8, uchar16, u8, unsigned);
+declare_vector!(ushort2, ushort3, ushort4, ushort8, ushort16, u16, unsigned);
+declare_vector!(uint2, uint3, uint4, uint8, uint16, u32, unsigned);
+declare_vector!(ulong2, ulong3, ulong4, ulong8, ulong16, u64, unsigned);
 
 // TODO: declare_vector!(half2, half3, half4, f16, float);
-declare_vector!(float2, float3, float4, f32, float);
-declare_vector!(double2, double3, double4, f64, float);
+declare_vector!(float2, float3, float4, float8, float16, f32, float);
+declare_vector!(double2, double3, double4, double8, double16, f64, float);
 
 declare_matrix!(float2x2, float3x2, float4x2, float2);
 declare_matrix!(float2x3, float3x3, float4x3, float3);
@@ -116,8 +136,16 @@ declare_matrix!(double2x2, double3x2, double4x2, double2);
 declare_matrix!(double2x3, double3x3, double4x3, double3);
 declare_matrix!(double2x4, double3x4, double4x4, double4);
 
+pub trait Broadcast<T> {
+  fn broadcast(self) -> T;
+}
+
+pub fn broadcast<T, S: Broadcast<T>>(x: S) -> T {
+  return x.broadcast();
+}
+
 pub trait Vector : Sized + Copy + Add<Output=Self> + Sub<Output=Self> + Mul<Output=Self> + Div<Output=Self> {
-  type Scalar;
+  type Scalar: Broadcast<Self>;
   type Boolean: Select<Self>;
 
   type CharVector;

@@ -55,27 +55,27 @@ impl Vector for uint2 {
 
   #[inline(always)]
   fn to_char_sat(self) -> char2 {
-    return uint2::to_char(min(self, uint2::broadcast(std::i8::MAX as u32)));
+    return uint2::to_char(min(self, broadcast(std::i8::MAX as u32)));
   }
 
   #[inline(always)]
   fn to_uchar_sat(self) -> uchar2 {
-    return uint2::to_uchar(min(self, uint2::broadcast(std::u8::MAX as u32)));
+    return uint2::to_uchar(min(self, broadcast(std::u8::MAX as u32)));
   }
 
   #[inline(always)]
   fn to_short_sat(self) -> short2 {
-    return uint2::to_short(min(self, uint2::broadcast(std::i16::MAX as u32)));
+    return uint2::to_short(min(self, broadcast(std::i16::MAX as u32)));
   }
 
   #[inline(always)]
   fn to_ushort_sat(self) -> ushort2 {
-    return uint2::to_ushort(min(self, uint2::broadcast(std::u16::MAX as u32)));
+    return uint2::to_ushort(min(self, broadcast(std::u16::MAX as u32)));
   }
 
   #[inline(always)]
   fn to_int_sat(self) -> int2 {
-    return uint2::to_int(min(self, uint2::broadcast(std::i32::MAX as u32)));
+    return uint2::to_int(min(self, broadcast(std::i32::MAX as u32)));
   }
 
   #[inline(always)]
@@ -85,7 +85,7 @@ impl Vector for uint2 {
 
   #[inline(always)]
   fn to_long_sat(self) -> long2 {
-    return uint2::to_long(min(self, uint2::broadcast(std::i64::MAX as u32)));
+    return uint2::to_long(min(self, broadcast(std::i64::MAX as u32)));
   }
 
   #[inline(always)]
@@ -135,11 +135,6 @@ impl uint2 {
     assert_eq!(std::mem::size_of::<T>(), std::mem::size_of::<Self>());
 
     return unsafe { std::mem::transmute_copy(&x) };
-  }
-
-  #[inline]
-  pub fn broadcast(x: u32) -> Self {
-    return uint2(x, x);
   }
 
   #[inline]

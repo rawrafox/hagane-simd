@@ -55,7 +55,7 @@ impl Vector for uchar3 {
 
   #[inline(always)]
   fn to_char_sat(self) -> char3 {
-    return uchar3::to_char(min(self, uchar3::broadcast(std::i8::MAX as u8)));
+    return uchar3::to_char(min(self, broadcast(std::i8::MAX as u8)));
   }
 
   #[inline(always)]
@@ -70,7 +70,7 @@ impl Vector for uchar3 {
 
   #[inline(always)]
   fn to_short_sat(self) -> short3 {
-    return uchar3::to_short(min(self, uchar3::broadcast(std::i16::MAX as u8)));
+    return uchar3::to_short(min(self, broadcast(std::i16::MAX as u8)));
   }
 
   #[inline(always)]
@@ -90,7 +90,7 @@ impl Vector for uchar3 {
 
   #[inline(always)]
   fn to_int_sat(self) -> int3 {
-    return uchar3::to_int(min(self, uchar3::broadcast(std::i32::MAX as u8)));
+    return uchar3::to_int(min(self, broadcast(std::i32::MAX as u8)));
   }
 
   #[inline(always)]
@@ -115,7 +115,7 @@ impl Vector for uchar3 {
 
   #[inline(always)]
   fn to_long_sat(self) -> long3 {
-    return uchar3::to_long(min(self, uchar3::broadcast(std::i64::MAX as u8)));
+    return uchar3::to_long(min(self, broadcast(std::i64::MAX as u8)));
   }
 
   #[inline(always)]
@@ -175,11 +175,6 @@ impl uchar3 {
     assert_eq!(std::mem::size_of::<T>(), std::mem::size_of::<Self>());
 
     return unsafe { std::mem::transmute_copy(&x) };
-  }
-
-  #[inline]
-  pub fn broadcast(x: u8) -> Self {
-    return uchar3(x, x, x);
   }
 
   #[inline]

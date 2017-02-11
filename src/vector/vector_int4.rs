@@ -57,22 +57,22 @@ impl Vector for int4 {
 
   #[inline(always)]
   fn to_char_sat(self) -> char4 {
-    return int4::to_char(clamp(self, int4::broadcast(std::i8::MIN as i32), int4::broadcast(std::i8::MAX as i32)));
+    return int4::to_char(clamp(self, broadcast(std::i8::MIN as i32), broadcast(std::i8::MAX as i32)));
   }
 
   #[inline(always)]
   fn to_uchar_sat(self) -> uchar4 {
-    return int4::to_uchar(clamp(self, int4::broadcast(std::u8::MIN as i32), int4::broadcast(std::u8::MAX as i32)));
+    return int4::to_uchar(clamp(self, broadcast(std::u8::MIN as i32), broadcast(std::u8::MAX as i32)));
   }
 
   #[inline(always)]
   fn to_short_sat(self) -> short4 {
-    return int4::to_short(clamp(self, int4::broadcast(std::i16::MIN as i32), int4::broadcast(std::i16::MAX as i32)));
+    return int4::to_short(clamp(self, broadcast(std::i16::MIN as i32), broadcast(std::i16::MAX as i32)));
   }
 
   #[inline(always)]
   fn to_ushort_sat(self) -> ushort4 {
-    return int4::to_ushort(clamp(self, int4::broadcast(std::u16::MIN as i32), int4::broadcast(std::u16::MAX as i32)));
+    return int4::to_ushort(clamp(self, broadcast(std::u16::MIN as i32), broadcast(std::u16::MAX as i32)));
   }
 
   #[inline(always)]
@@ -82,7 +82,7 @@ impl Vector for int4 {
 
   #[inline(always)]
   fn to_uint_sat(self) -> uint4 {
-    return int4::to_uint(max(self, int4::broadcast(0)));
+    return int4::to_uint(max(self, Self::ZERO));
   }
 
   #[inline(always)]
@@ -92,7 +92,7 @@ impl Vector for int4 {
 
   #[inline(always)]
   fn to_ulong_sat(self) -> ulong4 {
-    return int4::to_ulong(max(self, int4::broadcast(0)));
+    return int4::to_ulong(max(self, Self::ZERO));
   }
 }
 
@@ -173,11 +173,6 @@ impl int4 {
     assert_eq!(std::mem::size_of::<T>(), std::mem::size_of::<Self>());
 
     return unsafe { std::mem::transmute_copy(&x) };
-  }
-
-  #[inline]
-  pub fn broadcast(x: i32) -> Self {
-    return int4(x, x, x, x);
   }
 
   #[inline]

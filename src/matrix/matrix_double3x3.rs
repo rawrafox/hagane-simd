@@ -76,15 +76,15 @@ impl double3x3 {
 
   #[inline]
   pub fn scale(a: f64, x: double3x3) -> double3x3 {
-    let a = double3::broadcast(a);
+    let a: double3 = a.broadcast();
 
     return double3x3(a * x.0, a * x.1, a * x.2);
   }
 
   #[inline]
   pub fn linear_combination(a: f64, x: double3x3, b: f64, y: double3x3) -> double3x3 {
-    let a = double3::broadcast(a);
-    let b = double3::broadcast(b);
+    let a: double3 = a.broadcast();
+    let b: double3 = b.broadcast();
     return double3x3(a * x.0 + b * y.0, a * x.1 + b * y.1, a * x.2 + b * y.2);
   }
 

@@ -7,16 +7,16 @@ require "bridge/output"
 module Bridge
   class SIMD
     TYPES = [
-      { size: 1, max_width: 4, type: 'i8', opencl: 'char', kind: %i(signed integer), bool: "char" },
-      { size: 1, max_width: 4, type: 'u8', opencl: 'uchar', kind: %i(unsigned integer), bool: "char" },
-      { size: 2, max_width: 4, type: 'i16', opencl: "short", kind: %i(signed integer), bool: "short" },
-      { size: 2, max_width: 4, type: 'u16', opencl: "ushort", kind: %i(unsigned integer), bool: "short" },
-      { size: 4, max_width: 4, type: 'i32', opencl: "int", kind: %i(signed integer), bool: "int" },
-      { size: 4, max_width: 4, type: 'u32', opencl: "uint", kind: %i(unsigned integer), bool: "int" },
-      { size: 4, max_width: 4, type: 'f32', opencl: "float", kind: %i(float), bool: "int", max_matrix_size: 4 },
-      { size: 8, max_width: 4, type: 'i64', opencl: "long", kind: %i(signed integer), bool: "long" },
-      { size: 8, max_width: 4, type: 'u64', opencl: "ulong", kind: %i(unsigned integer), bool: "long"  },
-      { size: 8, max_width: 4, type: 'f64', opencl: "double", kind: %i(float), bool: "long", max_matrix_size: 4 }
+      { size: 1, max_width: 16, type: 'i8', opencl: 'char', kind: %i(signed integer), bool: "char" },
+      { size: 1, max_width: 16, type: 'u8', opencl: 'uchar', kind: %i(unsigned integer), bool: "char" },
+      { size: 2, max_width: 16, type: 'i16', opencl: "short", kind: %i(signed integer), bool: "short" },
+      { size: 2, max_width: 16, type: 'u16', opencl: "ushort", kind: %i(unsigned integer), bool: "short" },
+      { size: 4, max_width: 16, type: 'i32', opencl: "int", kind: %i(signed integer), bool: "int" },
+      { size: 4, max_width: 16, type: 'u32', opencl: "uint", kind: %i(unsigned integer), bool: "int" },
+      { size: 4, max_width: 16, type: 'f32', opencl: "float", kind: %i(float), bool: "int", max_matrix_size: 4 },
+      { size: 8, max_width: 16, type: 'i64', opencl: "long", kind: %i(signed integer), bool: "long" },
+      { size: 8, max_width: 16, type: 'u64', opencl: "ulong", kind: %i(unsigned integer), bool: "long"  },
+      { size: 8, max_width: 16, type: 'f64', opencl: "double", kind: %i(float), bool: "long", max_matrix_size: 4 }
     ]
 
     TYPES_BY_NAME = TYPES.map { |x| [x[:opencl], x] }.to_h
@@ -78,7 +78,9 @@ module Bridge
 
                 o.puts("return (self ^ mask) - mask;", pad: true)
               elsif kind.include?(:float)
-                o.puts("return bitselect(#{bool_name}::broadcast(std::#{TYPES_BY_NAME[bool][:type]}::MAX), #{name}::broadcast(0.0), self);")
+                o.puts("let x: Self::Boolean = std::#{TYPES_BY_NAME[bool][:type]}::MAX.broadcast();", pad: true)
+
+                o.puts("return x.bitselect(Self::ZERO, self);", pad: true)
               else
                 o.puts("return self;")
               end
@@ -208,7 +210,9 @@ module Bridge
             o.block("impl Float for #{name}", pad: true) do |o|
               o.puts("#[inline(always)]", pad: true)
               o.block("fn copysign(self, magnitude: Self) -> Self") do |o|
-                o.puts("return bitselect(#{bool_name}::broadcast(std::#{TYPES_BY_NAME[bool][:type]}::MAX), magnitude, self);")
+                o.puts("let x: Self::Boolean = std::#{TYPES_BY_NAME[bool][:type]}::MAX.broadcast();", pad: true)
+
+                o.puts("return x.bitselect(magnitude, self);", pad: true)
               end
 
               o.puts("#[inline(always)]", pad: true)
@@ -247,11 +251,6 @@ module Bridge
               end
 
               o.puts("#[inline(always)]", pad: true)
-              o.block("fn step(self, edge: Self) -> Self") do |o|
-                o.puts("return bitselect(lt(self, edge), #{name}::broadcast(1.0), #{name}::broadcast(0.0));")
-              end
-
-              o.puts("#[inline(always)]", pad: true)
               o.block("fn sin(self) -> Self") do |o|
                 result = width.times.map { |i| "self.#{i}.sin()" }.join(", ")
 
@@ -286,7 +285,9 @@ module Bridge
 
               o.puts("#[inline(always)]", pad: true)
               o.block("fn normalize(self) -> Self") do |o|
-                o.puts("return self * rsqrt(#{name}::broadcast(self.length_squared()));")
+                o.puts("let x: Self = self.length_squared().broadcast();", pad: true)
+
+                o.puts("return self * x.rsqrt();", pad: true)
               end
 
               o.puts("#[inline(always)]", pad: true)
@@ -299,7 +300,7 @@ module Bridge
                 o.puts("let dp = self.dot(n);", pad: true)
                 o.puts("let k = 1.0 - eta * eta * (1.0 - dp * dp);")
 
-                o.puts("return if k >= 0.0 { eta * self - (eta * dp + k.sqrt()) } else { #{name}::broadcast(0.0) };", pad: true)
+                o.puts("return if k >= 0.0 { eta * self - (eta * dp + k.sqrt()) } else { Self::ZERO };", pad: true)
               end
             end
           end
@@ -384,11 +385,6 @@ module Bridge
               o.puts("assert_eq!(std::mem::size_of::<T>(), std::mem::size_of::<Self>());")
               o.puts
               o.puts("return unsafe { std::mem::transmute_copy(&x) };")
-            end
-
-            o.puts("#[inline]", pad: true)
-            o.block("pub fn broadcast(x: #{scalar}) -> Self") do |o|
-              o.puts("return #{name}(#{(["x"] * width).join(", ")});")
             end
 
             # Swizzles
@@ -570,15 +566,15 @@ module Bridge
 
               o.puts("#[inline]", pad: true)
               o.block("pub fn scale(a: #{scalar}, x: #{name}) -> #{name}") do |o|
-                o.puts("let a = #{vector_name}::broadcast(a);")
+                o.puts("let a: #{vector_name} = a.broadcast();")
                 o.puts
                 o.puts("return #{name}(#{j.times.map { |k| "a * x.#{k}" }.join(", ")});")
               end
 
               o.puts("#[inline]", pad: true)
               o.block("pub fn linear_combination(a: #{scalar}, x: #{name}, b: #{scalar}, y: #{name}) -> #{name}") do |o|
-                o.puts("let a = #{vector_name}::broadcast(a);")
-                o.puts("let b = #{vector_name}::broadcast(b);")
+                o.puts("let a: #{vector_name} = a.broadcast();")
+                o.puts("let b: #{vector_name} = b.broadcast();")
 
                 o.puts("return #{name}(#{j.times.map { |k| "a * x.#{k} + b * y.#{k}" }.join(", ")});")
               end
@@ -658,15 +654,15 @@ module Bridge
       if saturate
         o.puts("#[inline(always)]", pad: true)
         o.block("fn to_#{out_type}_sat(self) -> #{out_name}") do |o|
-          min = "#{in_name}::broadcast(std::#{out_scalar}::MIN as #{in_scalar})"
-          max = "#{in_name}::broadcast(std::#{out_scalar}::MAX as #{in_scalar})"
+          min = "broadcast(std::#{out_scalar}::MIN as #{in_scalar})"
+          max = "broadcast(std::#{out_scalar}::MAX as #{in_scalar})"
 
           if in_scalar == out_scalar
             o.puts("return self;")
           elsif in_kind == out_kind && in_size < out_size
             o.puts("return #{in_name}::to_#{out_type}(self);")
           elsif in_kind.include?(:signed) && out_kind.include?(:unsigned) && in_size <= out_size
-            o.puts("return #{in_name}::to_#{out_type}(max(self, #{in_name}::broadcast(0)));")
+            o.puts("return #{in_name}::to_#{out_type}(max(self, Self::ZERO));")
           elsif in_kind.include?(:unsigned)
             o.puts("return #{in_name}::to_#{out_type}(min(self, #{max}));")
           else

@@ -76,15 +76,15 @@ impl float3x3 {
 
   #[inline]
   pub fn scale(a: f32, x: float3x3) -> float3x3 {
-    let a = float3::broadcast(a);
+    let a: float3 = a.broadcast();
 
     return float3x3(a * x.0, a * x.1, a * x.2);
   }
 
   #[inline]
   pub fn linear_combination(a: f32, x: float3x3, b: f32, y: float3x3) -> float3x3 {
-    let a = float3::broadcast(a);
-    let b = float3::broadcast(b);
+    let a: float3 = a.broadcast();
+    let b: float3 = b.broadcast();
     return float3x3(a * x.0 + b * y.0, a * x.1 + b * y.1, a * x.2 + b * y.2);
   }
 

@@ -1,11 +1,17 @@
 macro_rules! declare_vector {
-  ($name2:ident, $name3:ident, $name4:ident, $scalar:ident, $kind:ident) => (
+  ($name2:ident, $name3:ident, $name4:ident, $name8:ident, $name16:ident, $scalar:ident, $kind:ident) => (
     #[repr(C)]
     #[repr(simd)]
     #[derive(Copy, Clone, Debug)]
     pub struct $name2(pub $scalar, pub $scalar);
 
     impl_vector!($name2, $scalar, $kind);
+
+    impl Broadcast<$name2> for $scalar  {
+      fn broadcast(self) -> $name2 {
+        return $name2(self, self);
+      }
+    }
 
     #[repr(C)]
     #[repr(simd)]
@@ -14,12 +20,50 @@ macro_rules! declare_vector {
 
     impl_vector!($name3, $scalar, $kind);
 
+    impl Broadcast<$name3> for $scalar  {
+      fn broadcast(self) -> $name3 {
+        return $name3(self, self, self);
+      }
+    }
+
     #[repr(C)]
     #[repr(simd)]
     #[derive(Copy, Clone, Debug)]
     pub struct $name4(pub $scalar, pub $scalar, pub $scalar, pub $scalar);
 
     impl_vector!($name4, $scalar, $kind);
+
+    impl Broadcast<$name4> for $scalar  {
+      fn broadcast(self) -> $name4 {
+        return $name4(self, self, self, self);
+      }
+    }
+
+    #[repr(C)]
+    #[repr(simd)]
+    #[derive(Copy, Clone, Debug)]
+    pub struct $name8(pub $scalar, pub $scalar, pub $scalar, pub $scalar, pub $scalar, pub $scalar, pub $scalar, pub $scalar);
+
+    impl_vector!($name8, $scalar, $kind);
+
+    impl Broadcast<$name8> for $scalar  {
+      fn broadcast(self) -> $name8 {
+        return $name8(self, self, self, self, self, self, self, self);
+      }
+    }
+
+    #[repr(C)]
+    #[repr(simd)]
+    #[derive(Copy, Clone, Debug)]
+    pub struct $name16(pub $scalar, pub $scalar, pub $scalar, pub $scalar, pub $scalar, pub $scalar, pub $scalar, pub $scalar, pub $scalar, pub $scalar, pub $scalar, pub $scalar, pub $scalar, pub $scalar, pub $scalar, pub $scalar);
+
+    impl_vector!($name16, $scalar, $kind);
+
+    impl Broadcast<$name16> for $scalar  {
+      fn broadcast(self) -> $name16 {
+        return $name16(self, self, self, self, self, self, self, self, self, self, self, self, self, self, self, self);
+      }
+    }
   );
 }
 
@@ -39,7 +83,7 @@ macro_rules! impl_trait {
 
       #[inline]
       fn $fn_name(self, other: $scalar) -> Self {
-        return unsafe { $intrinsic(self, $vector::broadcast(other)) };
+        return unsafe { $intrinsic(self, broadcast(other)) };
       }
     }
 
@@ -48,7 +92,7 @@ macro_rules! impl_trait {
 
       #[inline]
       fn $fn_name(self, other: $vector) -> $vector {
-        return unsafe { $intrinsic($vector::broadcast(self), other) };
+        return unsafe { $intrinsic(broadcast(self), other) };
       }
     }
   }
@@ -61,10 +105,10 @@ macro_rules! impl_vector {
     impl_trait!($vector, $scalar, simd_and, BitAnd, bitand);
     impl_trait!($vector, $scalar, simd_or, BitOr, bitor);
     impl_trait!($vector, $scalar, simd_xor, BitXor, bitxor);
-    
+
     impl_trait!($vector, $scalar, simd_shl, Shl, shl);
     impl_trait!($vector, $scalar, simd_shr, Shr, shr);
-    
+
   };
   ($vector:ident, $scalar:ident, signed) => {
     impl_vector!($vector, $scalar, integer);

@@ -62,7 +62,7 @@ impl Vector for char3 {
 
   #[inline(always)]
   fn to_uchar_sat(self) -> uchar3 {
-    return char3::to_uchar(max(self, char3::broadcast(0)));
+    return char3::to_uchar(max(self, Self::ZERO));
   }
 
   #[inline(always)]
@@ -82,7 +82,7 @@ impl Vector for char3 {
 
   #[inline(always)]
   fn to_ushort_sat(self) -> ushort3 {
-    return char3::to_ushort(max(self, char3::broadcast(0)));
+    return char3::to_ushort(max(self, Self::ZERO));
   }
 
   #[inline(always)]
@@ -102,7 +102,7 @@ impl Vector for char3 {
 
   #[inline(always)]
   fn to_uint_sat(self) -> uint3 {
-    return char3::to_uint(max(self, char3::broadcast(0)));
+    return char3::to_uint(max(self, Self::ZERO));
   }
 
   #[inline(always)]
@@ -127,7 +127,7 @@ impl Vector for char3 {
 
   #[inline(always)]
   fn to_ulong_sat(self) -> ulong3 {
-    return char3::to_ulong(max(self, char3::broadcast(0)));
+    return char3::to_ulong(max(self, Self::ZERO));
   }
 
   #[inline(always)]
@@ -201,11 +201,6 @@ impl char3 {
     assert_eq!(std::mem::size_of::<T>(), std::mem::size_of::<Self>());
 
     return unsafe { std::mem::transmute_copy(&x) };
-  }
-
-  #[inline]
-  pub fn broadcast(x: i8) -> Self {
-    return char3(x, x, x);
   }
 
   #[inline]

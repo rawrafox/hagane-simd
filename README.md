@@ -18,9 +18,6 @@ This is a TODO list, a check means that it is "done".
    - [ ] Vector and scalars constructors (blocked on compiler)
    - [ ] Vector and vector constructors (blocked on compiler)
    - [ ] Arbitrary mix constructors (blocked on compiler)
-   - [ ] Widths
-     - [ ] 8
-     - [ ] 16
    - [ ] Swizzling (partially blocked on compiler)
      - [ ] `xyzw` specifier
      - [ ] `rgba` specifier

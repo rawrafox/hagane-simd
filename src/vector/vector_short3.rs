@@ -57,12 +57,12 @@ impl Vector for short3 {
 
   #[inline(always)]
   fn to_char_sat(self) -> char3 {
-    return short3::to_char(clamp(self, short3::broadcast(std::i8::MIN as i16), short3::broadcast(std::i8::MAX as i16)));
+    return short3::to_char(clamp(self, broadcast(std::i8::MIN as i16), broadcast(std::i8::MAX as i16)));
   }
 
   #[inline(always)]
   fn to_uchar_sat(self) -> uchar3 {
-    return short3::to_uchar(clamp(self, short3::broadcast(std::u8::MIN as i16), short3::broadcast(std::u8::MAX as i16)));
+    return short3::to_uchar(clamp(self, broadcast(std::u8::MIN as i16), broadcast(std::u8::MAX as i16)));
   }
 
   #[inline(always)]
@@ -72,7 +72,7 @@ impl Vector for short3 {
 
   #[inline(always)]
   fn to_ushort_sat(self) -> ushort3 {
-    return short3::to_ushort(max(self, short3::broadcast(0)));
+    return short3::to_ushort(max(self, Self::ZERO));
   }
 
   #[inline(always)]
@@ -92,7 +92,7 @@ impl Vector for short3 {
 
   #[inline(always)]
   fn to_uint_sat(self) -> uint3 {
-    return short3::to_uint(max(self, short3::broadcast(0)));
+    return short3::to_uint(max(self, Self::ZERO));
   }
 
   #[inline(always)]
@@ -117,7 +117,7 @@ impl Vector for short3 {
 
   #[inline(always)]
   fn to_ulong_sat(self) -> ulong3 {
-    return short3::to_ulong(max(self, short3::broadcast(0)));
+    return short3::to_ulong(max(self, Self::ZERO));
   }
 
   #[inline(always)]
@@ -191,11 +191,6 @@ impl short3 {
     assert_eq!(std::mem::size_of::<T>(), std::mem::size_of::<Self>());
 
     return unsafe { std::mem::transmute_copy(&x) };
-  }
-
-  #[inline]
-  pub fn broadcast(x: i16) -> Self {
-    return short3(x, x, x);
   }
 
   #[inline]

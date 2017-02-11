@@ -55,37 +55,37 @@ impl Vector for ulong4 {
 
   #[inline(always)]
   fn to_char_sat(self) -> char4 {
-    return ulong4::to_char(min(self, ulong4::broadcast(std::i8::MAX as u64)));
+    return ulong4::to_char(min(self, broadcast(std::i8::MAX as u64)));
   }
 
   #[inline(always)]
   fn to_uchar_sat(self) -> uchar4 {
-    return ulong4::to_uchar(min(self, ulong4::broadcast(std::u8::MAX as u64)));
+    return ulong4::to_uchar(min(self, broadcast(std::u8::MAX as u64)));
   }
 
   #[inline(always)]
   fn to_short_sat(self) -> short4 {
-    return ulong4::to_short(min(self, ulong4::broadcast(std::i16::MAX as u64)));
+    return ulong4::to_short(min(self, broadcast(std::i16::MAX as u64)));
   }
 
   #[inline(always)]
   fn to_ushort_sat(self) -> ushort4 {
-    return ulong4::to_ushort(min(self, ulong4::broadcast(std::u16::MAX as u64)));
+    return ulong4::to_ushort(min(self, broadcast(std::u16::MAX as u64)));
   }
 
   #[inline(always)]
   fn to_int_sat(self) -> int4 {
-    return ulong4::to_int(min(self, ulong4::broadcast(std::i32::MAX as u64)));
+    return ulong4::to_int(min(self, broadcast(std::i32::MAX as u64)));
   }
 
   #[inline(always)]
   fn to_uint_sat(self) -> uint4 {
-    return ulong4::to_uint(min(self, ulong4::broadcast(std::u32::MAX as u64)));
+    return ulong4::to_uint(min(self, broadcast(std::u32::MAX as u64)));
   }
 
   #[inline(always)]
   fn to_long_sat(self) -> long4 {
-    return ulong4::to_long(min(self, ulong4::broadcast(std::i64::MAX as u64)));
+    return ulong4::to_long(min(self, broadcast(std::i64::MAX as u64)));
   }
 
   #[inline(always)]
@@ -135,11 +135,6 @@ impl ulong4 {
     assert_eq!(std::mem::size_of::<T>(), std::mem::size_of::<Self>());
 
     return unsafe { std::mem::transmute_copy(&x) };
-  }
-
-  #[inline]
-  pub fn broadcast(x: u64) -> Self {
-    return ulong4(x, x, x, x);
   }
 
   #[inline]

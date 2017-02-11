@@ -31,15 +31,15 @@ impl std::ops::Mul<f32> for float2x4 {
 impl float2x4 {
   #[inline]
   pub fn scale(a: f32, x: float2x4) -> float2x4 {
-    let a = float4::broadcast(a);
+    let a: float4 = a.broadcast();
 
     return float2x4(a * x.0, a * x.1);
   }
 
   #[inline]
   pub fn linear_combination(a: f32, x: float2x4, b: f32, y: float2x4) -> float2x4 {
-    let a = float4::broadcast(a);
-    let b = float4::broadcast(b);
+    let a: float4 = a.broadcast();
+    let b: float4 = b.broadcast();
     return float2x4(a * x.0 + b * y.0, a * x.1 + b * y.1);
   }
 

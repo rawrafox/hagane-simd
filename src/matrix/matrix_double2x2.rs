@@ -76,15 +76,15 @@ impl double2x2 {
 
   #[inline]
   pub fn scale(a: f64, x: double2x2) -> double2x2 {
-    let a = double2::broadcast(a);
+    let a: double2 = a.broadcast();
 
     return double2x2(a * x.0, a * x.1);
   }
 
   #[inline]
   pub fn linear_combination(a: f64, x: double2x2, b: f64, y: double2x2) -> double2x2 {
-    let a = double2::broadcast(a);
-    let b = double2::broadcast(b);
+    let a: double2 = a.broadcast();
+    let b: double2 = b.broadcast();
     return double2x2(a * x.0 + b * y.0, a * x.1 + b * y.1);
   }
 

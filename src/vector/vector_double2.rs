@@ -25,7 +25,9 @@ impl Vector for double2 {
 
   #[inline(always)]
   fn abs(self) -> Self {
-    return bitselect(long2::broadcast(std::i64::MAX), double2::broadcast(0.0), self);
+    let x: Self::Boolean = std::i64::MAX.broadcast();
+
+    return x.bitselect(Self::ZERO, self);
   }
 
   #[inline(always)]
@@ -55,42 +57,42 @@ impl Vector for double2 {
 
   #[inline(always)]
   fn to_char_sat(self) -> char2 {
-    return double2::to_char(clamp(self, double2::broadcast(std::i8::MIN as f64), double2::broadcast(std::i8::MAX as f64)));
+    return double2::to_char(clamp(self, broadcast(std::i8::MIN as f64), broadcast(std::i8::MAX as f64)));
   }
 
   #[inline(always)]
   fn to_uchar_sat(self) -> uchar2 {
-    return double2::to_uchar(clamp(self, double2::broadcast(std::u8::MIN as f64), double2::broadcast(std::u8::MAX as f64)));
+    return double2::to_uchar(clamp(self, broadcast(std::u8::MIN as f64), broadcast(std::u8::MAX as f64)));
   }
 
   #[inline(always)]
   fn to_short_sat(self) -> short2 {
-    return double2::to_short(clamp(self, double2::broadcast(std::i16::MIN as f64), double2::broadcast(std::i16::MAX as f64)));
+    return double2::to_short(clamp(self, broadcast(std::i16::MIN as f64), broadcast(std::i16::MAX as f64)));
   }
 
   #[inline(always)]
   fn to_ushort_sat(self) -> ushort2 {
-    return double2::to_ushort(clamp(self, double2::broadcast(std::u16::MIN as f64), double2::broadcast(std::u16::MAX as f64)));
+    return double2::to_ushort(clamp(self, broadcast(std::u16::MIN as f64), broadcast(std::u16::MAX as f64)));
   }
 
   #[inline(always)]
   fn to_int_sat(self) -> int2 {
-    return double2::to_int(clamp(self, double2::broadcast(std::i32::MIN as f64), double2::broadcast(std::i32::MAX as f64)));
+    return double2::to_int(clamp(self, broadcast(std::i32::MIN as f64), broadcast(std::i32::MAX as f64)));
   }
 
   #[inline(always)]
   fn to_uint_sat(self) -> uint2 {
-    return double2::to_uint(clamp(self, double2::broadcast(std::u32::MIN as f64), double2::broadcast(std::u32::MAX as f64)));
+    return double2::to_uint(clamp(self, broadcast(std::u32::MIN as f64), broadcast(std::u32::MAX as f64)));
   }
 
   #[inline(always)]
   fn to_long_sat(self) -> long2 {
-    return double2::to_long(clamp(self, double2::broadcast(std::i64::MIN as f64), double2::broadcast(std::i64::MAX as f64)));
+    return double2::to_long(clamp(self, broadcast(std::i64::MIN as f64), broadcast(std::i64::MAX as f64)));
   }
 
   #[inline(always)]
   fn to_ulong_sat(self) -> ulong2 {
-    return double2::to_ulong(clamp(self, double2::broadcast(std::u64::MIN as f64), double2::broadcast(std::u64::MAX as f64)));
+    return double2::to_ulong(clamp(self, broadcast(std::u64::MIN as f64), broadcast(std::u64::MAX as f64)));
   }
 }
 
@@ -114,7 +116,9 @@ impl Dot<double2> for double2 {
 impl Float for double2 {
   #[inline(always)]
   fn copysign(self, magnitude: Self) -> Self {
-    return bitselect(long2::broadcast(std::i64::MAX), magnitude, self);
+    let x: Self::Boolean = std::i64::MAX.broadcast();
+
+    return x.bitselect(magnitude, self);
   }
 
   #[inline(always)]
@@ -140,11 +144,6 @@ impl Float for double2 {
   #[inline(always)]
   fn trunc(self) -> Self {
     return double2(self.0.trunc(), self.1.trunc());
-  }
-
-  #[inline(always)]
-  fn step(self, edge: Self) -> Self {
-    return bitselect(lt(self, edge), double2::broadcast(1.0), double2::broadcast(0.0));
   }
 
   #[inline(always)]
@@ -176,7 +175,9 @@ impl Geometry for double2 {
 
   #[inline(always)]
   fn normalize(self) -> Self {
-    return self * rsqrt(double2::broadcast(self.length_squared()));
+    let x: Self = self.length_squared().broadcast();
+
+    return self * x.rsqrt();
   }
 
   #[inline(always)]
@@ -189,7 +190,7 @@ impl Geometry for double2 {
     let dp = self.dot(n);
     let k = 1.0 - eta * eta * (1.0 - dp * dp);
 
-    return if k >= 0.0 { eta * self - (eta * dp + k.sqrt()) } else { double2::broadcast(0.0) };
+    return if k >= 0.0 { eta * self - (eta * dp + k.sqrt()) } else { Self::ZERO };
   }
 }
 
@@ -199,11 +200,6 @@ impl double2 {
     assert_eq!(std::mem::size_of::<T>(), std::mem::size_of::<Self>());
 
     return unsafe { std::mem::transmute_copy(&x) };
-  }
-
-  #[inline]
-  pub fn broadcast(x: f64) -> Self {
-    return double2(x, x);
   }
 
   #[inline]

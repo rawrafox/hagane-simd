@@ -76,15 +76,15 @@ impl float2x2 {
 
   #[inline]
   pub fn scale(a: f32, x: float2x2) -> float2x2 {
-    let a = float2::broadcast(a);
+    let a: float2 = a.broadcast();
 
     return float2x2(a * x.0, a * x.1);
   }
 
   #[inline]
   pub fn linear_combination(a: f32, x: float2x2, b: f32, y: float2x2) -> float2x2 {
-    let a = float2::broadcast(a);
-    let b = float2::broadcast(b);
+    let a: float2 = a.broadcast();
+    let b: float2 = b.broadcast();
     return float2x2(a * x.0 + b * y.0, a * x.1 + b * y.1);
   }
 

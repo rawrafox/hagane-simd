@@ -57,32 +57,32 @@ impl Vector for long2 {
 
   #[inline(always)]
   fn to_char_sat(self) -> char2 {
-    return long2::to_char(clamp(self, long2::broadcast(std::i8::MIN as i64), long2::broadcast(std::i8::MAX as i64)));
+    return long2::to_char(clamp(self, broadcast(std::i8::MIN as i64), broadcast(std::i8::MAX as i64)));
   }
 
   #[inline(always)]
   fn to_uchar_sat(self) -> uchar2 {
-    return long2::to_uchar(clamp(self, long2::broadcast(std::u8::MIN as i64), long2::broadcast(std::u8::MAX as i64)));
+    return long2::to_uchar(clamp(self, broadcast(std::u8::MIN as i64), broadcast(std::u8::MAX as i64)));
   }
 
   #[inline(always)]
   fn to_short_sat(self) -> short2 {
-    return long2::to_short(clamp(self, long2::broadcast(std::i16::MIN as i64), long2::broadcast(std::i16::MAX as i64)));
+    return long2::to_short(clamp(self, broadcast(std::i16::MIN as i64), broadcast(std::i16::MAX as i64)));
   }
 
   #[inline(always)]
   fn to_ushort_sat(self) -> ushort2 {
-    return long2::to_ushort(clamp(self, long2::broadcast(std::u16::MIN as i64), long2::broadcast(std::u16::MAX as i64)));
+    return long2::to_ushort(clamp(self, broadcast(std::u16::MIN as i64), broadcast(std::u16::MAX as i64)));
   }
 
   #[inline(always)]
   fn to_int_sat(self) -> int2 {
-    return long2::to_int(clamp(self, long2::broadcast(std::i32::MIN as i64), long2::broadcast(std::i32::MAX as i64)));
+    return long2::to_int(clamp(self, broadcast(std::i32::MIN as i64), broadcast(std::i32::MAX as i64)));
   }
 
   #[inline(always)]
   fn to_uint_sat(self) -> uint2 {
-    return long2::to_uint(clamp(self, long2::broadcast(std::u32::MIN as i64), long2::broadcast(std::u32::MAX as i64)));
+    return long2::to_uint(clamp(self, broadcast(std::u32::MIN as i64), broadcast(std::u32::MAX as i64)));
   }
 
   #[inline(always)]
@@ -92,7 +92,7 @@ impl Vector for long2 {
 
   #[inline(always)]
   fn to_ulong_sat(self) -> ulong2 {
-    return long2::to_ulong(max(self, long2::broadcast(0)));
+    return long2::to_ulong(max(self, Self::ZERO));
   }
 }
 
@@ -173,11 +173,6 @@ impl long2 {
     assert_eq!(std::mem::size_of::<T>(), std::mem::size_of::<Self>());
 
     return unsafe { std::mem::transmute_copy(&x) };
-  }
-
-  #[inline]
-  pub fn broadcast(x: i64) -> Self {
-    return long2(x, x);
   }
 
   #[inline]
