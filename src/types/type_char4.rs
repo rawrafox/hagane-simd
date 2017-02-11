@@ -308,6 +308,15 @@ impl PartialEq for char4 {
 impl simd::Vector for char4 {
 }
 
+impl simd::Dot for char4 {
+  type Output = i8;
+
+  #[inline]
+  fn dot(self, other: char4) -> i8 {
+    return char4::reduce_add(self * other);
+  }
+}
+
 impl simd::Logic for char4 {
   #[inline(always)]
   fn all(self) -> bool {
@@ -320,12 +329,27 @@ impl simd::Logic for char4 {
   }
 }
 
-impl simd::Dot for char4 {
-  type Output = i8;
+impl simd::Select<char4> for char4 {
+  #[inline(always)]
+  fn select(self, a: char4, b: char4) -> char4 {
+    return (self >> 7).bitselect(a, b);
+  }
 
-  #[inline]
-  fn dot(self, other: char4) -> i8 {
-    return char4::reduce_add(self * other);
+  #[inline(always)]
+  fn bitselect(self, a: char4, b: char4) -> char4 {
+    return (x & !z) | (y & z);
+  }
+}
+
+impl simd::Select<uchar4> for char4 {
+  #[inline(always)]
+  fn select(self, a: uchar4, b: uchar4) -> uchar4 {
+    return (self >> 7).bitselect(a, b);
+  }
+
+  #[inline(always)]
+  fn bitselect(self, a: uchar4, b: uchar4) -> uchar4 {
+    return uchar4::bitcast(self.bitselect(char4::bitcast(x), char4::bitcast(y)));
   }
 }
 
@@ -421,11 +445,6 @@ impl char4 {
   #[inline]
   pub fn reduce_max(x: char4) -> i8 {
     return char2::reduce_max(char2::max(x.lo(), x.hi()));
-  }
-
-  #[inline]
-  pub fn bitselect(x: char4, y: char4, z: char4) -> char4 {
-    return (x & !z) | (y & z);
   }
 
   #[inline]

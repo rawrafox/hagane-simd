@@ -308,6 +308,15 @@ impl PartialEq for ushort4 {
 impl simd::Vector for ushort4 {
 }
 
+impl simd::Dot for ushort4 {
+  type Output = u16;
+
+  #[inline]
+  fn dot(self, other: ushort4) -> u16 {
+    return ushort4::reduce_add(self * other);
+  }
+}
+
 impl simd::Logic for ushort4 {
   #[inline(always)]
   fn all(self) -> bool {
@@ -317,15 +326,6 @@ impl simd::Logic for ushort4 {
   #[inline(always)]
   fn any(self) -> bool {
     return (self.0 | self.1 | self.2 | self.3) & 0x8000 != 0;
-  }
-}
-
-impl simd::Dot for ushort4 {
-  type Output = u16;
-
-  #[inline]
-  fn dot(self, other: ushort4) -> u16 {
-    return ushort4::reduce_add(self * other);
   }
 }
 
@@ -420,11 +420,6 @@ impl ushort4 {
   #[inline]
   pub fn reduce_max(x: ushort4) -> u16 {
     return ushort2::reduce_max(ushort2::max(x.lo(), x.hi()));
-  }
-
-  #[inline]
-  pub fn bitselect(x: ushort4, y: ushort4, z: short4) -> ushort4 {
-    return ushort4::bitcast(short4::bitselect(short4::bitcast(x), short4::bitcast(y), z));
   }
 
   #[inline]

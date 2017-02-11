@@ -308,6 +308,15 @@ impl PartialEq for int3 {
 impl simd::Vector for int3 {
 }
 
+impl simd::Dot for int3 {
+  type Output = i32;
+
+  #[inline]
+  fn dot(self, other: int3) -> i32 {
+    return int3::reduce_add(self * other);
+  }
+}
+
 impl simd::Logic for int3 {
   #[inline(always)]
   fn all(self) -> bool {
@@ -320,12 +329,39 @@ impl simd::Logic for int3 {
   }
 }
 
-impl simd::Dot for int3 {
-  type Output = i32;
+impl simd::Select<int3> for int3 {
+  #[inline(always)]
+  fn select(self, a: int3, b: int3) -> int3 {
+    return (self >> 31).bitselect(a, b);
+  }
 
-  #[inline]
-  fn dot(self, other: int3) -> i32 {
-    return int3::reduce_add(self * other);
+  #[inline(always)]
+  fn bitselect(self, a: int3, b: int3) -> int3 {
+    return (x & !z) | (y & z);
+  }
+}
+
+impl simd::Select<uint3> for int3 {
+  #[inline(always)]
+  fn select(self, a: uint3, b: uint3) -> uint3 {
+    return (self >> 31).bitselect(a, b);
+  }
+
+  #[inline(always)]
+  fn bitselect(self, a: uint3, b: uint3) -> uint3 {
+    return uint3::bitcast(self.bitselect(int3::bitcast(x), int3::bitcast(y)));
+  }
+}
+
+impl simd::Select<float3> for int3 {
+  #[inline(always)]
+  fn select(self, a: float3, b: float3) -> float3 {
+    return (self >> 31).bitselect(a, b);
+  }
+
+  #[inline(always)]
+  fn bitselect(self, a: float3, b: float3) -> float3 {
+    return float3::bitcast(self.bitselect(int3::bitcast(x), int3::bitcast(y)));
   }
 }
 
@@ -421,11 +457,6 @@ impl int3 {
   #[inline]
   pub fn reduce_max(x: int3) -> i32 {
     return std::cmp::max(int2::reduce_max(x.lo()), x.2);
-  }
-
-  #[inline]
-  pub fn bitselect(x: int3, y: int3, z: int3) -> int3 {
-    return (x & !z) | (y & z);
   }
 
   #[inline]

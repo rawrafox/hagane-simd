@@ -333,16 +333,6 @@ impl double3 {
   }
 
   #[inline]
-  pub fn select(x: double3, y: double3, z: long3) -> double3 {
-    return double3::bitselect(x, y, z >> 63);
-  }
-
-  #[inline]
-  pub fn bitselect(x: double3, y: double3, z: long3) -> double3 {
-    return double3::bitcast(long3::bitselect(long3::bitcast(x), long3::bitcast(y), z));
-  }
-
-  #[inline]
   pub fn dot(x: double3, y: double3) -> f64 {
     return double3::reduce_add(x * y);
   }

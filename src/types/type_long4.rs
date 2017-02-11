@@ -308,6 +308,15 @@ impl PartialEq for long4 {
 impl simd::Vector for long4 {
 }
 
+impl simd::Dot for long4 {
+  type Output = i64;
+
+  #[inline]
+  fn dot(self, other: long4) -> i64 {
+    return long4::reduce_add(self * other);
+  }
+}
+
 impl simd::Logic for long4 {
   #[inline(always)]
   fn all(self) -> bool {
@@ -320,12 +329,39 @@ impl simd::Logic for long4 {
   }
 }
 
-impl simd::Dot for long4 {
-  type Output = i64;
+impl simd::Select<long4> for long4 {
+  #[inline(always)]
+  fn select(self, a: long4, b: long4) -> long4 {
+    return (self >> 63).bitselect(a, b);
+  }
 
-  #[inline]
-  fn dot(self, other: long4) -> i64 {
-    return long4::reduce_add(self * other);
+  #[inline(always)]
+  fn bitselect(self, a: long4, b: long4) -> long4 {
+    return (x & !z) | (y & z);
+  }
+}
+
+impl simd::Select<ulong4> for long4 {
+  #[inline(always)]
+  fn select(self, a: ulong4, b: ulong4) -> ulong4 {
+    return (self >> 63).bitselect(a, b);
+  }
+
+  #[inline(always)]
+  fn bitselect(self, a: ulong4, b: ulong4) -> ulong4 {
+    return ulong4::bitcast(self.bitselect(long4::bitcast(x), long4::bitcast(y)));
+  }
+}
+
+impl simd::Select<double4> for long4 {
+  #[inline(always)]
+  fn select(self, a: double4, b: double4) -> double4 {
+    return (self >> 63).bitselect(a, b);
+  }
+
+  #[inline(always)]
+  fn bitselect(self, a: double4, b: double4) -> double4 {
+    return double4::bitcast(self.bitselect(long4::bitcast(x), long4::bitcast(y)));
   }
 }
 
@@ -421,11 +457,6 @@ impl long4 {
   #[inline]
   pub fn reduce_max(x: long4) -> i64 {
     return long2::reduce_max(long2::max(x.lo(), x.hi()));
-  }
-
-  #[inline]
-  pub fn bitselect(x: long4, y: long4, z: long4) -> long4 {
-    return (x & !z) | (y & z);
   }
 
   #[inline]

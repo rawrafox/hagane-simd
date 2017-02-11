@@ -333,16 +333,6 @@ impl float2 {
   }
 
   #[inline]
-  pub fn select(x: float2, y: float2, z: int2) -> float2 {
-    return float2::bitselect(x, y, z >> 31);
-  }
-
-  #[inline]
-  pub fn bitselect(x: float2, y: float2, z: int2) -> float2 {
-    return float2::bitcast(int2::bitselect(int2::bitcast(x), int2::bitcast(y), z));
-  }
-
-  #[inline]
   pub fn dot(x: float2, y: float2) -> f32 {
     return float2::reduce_add(x * y);
   }

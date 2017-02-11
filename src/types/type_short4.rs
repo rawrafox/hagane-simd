@@ -308,6 +308,15 @@ impl PartialEq for short4 {
 impl simd::Vector for short4 {
 }
 
+impl simd::Dot for short4 {
+  type Output = i16;
+
+  #[inline]
+  fn dot(self, other: short4) -> i16 {
+    return short4::reduce_add(self * other);
+  }
+}
+
 impl simd::Logic for short4 {
   #[inline(always)]
   fn all(self) -> bool {
@@ -320,12 +329,27 @@ impl simd::Logic for short4 {
   }
 }
 
-impl simd::Dot for short4 {
-  type Output = i16;
+impl simd::Select<short4> for short4 {
+  #[inline(always)]
+  fn select(self, a: short4, b: short4) -> short4 {
+    return (self >> 15).bitselect(a, b);
+  }
 
-  #[inline]
-  fn dot(self, other: short4) -> i16 {
-    return short4::reduce_add(self * other);
+  #[inline(always)]
+  fn bitselect(self, a: short4, b: short4) -> short4 {
+    return (x & !z) | (y & z);
+  }
+}
+
+impl simd::Select<ushort4> for short4 {
+  #[inline(always)]
+  fn select(self, a: ushort4, b: ushort4) -> ushort4 {
+    return (self >> 15).bitselect(a, b);
+  }
+
+  #[inline(always)]
+  fn bitselect(self, a: ushort4, b: ushort4) -> ushort4 {
+    return ushort4::bitcast(self.bitselect(short4::bitcast(x), short4::bitcast(y)));
   }
 }
 
@@ -421,11 +445,6 @@ impl short4 {
   #[inline]
   pub fn reduce_max(x: short4) -> i16 {
     return short2::reduce_max(short2::max(x.lo(), x.hi()));
-  }
-
-  #[inline]
-  pub fn bitselect(x: short4, y: short4, z: short4) -> short4 {
-    return (x & !z) | (y & z);
   }
 
   #[inline]

@@ -308,6 +308,15 @@ impl PartialEq for uchar3 {
 impl simd::Vector for uchar3 {
 }
 
+impl simd::Dot for uchar3 {
+  type Output = u8;
+
+  #[inline]
+  fn dot(self, other: uchar3) -> u8 {
+    return uchar3::reduce_add(self * other);
+  }
+}
+
 impl simd::Logic for uchar3 {
   #[inline(always)]
   fn all(self) -> bool {
@@ -317,15 +326,6 @@ impl simd::Logic for uchar3 {
   #[inline(always)]
   fn any(self) -> bool {
     return (self.0 | self.1 | self.2) & 0x80 != 0;
-  }
-}
-
-impl simd::Dot for uchar3 {
-  type Output = u8;
-
-  #[inline]
-  fn dot(self, other: uchar3) -> u8 {
-    return uchar3::reduce_add(self * other);
   }
 }
 
@@ -420,11 +420,6 @@ impl uchar3 {
   #[inline]
   pub fn reduce_max(x: uchar3) -> u8 {
     return std::cmp::max(uchar2::reduce_max(x.lo()), x.2);
-  }
-
-  #[inline]
-  pub fn bitselect(x: uchar3, y: uchar3, z: char3) -> uchar3 {
-    return uchar3::bitcast(char3::bitselect(char3::bitcast(x), char3::bitcast(y), z));
   }
 
   #[inline]

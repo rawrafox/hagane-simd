@@ -208,6 +208,15 @@ module Bridge
             o.block("impl simd::Vector for #{name}", pad: true) do |o|
             end
 
+            o.block("impl simd::Dot for #{name}", pad: true) do |o|
+              o.puts("type Output = #{scalar};")
+              o.puts
+              o.puts("#[inline]")
+              o.block("fn dot(self, other: #{name}) -> #{scalar}") do |o|
+                o.puts("return #{name}::reduce_add(self * other);")
+              end
+            end
+
             if kind.include?(:integer)
               o.block("impl simd::Logic for #{name}", pad: true) do |o|
                 constant = kind.include?(:signed) ? "std::#{scalar}::MIN" : "0x8#{"0" * (attributes.fetch(:size) * 2 - 1)}"
@@ -228,12 +237,25 @@ module Bridge
               end
             end
 
-            o.block("impl simd::Dot for #{name}", pad: true) do |o|
-              o.puts("type Output = #{scalar};")
-              o.puts
-              o.puts("#[inline]")
-              o.block("fn dot(self, other: #{name}) -> #{scalar}") do |o|
-                o.puts("return #{name}::reduce_add(self * other);")
+            if kind.include?(:signed)
+              TYPES.select { |t| t.fetch(:bool) == type }.each do |other|
+                other_name = "#{other.fetch(:opencl)}#{width}"
+
+                o.block("impl simd::Select<#{other_name}> for #{name}", pad: true) do |o|
+                  o.puts("#[inline(always)]", pad: true)
+                  o.block("fn select(self, a: #{other_name}, b: #{other_name}) -> #{other_name}") do |o|
+                    o.puts("return (self >> #{attributes.fetch(:size) * 8 - 1}).bitselect(a, b);")
+                  end
+
+                  o.puts("#[inline(always)]", pad: true)
+                  o.block("fn bitselect(self, a: #{other_name}, b: #{other_name}) -> #{other_name}") do |o|
+                    if name == other_name
+                      o.puts("return (a & !self) | (b & self);")
+                    else
+                      o.puts("return #{other_name}::bitcast(self.bitselect(#{bool_name}::bitcast(a), #{bool_name}::bitcast(b)));")
+                    end
+                  end
+                end
               end
             end
 
@@ -485,27 +507,6 @@ module Bridge
                   o.puts("return #{name}(#{result});")
                 end
 
-              end
-
-              # Logic
-
-              if kind.include?(:float)
-                o.puts("#[inline]", pad: true)
-                o.block("pub fn select(x: #{name}, y: #{name}, z: #{bool_name}) -> #{name}") do |o|
-                  o.puts("return #{name}::bitselect(x, y, z >> #{attributes.fetch(:size) * 8 - 1});")
-                end
-              end
-
-              if kind.include?(:signed)
-                o.puts("#[inline]", pad: true)
-                o.block("pub fn bitselect(x: #{name}, y: #{name}, z: #{bool_name}) -> #{name}") do |o|
-                  o.puts("return (x & !z) | (y & z);")
-                end
-              else
-                o.puts("#[inline]", pad: true)
-                o.block("pub fn bitselect(x: #{name}, y: #{name}, z: #{bool_name}) -> #{name}") do |o|
-                  o.puts("return #{name}::bitcast(#{bool_name}::bitselect(#{bool_name}::bitcast(x), #{bool_name}::bitcast(y), z));")
-                end
               end
 
               # Geometry

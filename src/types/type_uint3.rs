@@ -308,6 +308,15 @@ impl PartialEq for uint3 {
 impl simd::Vector for uint3 {
 }
 
+impl simd::Dot for uint3 {
+  type Output = u32;
+
+  #[inline]
+  fn dot(self, other: uint3) -> u32 {
+    return uint3::reduce_add(self * other);
+  }
+}
+
 impl simd::Logic for uint3 {
   #[inline(always)]
   fn all(self) -> bool {
@@ -317,15 +326,6 @@ impl simd::Logic for uint3 {
   #[inline(always)]
   fn any(self) -> bool {
     return (self.0 | self.1 | self.2) & 0x80000000 != 0;
-  }
-}
-
-impl simd::Dot for uint3 {
-  type Output = u32;
-
-  #[inline]
-  fn dot(self, other: uint3) -> u32 {
-    return uint3::reduce_add(self * other);
   }
 }
 
@@ -420,11 +420,6 @@ impl uint3 {
   #[inline]
   pub fn reduce_max(x: uint3) -> u32 {
     return std::cmp::max(uint2::reduce_max(x.lo()), x.2);
-  }
-
-  #[inline]
-  pub fn bitselect(x: uint3, y: uint3, z: int3) -> uint3 {
-    return uint3::bitcast(int3::bitselect(int3::bitcast(x), int3::bitcast(y), z));
   }
 
   #[inline]

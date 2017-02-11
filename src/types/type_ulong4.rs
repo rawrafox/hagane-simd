@@ -308,6 +308,15 @@ impl PartialEq for ulong4 {
 impl simd::Vector for ulong4 {
 }
 
+impl simd::Dot for ulong4 {
+  type Output = u64;
+
+  #[inline]
+  fn dot(self, other: ulong4) -> u64 {
+    return ulong4::reduce_add(self * other);
+  }
+}
+
 impl simd::Logic for ulong4 {
   #[inline(always)]
   fn all(self) -> bool {
@@ -317,15 +326,6 @@ impl simd::Logic for ulong4 {
   #[inline(always)]
   fn any(self) -> bool {
     return (self.0 | self.1 | self.2 | self.3) & 0x8000000000000000 != 0;
-  }
-}
-
-impl simd::Dot for ulong4 {
-  type Output = u64;
-
-  #[inline]
-  fn dot(self, other: ulong4) -> u64 {
-    return ulong4::reduce_add(self * other);
   }
 }
 
@@ -420,11 +420,6 @@ impl ulong4 {
   #[inline]
   pub fn reduce_max(x: ulong4) -> u64 {
     return ulong2::reduce_max(ulong2::max(x.lo(), x.hi()));
-  }
-
-  #[inline]
-  pub fn bitselect(x: ulong4, y: ulong4, z: long4) -> ulong4 {
-    return ulong4::bitcast(long4::bitselect(long4::bitcast(x), long4::bitcast(y), z));
   }
 
   #[inline]

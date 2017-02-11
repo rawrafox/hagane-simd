@@ -146,9 +146,9 @@ pub mod objc;
 
 pub mod simd {
   pub trait Vector : Sized {
-    
+
   }
-  
+
   pub trait Common : Vector {
     fn abs(self) -> Self;
     fn max(self, other: Self) -> Self;
@@ -276,27 +276,27 @@ pub mod simd {
   pub fn norm_one<T: Geometry>(x: T) -> T::Scalar {
     return x.norm_one();
   }
-  
+
   #[inline(always)]
   pub fn norm_inf<T: Geometry>(x: T) -> T::Scalar {
     return x.norm_inf();
   }
-  
+
   #[inline(always)]
   pub fn distance<T: Geometry>(x: T, y: T) -> T::Scalar {
     return x.distance(y);
   }
-  
+
   #[inline(always)]
   pub fn distance_squared<T: Geometry>(x: T, y: T) -> T::Scalar {
     return x.distance_squared(y);
   }
-  
+
   #[inline(always)]
   pub fn normalize<T: Geometry>(x: T) -> T {
     return x.normalize();
   }
-  
+
   #[inline(always)]
   pub fn reflect<T: Geometry>(x: T, n: T) -> T {
     return x.reflect(n);
@@ -322,21 +322,6 @@ pub mod simd {
     return x.any();
   }
 
-  pub trait Select<T> : Logic {
-    fn select(self, a: T, b: T) -> T;
-    fn bitselect(self, a: T, b: T) -> T;
-  }
-
-  #[inline(always)]
-  pub fn select<T, B: Select<T>>(condition: B, a: T, b: T) -> T {
-    return condition.select(a, b);
-  }
-
-  #[inline(always)]
-  pub fn bitselect<T, B: Select<T>>(condition: B, a: T, b: T) -> T {
-    return condition.bitselect(a, b);
-  }
-
   pub trait Reduction : Vector {
     type Output;
 
@@ -358,5 +343,20 @@ pub mod simd {
   #[inline(always)]
   pub fn reduce_min<T: Reduction>(x: T) -> T::Output {
     return x.reduce_min();
+  }
+
+  pub trait Select<T> : Logic {
+    fn select(self, a: T, b: T) -> T;
+    fn bitselect(self, a: T, b: T) -> T;
+  }
+
+  #[inline(always)]
+  pub fn select<T, B: Select<T>>(condition: B, a: T, b: T) -> T {
+    return condition.select(a, b);
+  }
+
+  #[inline(always)]
+  pub fn bitselect<T, B: Select<T>>(condition: B, a: T, b: T) -> T {
+    return condition.bitselect(a, b);
   }
 }

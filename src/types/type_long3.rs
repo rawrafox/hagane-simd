@@ -308,6 +308,15 @@ impl PartialEq for long3 {
 impl simd::Vector for long3 {
 }
 
+impl simd::Dot for long3 {
+  type Output = i64;
+
+  #[inline]
+  fn dot(self, other: long3) -> i64 {
+    return long3::reduce_add(self * other);
+  }
+}
+
 impl simd::Logic for long3 {
   #[inline(always)]
   fn all(self) -> bool {
@@ -320,12 +329,39 @@ impl simd::Logic for long3 {
   }
 }
 
-impl simd::Dot for long3 {
-  type Output = i64;
+impl simd::Select<long3> for long3 {
+  #[inline(always)]
+  fn select(self, a: long3, b: long3) -> long3 {
+    return (self >> 63).bitselect(a, b);
+  }
 
-  #[inline]
-  fn dot(self, other: long3) -> i64 {
-    return long3::reduce_add(self * other);
+  #[inline(always)]
+  fn bitselect(self, a: long3, b: long3) -> long3 {
+    return (x & !z) | (y & z);
+  }
+}
+
+impl simd::Select<ulong3> for long3 {
+  #[inline(always)]
+  fn select(self, a: ulong3, b: ulong3) -> ulong3 {
+    return (self >> 63).bitselect(a, b);
+  }
+
+  #[inline(always)]
+  fn bitselect(self, a: ulong3, b: ulong3) -> ulong3 {
+    return ulong3::bitcast(self.bitselect(long3::bitcast(x), long3::bitcast(y)));
+  }
+}
+
+impl simd::Select<double3> for long3 {
+  #[inline(always)]
+  fn select(self, a: double3, b: double3) -> double3 {
+    return (self >> 63).bitselect(a, b);
+  }
+
+  #[inline(always)]
+  fn bitselect(self, a: double3, b: double3) -> double3 {
+    return double3::bitcast(self.bitselect(long3::bitcast(x), long3::bitcast(y)));
   }
 }
 
@@ -421,11 +457,6 @@ impl long3 {
   #[inline]
   pub fn reduce_max(x: long3) -> i64 {
     return std::cmp::max(long2::reduce_max(x.lo()), x.2);
-  }
-
-  #[inline]
-  pub fn bitselect(x: long3, y: long3, z: long3) -> long3 {
-    return (x & !z) | (y & z);
   }
 
   #[inline]
