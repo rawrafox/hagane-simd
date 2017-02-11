@@ -1,7 +1,7 @@
 use std;
 use ::*;
 
-impl simd::Vector for uchar3 {
+impl Vector for uchar3 {
   type Scalar = u8;
   type Boolean = char3;
 
@@ -25,12 +25,12 @@ impl simd::Vector for uchar3 {
 
   #[inline(always)]
   fn max(self, other: Self) -> Self {
-    return simd::bitselect(simd::gt(other, self), self, other);
+    return bitselect(gt(other, self), self, other);
   }
 
   #[inline(always)]
   fn min(self, other: Self) -> Self {
-    return simd::bitselect(simd::lt(other, self), self, other);
+    return bitselect(lt(other, self), self, other);
   }
 
   #[inline(always)]
@@ -40,17 +40,17 @@ impl simd::Vector for uchar3 {
 
   #[inline(always)]
   fn reduce_min(self) -> Self::Scalar {
-    return std::cmp::min(simd::reduce_min(self.lo()), self.2);
+    return std::cmp::min(reduce_min(self.lo()), self.2);
   }
 
   #[inline(always)]
   fn reduce_max(self) -> Self::Scalar {
-    return std::cmp::max(simd::reduce_max(self.lo()), self.2);
+    return std::cmp::max(reduce_max(self.lo()), self.2);
   }
 
   #[inline(always)]
   fn to_char_sat(self) -> char3 {
-    return uchar3::to_char(simd::min(self, uchar3::broadcast(std::i8::MAX as u8)));
+    return uchar3::to_char(min(self, uchar3::broadcast(std::i8::MAX as u8)));
   }
 
   #[inline(always)]
@@ -65,7 +65,7 @@ impl simd::Vector for uchar3 {
 
   #[inline(always)]
   fn to_short_sat(self) -> short3 {
-    return uchar3::to_short(simd::min(self, uchar3::broadcast(std::i16::MAX as u8)));
+    return uchar3::to_short(min(self, uchar3::broadcast(std::i16::MAX as u8)));
   }
 
   #[inline(always)]
@@ -85,7 +85,7 @@ impl simd::Vector for uchar3 {
 
   #[inline(always)]
   fn to_int_sat(self) -> int3 {
-    return uchar3::to_int(simd::min(self, uchar3::broadcast(std::i32::MAX as u8)));
+    return uchar3::to_int(min(self, uchar3::broadcast(std::i32::MAX as u8)));
   }
 
   #[inline(always)]
@@ -110,7 +110,7 @@ impl simd::Vector for uchar3 {
 
   #[inline(always)]
   fn to_long_sat(self) -> long3 {
-    return uchar3::to_long(simd::min(self, uchar3::broadcast(std::i64::MAX as u8)));
+    return uchar3::to_long(min(self, uchar3::broadcast(std::i64::MAX as u8)));
   }
 
   #[inline(always)]
@@ -129,15 +129,15 @@ impl simd::Vector for uchar3 {
   }
 }
 
-impl simd::Dot for uchar3 {
+impl Dot for uchar3 {
   type DotProduct = u8;
   #[inline(always)]
   fn dot(self, other: Self) -> Self::DotProduct {
-    return simd::reduce_add(self * other);
+    return reduce_add(self * other);
   }
 }
 
-impl simd::Integer for uchar3 {
+impl Integer for uchar3 {
   #[inline(always)]
   fn reduce_and(self) -> Self::Scalar {
     return self.0 & self.1 & self.2

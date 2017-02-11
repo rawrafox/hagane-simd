@@ -1,7 +1,7 @@
 use std;
 use ::*;
 
-impl simd::Vector for long3 {
+impl Vector for long3 {
   type Scalar = i64;
   type Boolean = long3;
 
@@ -21,17 +21,18 @@ impl simd::Vector for long3 {
   #[inline(always)]
   fn abs(self) -> Self {
     let mask = self >> 63;
+
     return (self ^ mask) - mask;
   }
 
   #[inline(always)]
   fn max(self, other: Self) -> Self {
-    return simd::bitselect(simd::gt(other, self), self, other);
+    return bitselect(gt(other, self), self, other);
   }
 
   #[inline(always)]
   fn min(self, other: Self) -> Self {
-    return simd::bitselect(simd::lt(other, self), self, other);
+    return bitselect(lt(other, self), self, other);
   }
 
   #[inline(always)]
@@ -41,42 +42,42 @@ impl simd::Vector for long3 {
 
   #[inline(always)]
   fn reduce_min(self) -> Self::Scalar {
-    return std::cmp::min(simd::reduce_min(self.lo()), self.2);
+    return std::cmp::min(reduce_min(self.lo()), self.2);
   }
 
   #[inline(always)]
   fn reduce_max(self) -> Self::Scalar {
-    return std::cmp::max(simd::reduce_max(self.lo()), self.2);
+    return std::cmp::max(reduce_max(self.lo()), self.2);
   }
 
   #[inline(always)]
   fn to_char_sat(self) -> char3 {
-    return long3::to_char(simd::clamp(self, long3::broadcast(std::i8::MIN as i64), long3::broadcast(std::i8::MAX as i64)));
+    return long3::to_char(clamp(self, long3::broadcast(std::i8::MIN as i64), long3::broadcast(std::i8::MAX as i64)));
   }
 
   #[inline(always)]
   fn to_uchar_sat(self) -> uchar3 {
-    return long3::to_uchar(simd::clamp(self, long3::broadcast(std::u8::MIN as i64), long3::broadcast(std::u8::MAX as i64)));
+    return long3::to_uchar(clamp(self, long3::broadcast(std::u8::MIN as i64), long3::broadcast(std::u8::MAX as i64)));
   }
 
   #[inline(always)]
   fn to_short_sat(self) -> short3 {
-    return long3::to_short(simd::clamp(self, long3::broadcast(std::i16::MIN as i64), long3::broadcast(std::i16::MAX as i64)));
+    return long3::to_short(clamp(self, long3::broadcast(std::i16::MIN as i64), long3::broadcast(std::i16::MAX as i64)));
   }
 
   #[inline(always)]
   fn to_ushort_sat(self) -> ushort3 {
-    return long3::to_ushort(simd::clamp(self, long3::broadcast(std::u16::MIN as i64), long3::broadcast(std::u16::MAX as i64)));
+    return long3::to_ushort(clamp(self, long3::broadcast(std::u16::MIN as i64), long3::broadcast(std::u16::MAX as i64)));
   }
 
   #[inline(always)]
   fn to_int_sat(self) -> int3 {
-    return long3::to_int(simd::clamp(self, long3::broadcast(std::i32::MIN as i64), long3::broadcast(std::i32::MAX as i64)));
+    return long3::to_int(clamp(self, long3::broadcast(std::i32::MIN as i64), long3::broadcast(std::i32::MAX as i64)));
   }
 
   #[inline(always)]
   fn to_uint_sat(self) -> uint3 {
-    return long3::to_uint(simd::clamp(self, long3::broadcast(std::u32::MIN as i64), long3::broadcast(std::u32::MAX as i64)));
+    return long3::to_uint(clamp(self, long3::broadcast(std::u32::MIN as i64), long3::broadcast(std::u32::MAX as i64)));
   }
 
   #[inline(always)]
@@ -86,19 +87,19 @@ impl simd::Vector for long3 {
 
   #[inline(always)]
   fn to_ulong_sat(self) -> ulong3 {
-    return long3::to_ulong(simd::max(self, long3::broadcast(0)));
+    return long3::to_ulong(max(self, long3::broadcast(0)));
   }
 }
 
-impl simd::Dot for long3 {
+impl Dot for long3 {
   type DotProduct = i64;
   #[inline(always)]
   fn dot(self, other: Self) -> Self::DotProduct {
-    return simd::reduce_add(self * other);
+    return reduce_add(self * other);
   }
 }
 
-impl simd::Integer for long3 {
+impl Integer for long3 {
   #[inline(always)]
   fn reduce_and(self) -> Self::Scalar {
     return self.0 & self.1 & self.2
@@ -125,7 +126,7 @@ impl simd::Integer for long3 {
   }
 }
 
-impl simd::Select<long3> for long3 {
+impl Select<long3> for long3 {
   #[inline(always)]
   fn select(self, a: long3, b: long3) -> long3 {
     return (self >> 63).bitselect(a, b);
@@ -137,7 +138,7 @@ impl simd::Select<long3> for long3 {
   }
 }
 
-impl simd::Select<ulong3> for long3 {
+impl Select<ulong3> for long3 {
   #[inline(always)]
   fn select(self, a: ulong3, b: ulong3) -> ulong3 {
     return (self >> 63).bitselect(a, b);
@@ -149,7 +150,7 @@ impl simd::Select<ulong3> for long3 {
   }
 }
 
-impl simd::Select<double3> for long3 {
+impl Select<double3> for long3 {
   #[inline(always)]
   fn select(self, a: double3, b: double3) -> double3 {
     return (self >> 63).bitselect(a, b);

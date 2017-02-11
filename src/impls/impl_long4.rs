@@ -1,7 +1,7 @@
 use std;
 use ::*;
 
-impl simd::Vector for long4 {
+impl Vector for long4 {
   type Scalar = i64;
   type Boolean = long4;
 
@@ -21,62 +21,63 @@ impl simd::Vector for long4 {
   #[inline(always)]
   fn abs(self) -> Self {
     let mask = self >> 63;
+
     return (self ^ mask) - mask;
   }
 
   #[inline(always)]
   fn max(self, other: Self) -> Self {
-    return simd::bitselect(simd::gt(other, self), self, other);
+    return bitselect(gt(other, self), self, other);
   }
 
   #[inline(always)]
   fn min(self, other: Self) -> Self {
-    return simd::bitselect(simd::lt(other, self), self, other);
+    return bitselect(lt(other, self), self, other);
   }
 
   #[inline(always)]
   fn reduce_add(self) -> Self::Scalar {
-    return simd::reduce_add(self.lo() + self.hi());
+    return reduce_add(self.lo() + self.hi());
   }
 
   #[inline(always)]
   fn reduce_min(self) -> Self::Scalar {
-    return simd::reduce_min(simd::min(self.lo(), self.hi()));
+    return reduce_min(min(self.lo(), self.hi()));
   }
 
   #[inline(always)]
   fn reduce_max(self) -> Self::Scalar {
-    return simd::reduce_max(simd::max(self.lo(), self.hi()));
+    return reduce_max(max(self.lo(), self.hi()));
   }
 
   #[inline(always)]
   fn to_char_sat(self) -> char4 {
-    return long4::to_char(simd::clamp(self, long4::broadcast(std::i8::MIN as i64), long4::broadcast(std::i8::MAX as i64)));
+    return long4::to_char(clamp(self, long4::broadcast(std::i8::MIN as i64), long4::broadcast(std::i8::MAX as i64)));
   }
 
   #[inline(always)]
   fn to_uchar_sat(self) -> uchar4 {
-    return long4::to_uchar(simd::clamp(self, long4::broadcast(std::u8::MIN as i64), long4::broadcast(std::u8::MAX as i64)));
+    return long4::to_uchar(clamp(self, long4::broadcast(std::u8::MIN as i64), long4::broadcast(std::u8::MAX as i64)));
   }
 
   #[inline(always)]
   fn to_short_sat(self) -> short4 {
-    return long4::to_short(simd::clamp(self, long4::broadcast(std::i16::MIN as i64), long4::broadcast(std::i16::MAX as i64)));
+    return long4::to_short(clamp(self, long4::broadcast(std::i16::MIN as i64), long4::broadcast(std::i16::MAX as i64)));
   }
 
   #[inline(always)]
   fn to_ushort_sat(self) -> ushort4 {
-    return long4::to_ushort(simd::clamp(self, long4::broadcast(std::u16::MIN as i64), long4::broadcast(std::u16::MAX as i64)));
+    return long4::to_ushort(clamp(self, long4::broadcast(std::u16::MIN as i64), long4::broadcast(std::u16::MAX as i64)));
   }
 
   #[inline(always)]
   fn to_int_sat(self) -> int4 {
-    return long4::to_int(simd::clamp(self, long4::broadcast(std::i32::MIN as i64), long4::broadcast(std::i32::MAX as i64)));
+    return long4::to_int(clamp(self, long4::broadcast(std::i32::MIN as i64), long4::broadcast(std::i32::MAX as i64)));
   }
 
   #[inline(always)]
   fn to_uint_sat(self) -> uint4 {
-    return long4::to_uint(simd::clamp(self, long4::broadcast(std::u32::MIN as i64), long4::broadcast(std::u32::MAX as i64)));
+    return long4::to_uint(clamp(self, long4::broadcast(std::u32::MIN as i64), long4::broadcast(std::u32::MAX as i64)));
   }
 
   #[inline(always)]
@@ -86,19 +87,19 @@ impl simd::Vector for long4 {
 
   #[inline(always)]
   fn to_ulong_sat(self) -> ulong4 {
-    return long4::to_ulong(simd::max(self, long4::broadcast(0)));
+    return long4::to_ulong(max(self, long4::broadcast(0)));
   }
 }
 
-impl simd::Dot for long4 {
+impl Dot for long4 {
   type DotProduct = i64;
   #[inline(always)]
   fn dot(self, other: Self) -> Self::DotProduct {
-    return simd::reduce_add(self * other);
+    return reduce_add(self * other);
   }
 }
 
-impl simd::Integer for long4 {
+impl Integer for long4 {
   #[inline(always)]
   fn reduce_and(self) -> Self::Scalar {
     return (self.lo() & self.hi()).reduce_and();
@@ -125,7 +126,7 @@ impl simd::Integer for long4 {
   }
 }
 
-impl simd::Select<long4> for long4 {
+impl Select<long4> for long4 {
   #[inline(always)]
   fn select(self, a: long4, b: long4) -> long4 {
     return (self >> 63).bitselect(a, b);
@@ -137,7 +138,7 @@ impl simd::Select<long4> for long4 {
   }
 }
 
-impl simd::Select<ulong4> for long4 {
+impl Select<ulong4> for long4 {
   #[inline(always)]
   fn select(self, a: ulong4, b: ulong4) -> ulong4 {
     return (self >> 63).bitselect(a, b);
@@ -149,7 +150,7 @@ impl simd::Select<ulong4> for long4 {
   }
 }
 
-impl simd::Select<double4> for long4 {
+impl Select<double4> for long4 {
   #[inline(always)]
   fn select(self, a: double4, b: double4) -> double4 {
     return (self >> 63).bitselect(a, b);

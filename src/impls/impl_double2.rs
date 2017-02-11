@@ -1,7 +1,7 @@
 use std;
 use ::*;
 
-impl simd::Vector for double2 {
+impl Vector for double2 {
   type Scalar = f64;
   type Boolean = long2;
 
@@ -20,7 +20,7 @@ impl simd::Vector for double2 {
 
   #[inline(always)]
   fn abs(self) -> Self {
-    return simd::bitselect(long2::broadcast(std::i64::MAX), double2::broadcast(0.0), self);
+    return bitselect(long2::broadcast(std::i64::MAX), double2::broadcast(0.0), self);
   }
 
   #[inline(always)]
@@ -50,46 +50,46 @@ impl simd::Vector for double2 {
 
   #[inline(always)]
   fn to_char_sat(self) -> char2 {
-    return double2::to_char(simd::clamp(self, double2::broadcast(std::i8::MIN as f64), double2::broadcast(std::i8::MAX as f64)));
+    return double2::to_char(clamp(self, double2::broadcast(std::i8::MIN as f64), double2::broadcast(std::i8::MAX as f64)));
   }
 
   #[inline(always)]
   fn to_uchar_sat(self) -> uchar2 {
-    return double2::to_uchar(simd::clamp(self, double2::broadcast(std::u8::MIN as f64), double2::broadcast(std::u8::MAX as f64)));
+    return double2::to_uchar(clamp(self, double2::broadcast(std::u8::MIN as f64), double2::broadcast(std::u8::MAX as f64)));
   }
 
   #[inline(always)]
   fn to_short_sat(self) -> short2 {
-    return double2::to_short(simd::clamp(self, double2::broadcast(std::i16::MIN as f64), double2::broadcast(std::i16::MAX as f64)));
+    return double2::to_short(clamp(self, double2::broadcast(std::i16::MIN as f64), double2::broadcast(std::i16::MAX as f64)));
   }
 
   #[inline(always)]
   fn to_ushort_sat(self) -> ushort2 {
-    return double2::to_ushort(simd::clamp(self, double2::broadcast(std::u16::MIN as f64), double2::broadcast(std::u16::MAX as f64)));
+    return double2::to_ushort(clamp(self, double2::broadcast(std::u16::MIN as f64), double2::broadcast(std::u16::MAX as f64)));
   }
 
   #[inline(always)]
   fn to_int_sat(self) -> int2 {
-    return double2::to_int(simd::clamp(self, double2::broadcast(std::i32::MIN as f64), double2::broadcast(std::i32::MAX as f64)));
+    return double2::to_int(clamp(self, double2::broadcast(std::i32::MIN as f64), double2::broadcast(std::i32::MAX as f64)));
   }
 
   #[inline(always)]
   fn to_uint_sat(self) -> uint2 {
-    return double2::to_uint(simd::clamp(self, double2::broadcast(std::u32::MIN as f64), double2::broadcast(std::u32::MAX as f64)));
+    return double2::to_uint(clamp(self, double2::broadcast(std::u32::MIN as f64), double2::broadcast(std::u32::MAX as f64)));
   }
 
   #[inline(always)]
   fn to_long_sat(self) -> long2 {
-    return double2::to_long(simd::clamp(self, double2::broadcast(std::i64::MIN as f64), double2::broadcast(std::i64::MAX as f64)));
+    return double2::to_long(clamp(self, double2::broadcast(std::i64::MIN as f64), double2::broadcast(std::i64::MAX as f64)));
   }
 
   #[inline(always)]
   fn to_ulong_sat(self) -> ulong2 {
-    return double2::to_ulong(simd::clamp(self, double2::broadcast(std::u64::MIN as f64), double2::broadcast(std::u64::MAX as f64)));
+    return double2::to_ulong(clamp(self, double2::broadcast(std::u64::MIN as f64), double2::broadcast(std::u64::MAX as f64)));
   }
 }
 
-impl simd::Cross for double2 {
+impl Cross for double2 {
   type CrossProduct = double3;
 
   #[inline(always)]
@@ -98,25 +98,25 @@ impl simd::Cross for double2 {
   }
 }
 
-impl simd::Dot for double2 {
+impl Dot for double2 {
   type DotProduct = f64;
   #[inline(always)]
   fn dot(self, other: Self) -> Self::DotProduct {
-    return simd::reduce_add(self * other);
+    return reduce_add(self * other);
   }
 }
 
-impl simd::Float for double2 {
+impl Float for double2 {
   #[inline(always)]
   fn copysign(self, magnitude: Self) -> Self {
-    return simd::bitselect(long2::broadcast(std::i64::MAX), magnitude, self);
+    return bitselect(long2::broadcast(std::i64::MAX), magnitude, self);
   }
 
   #[inline(always)]
   fn sign(self) -> Self {
     let (zero, one) = (double2::broadcast(0.0), double2::broadcast(1.0));
 
-    return simd::bitselect(simd::eq(self, zero) | simd::ne(self, self), one.copysign(self), zero);
+    return bitselect(eq(self, zero) | ne(self, self), one.copysign(self), zero);
   }
 
   #[inline(always)]
@@ -161,12 +161,12 @@ impl simd::Float for double2 {
 
   #[inline(always)]
   fn step(self, edge: Self) -> Self {
-    return simd::bitselect(simd::lt(self, edge), double2::broadcast(1.0), double2::broadcast(0.0));
+    return bitselect(lt(self, edge), double2::broadcast(1.0), double2::broadcast(0.0));
   }
 
   #[inline(always)]
   fn smoothstep(self, edge0: Self, edge1: Self) -> Self {
-    let t = simd::clamp((self - edge0) / (edge1 - edge0), double2::broadcast(0.0), double2::broadcast(1.0));
+    let t = clamp((self - edge0) / (edge1 - edge0), double2::broadcast(0.0), double2::broadcast(1.0));
 
     return t * t * (3.0 - 2.0 * t);
   }
@@ -182,7 +182,7 @@ impl simd::Float for double2 {
   }
 }
 
-impl simd::Geometry for double2 {
+impl Geometry for double2 {
   #[inline(always)]
   fn project(self, onto: Self) -> Self {
     return (self.dot(onto) / onto.dot(onto)) * onto;
@@ -220,7 +220,7 @@ impl simd::Geometry for double2 {
 
   #[inline(always)]
   fn normalize(self) -> Self {
-    return self * simd::rsqrt(double2::broadcast(self.length_squared()));
+    return self * rsqrt(double2::broadcast(self.length_squared()));
   }
 
   #[inline(always)]

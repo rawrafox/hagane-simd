@@ -1,6 +1,6 @@
 use std;
 use ::*;
-use ::simd::*;
+use ::*;
 
 extern {
   fn __invert_d3(a: double3x3) -> double3x3;
@@ -51,7 +51,7 @@ impl std::ops::Mul<f64> for double3x3 {
   }
 }
 
-impl simd::Dot for double3x3 {
+impl Dot for double3x3 {
   type DotProduct = double3x3;
 
   #[inline]
@@ -60,7 +60,7 @@ impl simd::Dot for double3x3 {
   }
 }
 
-impl simd::Dot<double3> for double3x3 {
+impl Dot<double3> for double3x3 {
   type DotProduct = double3;
 
   #[inline]

@@ -1,7 +1,7 @@
 use std;
 use ::*;
 
-impl simd::Vector for short3 {
+impl Vector for short3 {
   type Scalar = i16;
   type Boolean = short3;
 
@@ -21,17 +21,18 @@ impl simd::Vector for short3 {
   #[inline(always)]
   fn abs(self) -> Self {
     let mask = self >> 15;
+
     return (self ^ mask) - mask;
   }
 
   #[inline(always)]
   fn max(self, other: Self) -> Self {
-    return simd::bitselect(simd::gt(other, self), self, other);
+    return bitselect(gt(other, self), self, other);
   }
 
   #[inline(always)]
   fn min(self, other: Self) -> Self {
-    return simd::bitselect(simd::lt(other, self), self, other);
+    return bitselect(lt(other, self), self, other);
   }
 
   #[inline(always)]
@@ -41,22 +42,22 @@ impl simd::Vector for short3 {
 
   #[inline(always)]
   fn reduce_min(self) -> Self::Scalar {
-    return std::cmp::min(simd::reduce_min(self.lo()), self.2);
+    return std::cmp::min(reduce_min(self.lo()), self.2);
   }
 
   #[inline(always)]
   fn reduce_max(self) -> Self::Scalar {
-    return std::cmp::max(simd::reduce_max(self.lo()), self.2);
+    return std::cmp::max(reduce_max(self.lo()), self.2);
   }
 
   #[inline(always)]
   fn to_char_sat(self) -> char3 {
-    return short3::to_char(simd::clamp(self, short3::broadcast(std::i8::MIN as i16), short3::broadcast(std::i8::MAX as i16)));
+    return short3::to_char(clamp(self, short3::broadcast(std::i8::MIN as i16), short3::broadcast(std::i8::MAX as i16)));
   }
 
   #[inline(always)]
   fn to_uchar_sat(self) -> uchar3 {
-    return short3::to_uchar(simd::clamp(self, short3::broadcast(std::u8::MIN as i16), short3::broadcast(std::u8::MAX as i16)));
+    return short3::to_uchar(clamp(self, short3::broadcast(std::u8::MIN as i16), short3::broadcast(std::u8::MAX as i16)));
   }
 
   #[inline(always)]
@@ -66,7 +67,7 @@ impl simd::Vector for short3 {
 
   #[inline(always)]
   fn to_ushort_sat(self) -> ushort3 {
-    return short3::to_ushort(simd::max(self, short3::broadcast(0)));
+    return short3::to_ushort(max(self, short3::broadcast(0)));
   }
 
   #[inline(always)]
@@ -86,7 +87,7 @@ impl simd::Vector for short3 {
 
   #[inline(always)]
   fn to_uint_sat(self) -> uint3 {
-    return short3::to_uint(simd::max(self, short3::broadcast(0)));
+    return short3::to_uint(max(self, short3::broadcast(0)));
   }
 
   #[inline(always)]
@@ -111,7 +112,7 @@ impl simd::Vector for short3 {
 
   #[inline(always)]
   fn to_ulong_sat(self) -> ulong3 {
-    return short3::to_ulong(simd::max(self, short3::broadcast(0)));
+    return short3::to_ulong(max(self, short3::broadcast(0)));
   }
 
   #[inline(always)]
@@ -120,15 +121,15 @@ impl simd::Vector for short3 {
   }
 }
 
-impl simd::Dot for short3 {
+impl Dot for short3 {
   type DotProduct = i16;
   #[inline(always)]
   fn dot(self, other: Self) -> Self::DotProduct {
-    return simd::reduce_add(self * other);
+    return reduce_add(self * other);
   }
 }
 
-impl simd::Integer for short3 {
+impl Integer for short3 {
   #[inline(always)]
   fn reduce_and(self) -> Self::Scalar {
     return self.0 & self.1 & self.2
@@ -155,7 +156,7 @@ impl simd::Integer for short3 {
   }
 }
 
-impl simd::Select<short3> for short3 {
+impl Select<short3> for short3 {
   #[inline(always)]
   fn select(self, a: short3, b: short3) -> short3 {
     return (self >> 15).bitselect(a, b);
@@ -167,7 +168,7 @@ impl simd::Select<short3> for short3 {
   }
 }
 
-impl simd::Select<ushort3> for short3 {
+impl Select<ushort3> for short3 {
   #[inline(always)]
   fn select(self, a: ushort3, b: ushort3) -> ushort3 {
     return (self >> 15).bitselect(a, b);

@@ -1,7 +1,7 @@
 use std;
 use ::*;
 
-impl simd::Vector for ulong4 {
+impl Vector for ulong4 {
   type Scalar = u64;
   type Boolean = long4;
 
@@ -25,62 +25,62 @@ impl simd::Vector for ulong4 {
 
   #[inline(always)]
   fn max(self, other: Self) -> Self {
-    return simd::bitselect(simd::gt(other, self), self, other);
+    return bitselect(gt(other, self), self, other);
   }
 
   #[inline(always)]
   fn min(self, other: Self) -> Self {
-    return simd::bitselect(simd::lt(other, self), self, other);
+    return bitselect(lt(other, self), self, other);
   }
 
   #[inline(always)]
   fn reduce_add(self) -> Self::Scalar {
-    return simd::reduce_add(self.lo() + self.hi());
+    return reduce_add(self.lo() + self.hi());
   }
 
   #[inline(always)]
   fn reduce_min(self) -> Self::Scalar {
-    return simd::reduce_min(simd::min(self.lo(), self.hi()));
+    return reduce_min(min(self.lo(), self.hi()));
   }
 
   #[inline(always)]
   fn reduce_max(self) -> Self::Scalar {
-    return simd::reduce_max(simd::max(self.lo(), self.hi()));
+    return reduce_max(max(self.lo(), self.hi()));
   }
 
   #[inline(always)]
   fn to_char_sat(self) -> char4 {
-    return ulong4::to_char(simd::min(self, ulong4::broadcast(std::i8::MAX as u64)));
+    return ulong4::to_char(min(self, ulong4::broadcast(std::i8::MAX as u64)));
   }
 
   #[inline(always)]
   fn to_uchar_sat(self) -> uchar4 {
-    return ulong4::to_uchar(simd::min(self, ulong4::broadcast(std::u8::MAX as u64)));
+    return ulong4::to_uchar(min(self, ulong4::broadcast(std::u8::MAX as u64)));
   }
 
   #[inline(always)]
   fn to_short_sat(self) -> short4 {
-    return ulong4::to_short(simd::min(self, ulong4::broadcast(std::i16::MAX as u64)));
+    return ulong4::to_short(min(self, ulong4::broadcast(std::i16::MAX as u64)));
   }
 
   #[inline(always)]
   fn to_ushort_sat(self) -> ushort4 {
-    return ulong4::to_ushort(simd::min(self, ulong4::broadcast(std::u16::MAX as u64)));
+    return ulong4::to_ushort(min(self, ulong4::broadcast(std::u16::MAX as u64)));
   }
 
   #[inline(always)]
   fn to_int_sat(self) -> int4 {
-    return ulong4::to_int(simd::min(self, ulong4::broadcast(std::i32::MAX as u64)));
+    return ulong4::to_int(min(self, ulong4::broadcast(std::i32::MAX as u64)));
   }
 
   #[inline(always)]
   fn to_uint_sat(self) -> uint4 {
-    return ulong4::to_uint(simd::min(self, ulong4::broadcast(std::u32::MAX as u64)));
+    return ulong4::to_uint(min(self, ulong4::broadcast(std::u32::MAX as u64)));
   }
 
   #[inline(always)]
   fn to_long_sat(self) -> long4 {
-    return ulong4::to_long(simd::min(self, ulong4::broadcast(std::i64::MAX as u64)));
+    return ulong4::to_long(min(self, ulong4::broadcast(std::i64::MAX as u64)));
   }
 
   #[inline(always)]
@@ -89,15 +89,15 @@ impl simd::Vector for ulong4 {
   }
 }
 
-impl simd::Dot for ulong4 {
+impl Dot for ulong4 {
   type DotProduct = u64;
   #[inline(always)]
   fn dot(self, other: Self) -> Self::DotProduct {
-    return simd::reduce_add(self * other);
+    return reduce_add(self * other);
   }
 }
 
-impl simd::Integer for ulong4 {
+impl Integer for ulong4 {
   #[inline(always)]
   fn reduce_and(self) -> Self::Scalar {
     return (self.lo() & self.hi()).reduce_and();

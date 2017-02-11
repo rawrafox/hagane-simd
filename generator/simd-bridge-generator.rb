@@ -44,7 +44,7 @@ module Bridge
           o.puts("use std;", pad: true)
           o.puts("use ::*;")
 
-          o.block("impl simd::Vector for #{name}", pad: true) do |o|
+          o.block("impl Vector for #{name}", pad: true) do |o|
             o.puts("type Scalar = #{scalar};", pad: true)
             o.puts("type Boolean = #{bool_name};")
 
@@ -64,11 +64,11 @@ module Bridge
             o.puts("#[inline(always)]", pad: true)
             o.block("fn abs(self) -> Self") do |o|
               if kind.include?(:signed)
-                o.puts("let mask = self >> #{attributes.fetch(:size) * 8 - 1};")
+                o.puts("let mask = self >> #{attributes.fetch(:size) * 8 - 1};", pad: true)
 
-                o.puts("return (self ^ mask) - mask;")
+                o.puts("return (self ^ mask) - mask;", pad: true)
               elsif kind.include?(:float)
-                o.puts("return simd::bitselect(#{bool_name}::broadcast(std::#{TYPES_BY_NAME[bool][:type]}::MAX), #{name}::broadcast(0.0), self);")
+                o.puts("return bitselect(#{bool_name}::broadcast(std::#{TYPES_BY_NAME[bool][:type]}::MAX), #{name}::broadcast(0.0), self);")
               else
                 o.puts("return self;")
               end
@@ -81,7 +81,7 @@ module Bridge
 
                 o.puts("return #{name}(#{result});")
               else
-                o.puts("return simd::bitselect(simd::gt(other, self), self, other);")
+                o.puts("return bitselect(gt(other, self), self, other);")
               end
             end
 
@@ -92,7 +92,7 @@ module Bridge
 
                 o.puts("return #{name}(#{result});")
               else
-                o.puts("return simd::bitselect(simd::lt(other, self), self, other);")
+                o.puts("return bitselect(lt(other, self), self, other);")
               end
             end
 
@@ -104,7 +104,7 @@ module Bridge
               when 3
                 o.puts("return self.0 + self.1 + self.2;")
               else
-                o.puts("return simd::reduce_add(self.lo() + self.hi());")
+                o.puts("return reduce_add(self.lo() + self.hi());")
               end
             end
 
@@ -119,12 +119,12 @@ module Bridge
                 end
               when 3
                 if kind.include?(:float)
-                  o.puts("return self.2.min(simd::reduce_min(self.lo()));")
+                  o.puts("return self.2.min(reduce_min(self.lo()));")
                 else
-                  o.puts("return std::cmp::min(simd::reduce_min(self.lo()), self.2);")
+                  o.puts("return std::cmp::min(reduce_min(self.lo()), self.2);")
                 end
               else
-                o.puts("return simd::reduce_min(simd::min(self.lo(), self.hi()));")
+                o.puts("return reduce_min(min(self.lo(), self.hi()));")
               end
             end
 
@@ -139,12 +139,12 @@ module Bridge
                 end
               when 3
                 if kind.include?(:float)
-                  o.puts("return self.2.max(simd::reduce_max(self.lo()));")
+                  o.puts("return self.2.max(reduce_max(self.lo()));")
                 else
-                  o.puts("return std::cmp::max(simd::reduce_max(self.lo()), self.2);")
+                  o.puts("return std::cmp::max(reduce_max(self.lo()), self.2);")
                 end
               else
-                o.puts("return simd::reduce_max(simd::max(self.lo(), self.hi()));")
+                o.puts("return reduce_max(max(self.lo(), self.hi()));")
               end
             end
 
@@ -169,7 +169,7 @@ module Bridge
           end
 
           if kind.include?(:float) && [2, 3].include?(width)
-            o.block("impl simd::Cross for #{name}", pad: true) do |o|
+            o.block("impl Cross for #{name}", pad: true) do |o|
               o.puts("type CrossProduct = #{type}3;", pad: true)
 
               o.puts("#[inline(always)]", pad: true)
@@ -185,27 +185,27 @@ module Bridge
             end
           end
 
-          o.block("impl simd::Dot for #{name}", pad: true) do |o|
+          o.block("impl Dot for #{name}", pad: true) do |o|
             o.puts("type DotProduct = #{scalar};", pad: true)
 
             o.puts("#[inline(always)]")
             o.block("fn dot(self, other: Self) -> Self::DotProduct") do |o|
-              o.puts("return simd::reduce_add(self * other);")
+              o.puts("return reduce_add(self * other);")
             end
           end
           
           if kind.include?(:float)
-            o.block("impl simd::Float for #{name}", pad: true) do |o|
+            o.block("impl Float for #{name}", pad: true) do |o|
               o.puts("#[inline(always)]", pad: true)
               o.block("fn copysign(self, magnitude: Self) -> Self") do |o|
-                o.puts("return simd::bitselect(#{bool_name}::broadcast(std::#{TYPES_BY_NAME[bool][:type]}::MAX), magnitude, self);")
+                o.puts("return bitselect(#{bool_name}::broadcast(std::#{TYPES_BY_NAME[bool][:type]}::MAX), magnitude, self);")
               end
 
               o.puts("#[inline(always)]", pad: true)
               o.block("fn sign(self) -> Self") do |o|
                 o.puts("let (zero, one) = (#{name}::broadcast(0.0), #{name}::broadcast(1.0));")
                 o.puts
-                o.puts("return simd::bitselect(simd::eq(self, zero) | simd::ne(self, self), one.copysign(self), zero);")
+                o.puts("return bitselect(eq(self, zero) | ne(self, self), one.copysign(self), zero);")
               end
 
               o.puts("#[inline(always)]", pad: true)
@@ -260,12 +260,12 @@ module Bridge
 
               o.puts("#[inline(always)]", pad: true)
               o.block("fn step(self, edge: Self) -> Self") do |o|
-                o.puts("return simd::bitselect(simd::lt(self, edge), #{name}::broadcast(1.0), #{name}::broadcast(0.0));")
+                o.puts("return bitselect(lt(self, edge), #{name}::broadcast(1.0), #{name}::broadcast(0.0));")
               end
 
               o.puts("#[inline(always)]", pad: true)
               o.block("fn smoothstep(self, edge0: Self, edge1: Self) -> Self") do |o|
-                o.puts("let t = simd::clamp((self - edge0) / (edge1 - edge0), #{name}::broadcast(0.0), #{name}::broadcast(1.0));")
+                o.puts("let t = clamp((self - edge0) / (edge1 - edge0), #{name}::broadcast(0.0), #{name}::broadcast(1.0));")
                 o.puts
                 o.puts("return t * t * (3.0 - 2.0 * t);")
               end
@@ -287,7 +287,7 @@ module Bridge
           end
 
           if kind.include?(:float)
-            o.block("impl simd::Geometry for #{name}", pad: true) do |o|
+            o.block("impl Geometry for #{name}", pad: true) do |o|
               o.puts("#[inline(always)]", pad: true)
               o.block("fn project(self, onto: Self) -> Self") do |o|
                 o.puts("return (self.dot(onto) / onto.dot(onto)) * onto;")
@@ -325,7 +325,7 @@ module Bridge
 
               o.puts("#[inline(always)]", pad: true)
               o.block("fn normalize(self) -> Self") do |o|
-                o.puts("return self * simd::rsqrt(#{name}::broadcast(self.length_squared()));")
+                o.puts("return self * rsqrt(#{name}::broadcast(self.length_squared()));")
               end
 
               o.puts("#[inline(always)]", pad: true)
@@ -344,7 +344,7 @@ module Bridge
           end
 
           if kind.include?(:integer)
-            o.block("impl simd::Integer for #{name}", pad: true) do |o|
+            o.block("impl Integer for #{name}", pad: true) do |o|
               o.puts("#[inline(always)]", pad: true)
               o.block("fn reduce_and(self) -> Self::Scalar") do |o|
                 case width
@@ -399,7 +399,7 @@ module Bridge
             TYPES.select { |t| t.fetch(:bool) == type }.each do |other|
               other_name = "#{other.fetch(:opencl)}#{width}"
 
-              o.block("impl simd::Select<#{other_name}> for #{name}", pad: true) do |o|
+              o.block("impl Select<#{other_name}> for #{name}", pad: true) do |o|
                 o.puts("#[inline(always)]", pad: true)
                 o.block("fn select(self, a: #{other_name}, b: #{other_name}) -> #{other_name}") do |o|
                   o.puts("return (self >> #{attributes.fetch(:size) * 8 - 1}).bitselect(a, b);")
@@ -519,7 +519,7 @@ module Bridge
 
             o.puts("use std;", pad: true)
             o.puts("use ::*;")
-            o.puts("use ::simd::*;") if i == j
+            o.puts("use ::*;") if i == j
 
             if i == j
               if ["f32", "f64"].include?(scalar)
@@ -579,7 +579,7 @@ module Bridge
             end
 
             if kind.include?(:float) && i == j
-              o.block("impl simd::Dot for #{name}", pad: true) do |o|
+              o.block("impl Dot for #{name}", pad: true) do |o|
                 o.puts("type DotProduct = #{name};")
                 o.puts
                 o.puts("#[inline]")
@@ -588,7 +588,7 @@ module Bridge
                 end
               end
 
-              o.block("impl simd::Dot<#{vector_name}> for #{name}", pad: true) do |o|
+              o.block("impl Dot<#{vector_name}> for #{name}", pad: true) do |o|
                 o.puts("type DotProduct = #{vector_name};")
                 o.puts
                 o.puts("#[inline]")
@@ -656,7 +656,7 @@ module Bridge
                 end
               end
 
-              # matrix_multiply is expressed via the `simd::Dot` trait
+              # matrix_multiply is expressed via the `Dot` trait
 
               # TODO: o.puts("#[inline]", pad: true)
               #o.block("pub fn equal(x: #{name}, y: #{name}) -> bool") do |o|
@@ -706,11 +706,11 @@ module Bridge
           elsif in_kind == out_kind && in_size < out_size
             o.puts("return #{in_name}::to_#{out_type}(self);")
           elsif in_kind.include?(:signed) && out_kind.include?(:unsigned) && in_size <= out_size
-            o.puts("return #{in_name}::to_#{out_type}(simd::max(self, #{in_name}::broadcast(0)));")
+            o.puts("return #{in_name}::to_#{out_type}(max(self, #{in_name}::broadcast(0)));")
           elsif in_kind.include?(:unsigned)
-            o.puts("return #{in_name}::to_#{out_type}(simd::min(self, #{max}));")
+            o.puts("return #{in_name}::to_#{out_type}(min(self, #{max}));")
           else
-            o.puts("return #{in_name}::to_#{out_type}(simd::clamp(self, #{min}, #{max}));")
+            o.puts("return #{in_name}::to_#{out_type}(clamp(self, #{min}, #{max}));")
           end
         end
       else

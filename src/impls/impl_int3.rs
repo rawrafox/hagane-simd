@@ -1,7 +1,7 @@
 use std;
 use ::*;
 
-impl simd::Vector for int3 {
+impl Vector for int3 {
   type Scalar = i32;
   type Boolean = int3;
 
@@ -21,17 +21,18 @@ impl simd::Vector for int3 {
   #[inline(always)]
   fn abs(self) -> Self {
     let mask = self >> 31;
+
     return (self ^ mask) - mask;
   }
 
   #[inline(always)]
   fn max(self, other: Self) -> Self {
-    return simd::bitselect(simd::gt(other, self), self, other);
+    return bitselect(gt(other, self), self, other);
   }
 
   #[inline(always)]
   fn min(self, other: Self) -> Self {
-    return simd::bitselect(simd::lt(other, self), self, other);
+    return bitselect(lt(other, self), self, other);
   }
 
   #[inline(always)]
@@ -41,32 +42,32 @@ impl simd::Vector for int3 {
 
   #[inline(always)]
   fn reduce_min(self) -> Self::Scalar {
-    return std::cmp::min(simd::reduce_min(self.lo()), self.2);
+    return std::cmp::min(reduce_min(self.lo()), self.2);
   }
 
   #[inline(always)]
   fn reduce_max(self) -> Self::Scalar {
-    return std::cmp::max(simd::reduce_max(self.lo()), self.2);
+    return std::cmp::max(reduce_max(self.lo()), self.2);
   }
 
   #[inline(always)]
   fn to_char_sat(self) -> char3 {
-    return int3::to_char(simd::clamp(self, int3::broadcast(std::i8::MIN as i32), int3::broadcast(std::i8::MAX as i32)));
+    return int3::to_char(clamp(self, int3::broadcast(std::i8::MIN as i32), int3::broadcast(std::i8::MAX as i32)));
   }
 
   #[inline(always)]
   fn to_uchar_sat(self) -> uchar3 {
-    return int3::to_uchar(simd::clamp(self, int3::broadcast(std::u8::MIN as i32), int3::broadcast(std::u8::MAX as i32)));
+    return int3::to_uchar(clamp(self, int3::broadcast(std::u8::MIN as i32), int3::broadcast(std::u8::MAX as i32)));
   }
 
   #[inline(always)]
   fn to_short_sat(self) -> short3 {
-    return int3::to_short(simd::clamp(self, int3::broadcast(std::i16::MIN as i32), int3::broadcast(std::i16::MAX as i32)));
+    return int3::to_short(clamp(self, int3::broadcast(std::i16::MIN as i32), int3::broadcast(std::i16::MAX as i32)));
   }
 
   #[inline(always)]
   fn to_ushort_sat(self) -> ushort3 {
-    return int3::to_ushort(simd::clamp(self, int3::broadcast(std::u16::MIN as i32), int3::broadcast(std::u16::MAX as i32)));
+    return int3::to_ushort(clamp(self, int3::broadcast(std::u16::MIN as i32), int3::broadcast(std::u16::MAX as i32)));
   }
 
   #[inline(always)]
@@ -76,7 +77,7 @@ impl simd::Vector for int3 {
 
   #[inline(always)]
   fn to_uint_sat(self) -> uint3 {
-    return int3::to_uint(simd::max(self, int3::broadcast(0)));
+    return int3::to_uint(max(self, int3::broadcast(0)));
   }
 
   #[inline(always)]
@@ -96,7 +97,7 @@ impl simd::Vector for int3 {
 
   #[inline(always)]
   fn to_ulong_sat(self) -> ulong3 {
-    return int3::to_ulong(simd::max(self, int3::broadcast(0)));
+    return int3::to_ulong(max(self, int3::broadcast(0)));
   }
 
   #[inline(always)]
@@ -105,15 +106,15 @@ impl simd::Vector for int3 {
   }
 }
 
-impl simd::Dot for int3 {
+impl Dot for int3 {
   type DotProduct = i32;
   #[inline(always)]
   fn dot(self, other: Self) -> Self::DotProduct {
-    return simd::reduce_add(self * other);
+    return reduce_add(self * other);
   }
 }
 
-impl simd::Integer for int3 {
+impl Integer for int3 {
   #[inline(always)]
   fn reduce_and(self) -> Self::Scalar {
     return self.0 & self.1 & self.2
@@ -140,7 +141,7 @@ impl simd::Integer for int3 {
   }
 }
 
-impl simd::Select<int3> for int3 {
+impl Select<int3> for int3 {
   #[inline(always)]
   fn select(self, a: int3, b: int3) -> int3 {
     return (self >> 31).bitselect(a, b);
@@ -152,7 +153,7 @@ impl simd::Select<int3> for int3 {
   }
 }
 
-impl simd::Select<uint3> for int3 {
+impl Select<uint3> for int3 {
   #[inline(always)]
   fn select(self, a: uint3, b: uint3) -> uint3 {
     return (self >> 31).bitselect(a, b);
@@ -164,7 +165,7 @@ impl simd::Select<uint3> for int3 {
   }
 }
 
-impl simd::Select<float3> for int3 {
+impl Select<float3> for int3 {
   #[inline(always)]
   fn select(self, a: float3, b: float3) -> float3 {
     return (self >> 31).bitselect(a, b);

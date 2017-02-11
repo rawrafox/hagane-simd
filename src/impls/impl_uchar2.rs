@@ -1,7 +1,7 @@
 use std;
 use ::*;
 
-impl simd::Vector for uchar2 {
+impl Vector for uchar2 {
   type Scalar = u8;
   type Boolean = char2;
 
@@ -25,12 +25,12 @@ impl simd::Vector for uchar2 {
 
   #[inline(always)]
   fn max(self, other: Self) -> Self {
-    return simd::bitselect(simd::gt(other, self), self, other);
+    return bitselect(gt(other, self), self, other);
   }
 
   #[inline(always)]
   fn min(self, other: Self) -> Self {
-    return simd::bitselect(simd::lt(other, self), self, other);
+    return bitselect(lt(other, self), self, other);
   }
 
   #[inline(always)]
@@ -50,7 +50,7 @@ impl simd::Vector for uchar2 {
 
   #[inline(always)]
   fn to_char_sat(self) -> char2 {
-    return uchar2::to_char(simd::min(self, uchar2::broadcast(std::i8::MAX as u8)));
+    return uchar2::to_char(min(self, uchar2::broadcast(std::i8::MAX as u8)));
   }
 
   #[inline(always)]
@@ -60,7 +60,7 @@ impl simd::Vector for uchar2 {
 
   #[inline(always)]
   fn to_short_sat(self) -> short2 {
-    return uchar2::to_short(simd::min(self, uchar2::broadcast(std::i16::MAX as u8)));
+    return uchar2::to_short(min(self, uchar2::broadcast(std::i16::MAX as u8)));
   }
 
   #[inline(always)]
@@ -70,7 +70,7 @@ impl simd::Vector for uchar2 {
 
   #[inline(always)]
   fn to_int_sat(self) -> int2 {
-    return uchar2::to_int(simd::min(self, uchar2::broadcast(std::i32::MAX as u8)));
+    return uchar2::to_int(min(self, uchar2::broadcast(std::i32::MAX as u8)));
   }
 
   #[inline(always)]
@@ -80,7 +80,7 @@ impl simd::Vector for uchar2 {
 
   #[inline(always)]
   fn to_long_sat(self) -> long2 {
-    return uchar2::to_long(simd::min(self, uchar2::broadcast(std::i64::MAX as u8)));
+    return uchar2::to_long(min(self, uchar2::broadcast(std::i64::MAX as u8)));
   }
 
   #[inline(always)]
@@ -89,15 +89,15 @@ impl simd::Vector for uchar2 {
   }
 }
 
-impl simd::Dot for uchar2 {
+impl Dot for uchar2 {
   type DotProduct = u8;
   #[inline(always)]
   fn dot(self, other: Self) -> Self::DotProduct {
-    return simd::reduce_add(self * other);
+    return reduce_add(self * other);
   }
 }
 
-impl simd::Integer for uchar2 {
+impl Integer for uchar2 {
   #[inline(always)]
   fn reduce_and(self) -> Self::Scalar {
     return self.0 & self.1

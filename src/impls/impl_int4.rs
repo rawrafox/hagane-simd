@@ -1,7 +1,7 @@
 use std;
 use ::*;
 
-impl simd::Vector for int4 {
+impl Vector for int4 {
   type Scalar = i32;
   type Boolean = int4;
 
@@ -21,52 +21,53 @@ impl simd::Vector for int4 {
   #[inline(always)]
   fn abs(self) -> Self {
     let mask = self >> 31;
+
     return (self ^ mask) - mask;
   }
 
   #[inline(always)]
   fn max(self, other: Self) -> Self {
-    return simd::bitselect(simd::gt(other, self), self, other);
+    return bitselect(gt(other, self), self, other);
   }
 
   #[inline(always)]
   fn min(self, other: Self) -> Self {
-    return simd::bitselect(simd::lt(other, self), self, other);
+    return bitselect(lt(other, self), self, other);
   }
 
   #[inline(always)]
   fn reduce_add(self) -> Self::Scalar {
-    return simd::reduce_add(self.lo() + self.hi());
+    return reduce_add(self.lo() + self.hi());
   }
 
   #[inline(always)]
   fn reduce_min(self) -> Self::Scalar {
-    return simd::reduce_min(simd::min(self.lo(), self.hi()));
+    return reduce_min(min(self.lo(), self.hi()));
   }
 
   #[inline(always)]
   fn reduce_max(self) -> Self::Scalar {
-    return simd::reduce_max(simd::max(self.lo(), self.hi()));
+    return reduce_max(max(self.lo(), self.hi()));
   }
 
   #[inline(always)]
   fn to_char_sat(self) -> char4 {
-    return int4::to_char(simd::clamp(self, int4::broadcast(std::i8::MIN as i32), int4::broadcast(std::i8::MAX as i32)));
+    return int4::to_char(clamp(self, int4::broadcast(std::i8::MIN as i32), int4::broadcast(std::i8::MAX as i32)));
   }
 
   #[inline(always)]
   fn to_uchar_sat(self) -> uchar4 {
-    return int4::to_uchar(simd::clamp(self, int4::broadcast(std::u8::MIN as i32), int4::broadcast(std::u8::MAX as i32)));
+    return int4::to_uchar(clamp(self, int4::broadcast(std::u8::MIN as i32), int4::broadcast(std::u8::MAX as i32)));
   }
 
   #[inline(always)]
   fn to_short_sat(self) -> short4 {
-    return int4::to_short(simd::clamp(self, int4::broadcast(std::i16::MIN as i32), int4::broadcast(std::i16::MAX as i32)));
+    return int4::to_short(clamp(self, int4::broadcast(std::i16::MIN as i32), int4::broadcast(std::i16::MAX as i32)));
   }
 
   #[inline(always)]
   fn to_ushort_sat(self) -> ushort4 {
-    return int4::to_ushort(simd::clamp(self, int4::broadcast(std::u16::MIN as i32), int4::broadcast(std::u16::MAX as i32)));
+    return int4::to_ushort(clamp(self, int4::broadcast(std::u16::MIN as i32), int4::broadcast(std::u16::MAX as i32)));
   }
 
   #[inline(always)]
@@ -76,7 +77,7 @@ impl simd::Vector for int4 {
 
   #[inline(always)]
   fn to_uint_sat(self) -> uint4 {
-    return int4::to_uint(simd::max(self, int4::broadcast(0)));
+    return int4::to_uint(max(self, int4::broadcast(0)));
   }
 
   #[inline(always)]
@@ -86,19 +87,19 @@ impl simd::Vector for int4 {
 
   #[inline(always)]
   fn to_ulong_sat(self) -> ulong4 {
-    return int4::to_ulong(simd::max(self, int4::broadcast(0)));
+    return int4::to_ulong(max(self, int4::broadcast(0)));
   }
 }
 
-impl simd::Dot for int4 {
+impl Dot for int4 {
   type DotProduct = i32;
   #[inline(always)]
   fn dot(self, other: Self) -> Self::DotProduct {
-    return simd::reduce_add(self * other);
+    return reduce_add(self * other);
   }
 }
 
-impl simd::Integer for int4 {
+impl Integer for int4 {
   #[inline(always)]
   fn reduce_and(self) -> Self::Scalar {
     return (self.lo() & self.hi()).reduce_and();
@@ -125,7 +126,7 @@ impl simd::Integer for int4 {
   }
 }
 
-impl simd::Select<int4> for int4 {
+impl Select<int4> for int4 {
   #[inline(always)]
   fn select(self, a: int4, b: int4) -> int4 {
     return (self >> 31).bitselect(a, b);
@@ -137,7 +138,7 @@ impl simd::Select<int4> for int4 {
   }
 }
 
-impl simd::Select<uint4> for int4 {
+impl Select<uint4> for int4 {
   #[inline(always)]
   fn select(self, a: uint4, b: uint4) -> uint4 {
     return (self >> 31).bitselect(a, b);
@@ -149,7 +150,7 @@ impl simd::Select<uint4> for int4 {
   }
 }
 
-impl simd::Select<float4> for int4 {
+impl Select<float4> for int4 {
   #[inline(always)]
   fn select(self, a: float4, b: float4) -> float4 {
     return (self >> 31).bitselect(a, b);

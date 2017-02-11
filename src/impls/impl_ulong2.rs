@@ -1,7 +1,7 @@
 use std;
 use ::*;
 
-impl simd::Vector for ulong2 {
+impl Vector for ulong2 {
   type Scalar = u64;
   type Boolean = long2;
 
@@ -25,12 +25,12 @@ impl simd::Vector for ulong2 {
 
   #[inline(always)]
   fn max(self, other: Self) -> Self {
-    return simd::bitselect(simd::gt(other, self), self, other);
+    return bitselect(gt(other, self), self, other);
   }
 
   #[inline(always)]
   fn min(self, other: Self) -> Self {
-    return simd::bitselect(simd::lt(other, self), self, other);
+    return bitselect(lt(other, self), self, other);
   }
 
   #[inline(always)]
@@ -50,37 +50,37 @@ impl simd::Vector for ulong2 {
 
   #[inline(always)]
   fn to_char_sat(self) -> char2 {
-    return ulong2::to_char(simd::min(self, ulong2::broadcast(std::i8::MAX as u64)));
+    return ulong2::to_char(min(self, ulong2::broadcast(std::i8::MAX as u64)));
   }
 
   #[inline(always)]
   fn to_uchar_sat(self) -> uchar2 {
-    return ulong2::to_uchar(simd::min(self, ulong2::broadcast(std::u8::MAX as u64)));
+    return ulong2::to_uchar(min(self, ulong2::broadcast(std::u8::MAX as u64)));
   }
 
   #[inline(always)]
   fn to_short_sat(self) -> short2 {
-    return ulong2::to_short(simd::min(self, ulong2::broadcast(std::i16::MAX as u64)));
+    return ulong2::to_short(min(self, ulong2::broadcast(std::i16::MAX as u64)));
   }
 
   #[inline(always)]
   fn to_ushort_sat(self) -> ushort2 {
-    return ulong2::to_ushort(simd::min(self, ulong2::broadcast(std::u16::MAX as u64)));
+    return ulong2::to_ushort(min(self, ulong2::broadcast(std::u16::MAX as u64)));
   }
 
   #[inline(always)]
   fn to_int_sat(self) -> int2 {
-    return ulong2::to_int(simd::min(self, ulong2::broadcast(std::i32::MAX as u64)));
+    return ulong2::to_int(min(self, ulong2::broadcast(std::i32::MAX as u64)));
   }
 
   #[inline(always)]
   fn to_uint_sat(self) -> uint2 {
-    return ulong2::to_uint(simd::min(self, ulong2::broadcast(std::u32::MAX as u64)));
+    return ulong2::to_uint(min(self, ulong2::broadcast(std::u32::MAX as u64)));
   }
 
   #[inline(always)]
   fn to_long_sat(self) -> long2 {
-    return ulong2::to_long(simd::min(self, ulong2::broadcast(std::i64::MAX as u64)));
+    return ulong2::to_long(min(self, ulong2::broadcast(std::i64::MAX as u64)));
   }
 
   #[inline(always)]
@@ -89,15 +89,15 @@ impl simd::Vector for ulong2 {
   }
 }
 
-impl simd::Dot for ulong2 {
+impl Dot for ulong2 {
   type DotProduct = u64;
   #[inline(always)]
   fn dot(self, other: Self) -> Self::DotProduct {
-    return simd::reduce_add(self * other);
+    return reduce_add(self * other);
   }
 }
 
-impl simd::Integer for ulong2 {
+impl Integer for ulong2 {
   #[inline(always)]
   fn reduce_and(self) -> Self::Scalar {
     return self.0 & self.1

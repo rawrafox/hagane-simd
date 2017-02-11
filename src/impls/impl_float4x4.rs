@@ -1,6 +1,6 @@
 use std;
 use ::*;
-use ::simd::*;
+use ::*;
 
 extern {
   fn __invert_f4(a: float4x4) -> float4x4;
@@ -51,7 +51,7 @@ impl std::ops::Mul<f32> for float4x4 {
   }
 }
 
-impl simd::Dot for float4x4 {
+impl Dot for float4x4 {
   type DotProduct = float4x4;
 
   #[inline]
@@ -60,7 +60,7 @@ impl simd::Dot for float4x4 {
   }
 }
 
-impl simd::Dot<float4> for float4x4 {
+impl Dot<float4> for float4x4 {
   type DotProduct = float4;
 
   #[inline]
