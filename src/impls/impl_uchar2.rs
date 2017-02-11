@@ -14,8 +14,6 @@ extern "platform-intrinsic" {
   fn simd_and<T>(x: T, y: T) -> T;
   fn simd_or<T>(x: T, y: T) -> T;
   fn simd_xor<T>(x: T, y: T) -> T;
-
-  fn simd_cast<T, U>(x: T) -> U;
 }
 
 impl std::ops::Add for uchar2 {
@@ -286,6 +284,19 @@ impl simd::Vector for uchar2 {
   type Scalar = u8;
   type Boolean = char2;
 
+  type CharVector = char2;
+  type ShortVector = short2;
+  type IntVector = int2;
+  type LongVector = long2;
+
+  type UCharVector = uchar2;
+  type UShortVector = ushort2;
+  type UIntVector = uint2;
+  type ULongVector = ulong2;
+
+  type FloatVector = float2;
+  type DoubleVector = double2;
+
   #[inline(always)]
   fn abs(self) -> Self {
     return self;
@@ -299,6 +310,46 @@ impl simd::Vector for uchar2 {
   #[inline(always)]
   fn min(self, other: Self) -> Self {
     return simd::bitselect(simd::lt(other, self), self, other);
+  }
+
+  #[inline(always)]
+  fn to_char_sat(self) -> char2 {
+    return uchar2::to_char(simd::min(self, uchar2::broadcast(std::i8::MAX as u8)));
+  }
+
+  #[inline(always)]
+  fn to_uchar_sat(self) -> uchar2 {
+    return self;
+  }
+
+  #[inline(always)]
+  fn to_short_sat(self) -> short2 {
+    return uchar2::to_short(simd::min(self, uchar2::broadcast(std::i16::MAX as u8)));
+  }
+
+  #[inline(always)]
+  fn to_ushort_sat(self) -> ushort2 {
+    return uchar2::to_ushort(self);
+  }
+
+  #[inline(always)]
+  fn to_int_sat(self) -> int2 {
+    return uchar2::to_int(simd::min(self, uchar2::broadcast(std::i32::MAX as u8)));
+  }
+
+  #[inline(always)]
+  fn to_uint_sat(self) -> uint2 {
+    return uchar2::to_uint(self);
+  }
+
+  #[inline(always)]
+  fn to_long_sat(self) -> long2 {
+    return uchar2::to_long(simd::min(self, uchar2::broadcast(std::i64::MAX as u8)));
+  }
+
+  #[inline(always)]
+  fn to_ulong_sat(self) -> ulong2 {
+    return uchar2::to_ulong(self);
   }
 }
 
@@ -355,96 +406,6 @@ impl uchar2 {
   #[inline]
   pub fn madd(x: uchar2, y: uchar2, z: uchar2) -> uchar2 {
     return x * y + z;
-  }
-
-  #[inline]
-  pub fn to_char(x: uchar2) -> char2 {
-    return unsafe { simd_cast(x) };
-  }
-
-  #[inline]
-  pub fn to_char_sat(x: uchar2) -> char2 {
-    return uchar2::to_char(simd::min(x, uchar2::broadcast(std::i8::MAX as u8)));
-  }
-
-  #[inline]
-  pub fn to_uchar(x: uchar2) -> uchar2 {
-    return unsafe { simd_cast(x) };
-  }
-
-  #[inline]
-  pub fn to_uchar_sat(x: uchar2) -> uchar2 {
-    return x;
-  }
-
-  #[inline]
-  pub fn to_short(x: uchar2) -> short2 {
-    return unsafe { simd_cast(x) };
-  }
-
-  #[inline]
-  pub fn to_short_sat(x: uchar2) -> short2 {
-    return uchar2::to_short(simd::min(x, uchar2::broadcast(std::i16::MAX as u8)));
-  }
-
-  #[inline]
-  pub fn to_ushort(x: uchar2) -> ushort2 {
-    return unsafe { simd_cast(x) };
-  }
-
-  #[inline]
-  pub fn to_ushort_sat(x: uchar2) -> ushort2 {
-    return uchar2::to_ushort(x);
-  }
-
-  #[inline]
-  pub fn to_int(x: uchar2) -> int2 {
-    return unsafe { simd_cast(x) };
-  }
-
-  #[inline]
-  pub fn to_int_sat(x: uchar2) -> int2 {
-    return uchar2::to_int(simd::min(x, uchar2::broadcast(std::i32::MAX as u8)));
-  }
-
-  #[inline]
-  pub fn to_uint(x: uchar2) -> uint2 {
-    return unsafe { simd_cast(x) };
-  }
-
-  #[inline]
-  pub fn to_uint_sat(x: uchar2) -> uint2 {
-    return uchar2::to_uint(x);
-  }
-
-  #[inline]
-  pub fn to_float(x: uchar2) -> float2 {
-    return unsafe { simd_cast(x) };
-  }
-
-  #[inline]
-  pub fn to_long(x: uchar2) -> long2 {
-    return unsafe { simd_cast(x) };
-  }
-
-  #[inline]
-  pub fn to_long_sat(x: uchar2) -> long2 {
-    return uchar2::to_long(simd::min(x, uchar2::broadcast(std::i64::MAX as u8)));
-  }
-
-  #[inline]
-  pub fn to_ulong(x: uchar2) -> ulong2 {
-    return unsafe { simd_cast(x) };
-  }
-
-  #[inline]
-  pub fn to_ulong_sat(x: uchar2) -> ulong2 {
-    return uchar2::to_ulong(x);
-  }
-
-  #[inline]
-  pub fn to_double(x: uchar2) -> double2 {
-    return unsafe { simd_cast(x) };
   }
 
   #[inline]

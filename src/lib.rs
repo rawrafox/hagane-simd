@@ -92,7 +92,7 @@ macro_rules! declare_matrix {
     #[repr(C)]
     #[derive(Copy, Clone, Debug)]
     pub struct $name3(pub $vector, pub $vector, pub $vector);
-    
+
     #[repr(C)]
     #[derive(Copy, Clone, Debug)]
     pub struct $name4(pub $vector, pub $vector, pub $vector, pub $vector);
@@ -142,7 +142,7 @@ pub mod simd {
     fn simd_gt<T, U>(x: T, y: T) -> U;
     fn simd_ge<T, U>(x: T, y: T) -> U;
 
-    // fn simd_cast<T, U>(x: T) -> U;
+    fn simd_cast<T, U>(x: T) -> U;
 
     fn simd_insert<T, E>(x: T, i: u32, e: E) -> T;
     fn simd_extract<T, E>(x: T, i: u32) -> E;
@@ -151,6 +151,19 @@ pub mod simd {
   pub trait Vector : Sized {
     type Scalar;
     type Boolean;
+
+    type CharVector;
+    type ShortVector;
+    type IntVector;
+    type LongVector;
+
+    type UCharVector;
+    type UShortVector;
+    type UIntVector;
+    type ULongVector;
+
+    type FloatVector;
+    type DoubleVector;
 
     #[inline(always)]
     fn extract(self, i: u32) -> Self::Scalar {
@@ -200,6 +213,66 @@ pub mod simd {
     fn clamp(self, min: Self, max: Self) -> Self  {
       return self.max(min).min(max)
     }
+
+    #[inline(always)]
+    fn to_char(self) -> Self::CharVector {
+      return unsafe { simd_cast(self) };
+    }
+
+    #[inline(always)]
+    fn to_short(self) -> Self::ShortVector {
+      return unsafe { simd_cast(self) };
+    }
+
+    #[inline(always)]
+    fn to_int(self) -> Self::IntVector {
+      return unsafe { simd_cast(self) };
+    }
+
+    #[inline(always)]
+    fn to_long(self) -> Self::LongVector {
+      return unsafe { simd_cast(self) };
+    }
+
+    #[inline(always)]
+    fn to_uchar(self) -> Self::UCharVector {
+      return unsafe { simd_cast(self) };
+    }
+
+    #[inline(always)]
+    fn to_ushort(self) -> Self::UShortVector {
+      return unsafe { simd_cast(self) };
+    }
+
+    #[inline(always)]
+    fn to_uint(self) -> Self::UIntVector {
+      return unsafe { simd_cast(self) };
+    }
+
+    #[inline(always)]
+    fn to_ulong(self) -> Self::ULongVector {
+      return unsafe { simd_cast(self) };
+    }
+
+    #[inline(always)]
+    fn to_float(self) -> Self::FloatVector {
+      return unsafe { simd_cast(self) };
+    }
+
+    #[inline(always)]
+    fn to_double(self) -> Self::DoubleVector {
+      return unsafe { simd_cast(self) };
+    }
+
+    fn to_char_sat(self) -> Self::CharVector;
+    fn to_short_sat(self) -> Self::ShortVector;
+    fn to_int_sat(self) -> Self::IntVector;
+    fn to_long_sat(self) -> Self::LongVector;
+
+    fn to_uchar_sat(self) -> Self::UCharVector;
+    fn to_ushort_sat(self) -> Self::UShortVector;
+    fn to_uint_sat(self) -> Self::UIntVector;
+    fn to_ulong_sat(self) -> Self::ULongVector;
   }
 
   #[inline(always)]
@@ -260,6 +333,96 @@ pub mod simd {
   #[inline(always)]
   pub fn clamp<T: Vector>(t: T, min: T, max: T) -> T {
     return t.clamp(min, max);
+  }
+
+  #[inline(always)]
+  pub fn to_char<T: Vector>(x: T) -> T::CharVector {
+    return x.to_char();
+  }
+
+  #[inline(always)]
+  pub fn to_short<T: Vector>(x: T) -> T::ShortVector {
+    return x.to_short();
+  }
+
+  #[inline(always)]
+  pub fn to_int<T: Vector>(x: T) -> T::IntVector {
+    return x.to_int();
+  }
+
+  #[inline(always)]
+  pub fn to_long<T: Vector>(x: T) -> T::LongVector {
+    return x.to_long();
+  }
+
+  #[inline(always)]
+  pub fn to_uchar<T: Vector>(x: T) -> T::UCharVector {
+    return x.to_uchar();
+  }
+
+  #[inline(always)]
+  pub fn to_ushort<T: Vector>(x: T) -> T::UShortVector {
+    return x.to_ushort();
+  }
+
+  #[inline(always)]
+  pub fn to_uint<T: Vector>(x: T) -> T::UIntVector {
+    return x.to_uint();
+  }
+
+  #[inline(always)]
+  pub fn to_ulong<T: Vector>(x: T) -> T::ULongVector {
+    return x.to_ulong();
+  }
+
+  #[inline(always)]
+  pub fn to_float<T: Vector>(x: T) -> T::FloatVector {
+    return x.to_float();
+  }
+
+  #[inline(always)]
+  pub fn to_double<T: Vector>(x: T) -> T::DoubleVector {
+    return x.to_double();
+  }
+
+  #[inline(always)]
+  pub fn to_char_sat<T: Vector>(x: T) -> T::CharVector {
+    return x.to_char_sat();
+  }
+
+  #[inline(always)]
+  pub fn to_short_sat<T: Vector>(x: T) -> T::ShortVector {
+    return x.to_short_sat();
+  }
+
+  #[inline(always)]
+  pub fn to_int_sat<T: Vector>(x: T) -> T::IntVector {
+    return x.to_int_sat();
+  }
+
+  #[inline(always)]
+  pub fn to_long_sat<T: Vector>(x: T) -> T::LongVector {
+    return x.to_long_sat();
+  }
+
+  #[inline(always)]
+  pub fn to_uchar_sat<T: Vector>(x: T) -> T::UCharVector {
+    return x.to_uchar_sat();
+  }
+
+  #[inline(always)]
+  pub fn to_ushort_sat<T: Vector>(x: T) -> T::UShortVector {
+    return x.to_ushort_sat();
+  }
+
+  #[inline(always)]
+  pub fn to_uint_sat<T: Vector>(x: T) -> T::UIntVector {
+    return x.to_uint_sat();
+  }
+
+  #[inline(always)]
+  pub fn to_ulong_sat<T: Vector>(x: T) -> T::ULongVector {
+    return x.to_ulong_sat();
   }
 
   pub trait Cross : Vector {

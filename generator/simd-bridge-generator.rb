@@ -59,8 +59,6 @@ module Bridge
               o.puts("fn simd_or<T>(x: T, y: T) -> T;")
               o.puts("fn simd_xor<T>(x: T, y: T) -> T;")
             end
-
-            o.puts("fn simd_cast<T, U>(x: T) -> U;", pad: true)
           end
 
           %w(add sub mul div).each do |op|
@@ -181,6 +179,19 @@ module Bridge
             o.puts("type Scalar = #{scalar};", pad: true)
             o.puts("type Boolean = #{bool_name};")
 
+            o.puts("type CharVector = char#{width};", pad: true)
+            o.puts("type ShortVector = short#{width};")
+            o.puts("type IntVector = int#{width};")
+            o.puts("type LongVector = long#{width};")
+
+            o.puts("type UCharVector = uchar#{width};", pad: true)
+            o.puts("type UShortVector = ushort#{width};")
+            o.puts("type UIntVector = uint#{width};")
+            o.puts("type ULongVector = ulong#{width};")
+
+            o.puts("type FloatVector = float#{width};", pad: true)
+            o.puts("type DoubleVector = double#{width};")
+
             o.puts("#[inline(always)]", pad: true)
             o.block("fn abs(self) -> Self") do |o|
               if kind.include?(:signed)
@@ -215,6 +226,25 @@ module Bridge
                 o.puts("return simd::bitselect(simd::lt(other, self), self, other);")
               end
             end
+
+            self.conversion(o, type, "char", width)
+            self.conversion(o, type, "char", width, saturate: true)
+            self.conversion(o, type, "uchar", width)
+            self.conversion(o, type, "uchar", width, saturate: true)
+            self.conversion(o, type, "short", width)
+            self.conversion(o, type, "short", width, saturate: true)
+            self.conversion(o, type, "ushort", width)
+            self.conversion(o, type, "ushort", width, saturate: true)
+            self.conversion(o, type, "int", width)
+            self.conversion(o, type, "int", width, saturate: true)
+            self.conversion(o, type, "uint", width)
+            self.conversion(o, type, "uint", width, saturate: true)
+            self.conversion(o, type, "float", width)
+            self.conversion(o, type, "long", width)
+            self.conversion(o, type, "long", width, saturate: true)
+            self.conversion(o, type, "ulong", width)
+            self.conversion(o, type, "ulong", width, saturate: true)
+            self.conversion(o, type, "double", width)
           end
 
           if kind.include?(:float) && [2, 3].include?(width)
@@ -508,27 +538,6 @@ module Bridge
               o.puts("return x * y + z;")
             end
 
-            # Conversion
-            
-            self.conversion(o, type, "char", width)
-            self.conversion(o, type, "char", width, saturate: true)
-            self.conversion(o, type, "uchar", width)
-            self.conversion(o, type, "uchar", width, saturate: true)
-            self.conversion(o, type, "short", width)
-            self.conversion(o, type, "short", width, saturate: true)
-            self.conversion(o, type, "ushort", width)
-            self.conversion(o, type, "ushort", width, saturate: true)
-            self.conversion(o, type, "int", width)
-            self.conversion(o, type, "int", width, saturate: true)
-            self.conversion(o, type, "uint", width)
-            self.conversion(o, type, "uint", width, saturate: true)
-            self.conversion(o, type, "float", width)
-            self.conversion(o, type, "long", width)
-            self.conversion(o, type, "long", width, saturate: true)
-            self.conversion(o, type, "ulong", width)
-            self.conversion(o, type, "ulong", width, saturate: true)
-            self.conversion(o, type, "double", width)
-
             # Swizzles
 
             case width
@@ -794,28 +803,29 @@ module Bridge
       out_size = out_ty.fetch(:size)
       out_kind = out_ty.fetch(:kind)
 
-      o.puts("#[inline]", pad: true)
-      o.block("pub fn to_#{out_type}#{"_sat" if saturate}(x: #{in_name}) -> #{out_name}") do |o|
-        if saturate
+      if saturate
+        o.puts("#[inline(always)]", pad: true)
+        o.block("fn to_#{out_type}_sat(self) -> #{out_name}") do |o|
           min = "#{in_name}::broadcast(std::#{out_scalar}::MIN as #{in_scalar})"
           max = "#{in_name}::broadcast(std::#{out_scalar}::MAX as #{in_scalar})"
 
           if in_scalar == out_scalar
-            o.puts("return x;")
+            o.puts("return self;")
           elsif in_kind == out_kind && in_size < out_size
-            o.puts("return #{in_name}::to_#{out_type}(x);")
+            o.puts("return #{in_name}::to_#{out_type}(self);")
           elsif in_kind.include?(:signed) && out_kind.include?(:unsigned) && in_size <= out_size
-            o.puts("return #{in_name}::to_#{out_type}(simd::max(x, #{in_name}::broadcast(0)));")
+            o.puts("return #{in_name}::to_#{out_type}(simd::max(self, #{in_name}::broadcast(0)));")
           elsif in_kind.include?(:unsigned)
-            o.puts("return #{in_name}::to_#{out_type}(simd::min(x, #{max}));")
+            o.puts("return #{in_name}::to_#{out_type}(simd::min(self, #{max}));")
           else
-            o.puts("return #{in_name}::to_#{out_type}(simd::clamp(x, #{min}, #{max}));")
+            o.puts("return #{in_name}::to_#{out_type}(simd::clamp(self, #{min}, #{max}));")
           end
-        else
-          if width == 3 && !in_kind.include?(:float) && in_size < out_size # TODO: Fix this compiler bug
-            o.puts("return #{out_name}(x.0 as #{out_scalar}, x.1 as #{out_scalar}, x.2 as #{out_scalar});")
-          else
-            o.puts("return unsafe { simd_cast(x) };")
+        end
+      else
+        if width == 3 && !in_kind.include?(:float) && in_size < out_size # TODO: Fix this compiler bug
+          o.puts("#[inline(always)]", pad: true)
+          o.block("fn to_#{out_type}(self) -> #{out_name}") do |o|
+            o.puts("return #{out_name}(self.0 as #{out_scalar}, self.1 as #{out_scalar}, self.2 as #{out_scalar});")
           end
         end
       end

@@ -14,8 +14,6 @@ extern "platform-intrinsic" {
   fn simd_and<T>(x: T, y: T) -> T;
   fn simd_or<T>(x: T, y: T) -> T;
   fn simd_xor<T>(x: T, y: T) -> T;
-
-  fn simd_cast<T, U>(x: T) -> U;
 }
 
 impl std::ops::Add for long3 {
@@ -286,6 +284,19 @@ impl simd::Vector for long3 {
   type Scalar = i64;
   type Boolean = long3;
 
+  type CharVector = char3;
+  type ShortVector = short3;
+  type IntVector = int3;
+  type LongVector = long3;
+
+  type UCharVector = uchar3;
+  type UShortVector = ushort3;
+  type UIntVector = uint3;
+  type ULongVector = ulong3;
+
+  type FloatVector = float3;
+  type DoubleVector = double3;
+
   #[inline(always)]
   fn abs(self) -> Self {
     let mask = self >> 63;
@@ -300,6 +311,46 @@ impl simd::Vector for long3 {
   #[inline(always)]
   fn min(self, other: Self) -> Self {
     return simd::bitselect(simd::lt(other, self), self, other);
+  }
+
+  #[inline(always)]
+  fn to_char_sat(self) -> char3 {
+    return long3::to_char(simd::clamp(self, long3::broadcast(std::i8::MIN as i64), long3::broadcast(std::i8::MAX as i64)));
+  }
+
+  #[inline(always)]
+  fn to_uchar_sat(self) -> uchar3 {
+    return long3::to_uchar(simd::clamp(self, long3::broadcast(std::u8::MIN as i64), long3::broadcast(std::u8::MAX as i64)));
+  }
+
+  #[inline(always)]
+  fn to_short_sat(self) -> short3 {
+    return long3::to_short(simd::clamp(self, long3::broadcast(std::i16::MIN as i64), long3::broadcast(std::i16::MAX as i64)));
+  }
+
+  #[inline(always)]
+  fn to_ushort_sat(self) -> ushort3 {
+    return long3::to_ushort(simd::clamp(self, long3::broadcast(std::u16::MIN as i64), long3::broadcast(std::u16::MAX as i64)));
+  }
+
+  #[inline(always)]
+  fn to_int_sat(self) -> int3 {
+    return long3::to_int(simd::clamp(self, long3::broadcast(std::i32::MIN as i64), long3::broadcast(std::i32::MAX as i64)));
+  }
+
+  #[inline(always)]
+  fn to_uint_sat(self) -> uint3 {
+    return long3::to_uint(simd::clamp(self, long3::broadcast(std::u32::MIN as i64), long3::broadcast(std::u32::MAX as i64)));
+  }
+
+  #[inline(always)]
+  fn to_long_sat(self) -> long3 {
+    return self;
+  }
+
+  #[inline(always)]
+  fn to_ulong_sat(self) -> ulong3 {
+    return long3::to_ulong(simd::max(self, long3::broadcast(0)));
   }
 }
 
@@ -392,96 +443,6 @@ impl long3 {
   #[inline]
   pub fn madd(x: long3, y: long3, z: long3) -> long3 {
     return x * y + z;
-  }
-
-  #[inline]
-  pub fn to_char(x: long3) -> char3 {
-    return unsafe { simd_cast(x) };
-  }
-
-  #[inline]
-  pub fn to_char_sat(x: long3) -> char3 {
-    return long3::to_char(simd::clamp(x, long3::broadcast(std::i8::MIN as i64), long3::broadcast(std::i8::MAX as i64)));
-  }
-
-  #[inline]
-  pub fn to_uchar(x: long3) -> uchar3 {
-    return unsafe { simd_cast(x) };
-  }
-
-  #[inline]
-  pub fn to_uchar_sat(x: long3) -> uchar3 {
-    return long3::to_uchar(simd::clamp(x, long3::broadcast(std::u8::MIN as i64), long3::broadcast(std::u8::MAX as i64)));
-  }
-
-  #[inline]
-  pub fn to_short(x: long3) -> short3 {
-    return unsafe { simd_cast(x) };
-  }
-
-  #[inline]
-  pub fn to_short_sat(x: long3) -> short3 {
-    return long3::to_short(simd::clamp(x, long3::broadcast(std::i16::MIN as i64), long3::broadcast(std::i16::MAX as i64)));
-  }
-
-  #[inline]
-  pub fn to_ushort(x: long3) -> ushort3 {
-    return unsafe { simd_cast(x) };
-  }
-
-  #[inline]
-  pub fn to_ushort_sat(x: long3) -> ushort3 {
-    return long3::to_ushort(simd::clamp(x, long3::broadcast(std::u16::MIN as i64), long3::broadcast(std::u16::MAX as i64)));
-  }
-
-  #[inline]
-  pub fn to_int(x: long3) -> int3 {
-    return unsafe { simd_cast(x) };
-  }
-
-  #[inline]
-  pub fn to_int_sat(x: long3) -> int3 {
-    return long3::to_int(simd::clamp(x, long3::broadcast(std::i32::MIN as i64), long3::broadcast(std::i32::MAX as i64)));
-  }
-
-  #[inline]
-  pub fn to_uint(x: long3) -> uint3 {
-    return unsafe { simd_cast(x) };
-  }
-
-  #[inline]
-  pub fn to_uint_sat(x: long3) -> uint3 {
-    return long3::to_uint(simd::clamp(x, long3::broadcast(std::u32::MIN as i64), long3::broadcast(std::u32::MAX as i64)));
-  }
-
-  #[inline]
-  pub fn to_float(x: long3) -> float3 {
-    return unsafe { simd_cast(x) };
-  }
-
-  #[inline]
-  pub fn to_long(x: long3) -> long3 {
-    return unsafe { simd_cast(x) };
-  }
-
-  #[inline]
-  pub fn to_long_sat(x: long3) -> long3 {
-    return x;
-  }
-
-  #[inline]
-  pub fn to_ulong(x: long3) -> ulong3 {
-    return unsafe { simd_cast(x) };
-  }
-
-  #[inline]
-  pub fn to_ulong_sat(x: long3) -> ulong3 {
-    return long3::to_ulong(simd::max(x, long3::broadcast(0)));
-  }
-
-  #[inline]
-  pub fn to_double(x: long3) -> double3 {
-    return unsafe { simd_cast(x) };
   }
 
   #[inline]

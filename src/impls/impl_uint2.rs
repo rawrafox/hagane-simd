@@ -14,8 +14,6 @@ extern "platform-intrinsic" {
   fn simd_and<T>(x: T, y: T) -> T;
   fn simd_or<T>(x: T, y: T) -> T;
   fn simd_xor<T>(x: T, y: T) -> T;
-
-  fn simd_cast<T, U>(x: T) -> U;
 }
 
 impl std::ops::Add for uint2 {
@@ -286,6 +284,19 @@ impl simd::Vector for uint2 {
   type Scalar = u32;
   type Boolean = int2;
 
+  type CharVector = char2;
+  type ShortVector = short2;
+  type IntVector = int2;
+  type LongVector = long2;
+
+  type UCharVector = uchar2;
+  type UShortVector = ushort2;
+  type UIntVector = uint2;
+  type ULongVector = ulong2;
+
+  type FloatVector = float2;
+  type DoubleVector = double2;
+
   #[inline(always)]
   fn abs(self) -> Self {
     return self;
@@ -299,6 +310,46 @@ impl simd::Vector for uint2 {
   #[inline(always)]
   fn min(self, other: Self) -> Self {
     return simd::bitselect(simd::lt(other, self), self, other);
+  }
+
+  #[inline(always)]
+  fn to_char_sat(self) -> char2 {
+    return uint2::to_char(simd::min(self, uint2::broadcast(std::i8::MAX as u32)));
+  }
+
+  #[inline(always)]
+  fn to_uchar_sat(self) -> uchar2 {
+    return uint2::to_uchar(simd::min(self, uint2::broadcast(std::u8::MAX as u32)));
+  }
+
+  #[inline(always)]
+  fn to_short_sat(self) -> short2 {
+    return uint2::to_short(simd::min(self, uint2::broadcast(std::i16::MAX as u32)));
+  }
+
+  #[inline(always)]
+  fn to_ushort_sat(self) -> ushort2 {
+    return uint2::to_ushort(simd::min(self, uint2::broadcast(std::u16::MAX as u32)));
+  }
+
+  #[inline(always)]
+  fn to_int_sat(self) -> int2 {
+    return uint2::to_int(simd::min(self, uint2::broadcast(std::i32::MAX as u32)));
+  }
+
+  #[inline(always)]
+  fn to_uint_sat(self) -> uint2 {
+    return self;
+  }
+
+  #[inline(always)]
+  fn to_long_sat(self) -> long2 {
+    return uint2::to_long(simd::min(self, uint2::broadcast(std::i64::MAX as u32)));
+  }
+
+  #[inline(always)]
+  fn to_ulong_sat(self) -> ulong2 {
+    return uint2::to_ulong(self);
   }
 }
 
@@ -355,96 +406,6 @@ impl uint2 {
   #[inline]
   pub fn madd(x: uint2, y: uint2, z: uint2) -> uint2 {
     return x * y + z;
-  }
-
-  #[inline]
-  pub fn to_char(x: uint2) -> char2 {
-    return unsafe { simd_cast(x) };
-  }
-
-  #[inline]
-  pub fn to_char_sat(x: uint2) -> char2 {
-    return uint2::to_char(simd::min(x, uint2::broadcast(std::i8::MAX as u32)));
-  }
-
-  #[inline]
-  pub fn to_uchar(x: uint2) -> uchar2 {
-    return unsafe { simd_cast(x) };
-  }
-
-  #[inline]
-  pub fn to_uchar_sat(x: uint2) -> uchar2 {
-    return uint2::to_uchar(simd::min(x, uint2::broadcast(std::u8::MAX as u32)));
-  }
-
-  #[inline]
-  pub fn to_short(x: uint2) -> short2 {
-    return unsafe { simd_cast(x) };
-  }
-
-  #[inline]
-  pub fn to_short_sat(x: uint2) -> short2 {
-    return uint2::to_short(simd::min(x, uint2::broadcast(std::i16::MAX as u32)));
-  }
-
-  #[inline]
-  pub fn to_ushort(x: uint2) -> ushort2 {
-    return unsafe { simd_cast(x) };
-  }
-
-  #[inline]
-  pub fn to_ushort_sat(x: uint2) -> ushort2 {
-    return uint2::to_ushort(simd::min(x, uint2::broadcast(std::u16::MAX as u32)));
-  }
-
-  #[inline]
-  pub fn to_int(x: uint2) -> int2 {
-    return unsafe { simd_cast(x) };
-  }
-
-  #[inline]
-  pub fn to_int_sat(x: uint2) -> int2 {
-    return uint2::to_int(simd::min(x, uint2::broadcast(std::i32::MAX as u32)));
-  }
-
-  #[inline]
-  pub fn to_uint(x: uint2) -> uint2 {
-    return unsafe { simd_cast(x) };
-  }
-
-  #[inline]
-  pub fn to_uint_sat(x: uint2) -> uint2 {
-    return x;
-  }
-
-  #[inline]
-  pub fn to_float(x: uint2) -> float2 {
-    return unsafe { simd_cast(x) };
-  }
-
-  #[inline]
-  pub fn to_long(x: uint2) -> long2 {
-    return unsafe { simd_cast(x) };
-  }
-
-  #[inline]
-  pub fn to_long_sat(x: uint2) -> long2 {
-    return uint2::to_long(simd::min(x, uint2::broadcast(std::i64::MAX as u32)));
-  }
-
-  #[inline]
-  pub fn to_ulong(x: uint2) -> ulong2 {
-    return unsafe { simd_cast(x) };
-  }
-
-  #[inline]
-  pub fn to_ulong_sat(x: uint2) -> ulong2 {
-    return uint2::to_ulong(x);
-  }
-
-  #[inline]
-  pub fn to_double(x: uint2) -> double2 {
-    return unsafe { simd_cast(x) };
   }
 
   #[inline]

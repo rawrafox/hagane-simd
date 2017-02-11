@@ -14,8 +14,6 @@ extern "platform-intrinsic" {
   fn simd_and<T>(x: T, y: T) -> T;
   fn simd_or<T>(x: T, y: T) -> T;
   fn simd_xor<T>(x: T, y: T) -> T;
-
-  fn simd_cast<T, U>(x: T) -> U;
 }
 
 impl std::ops::Add for ulong3 {
@@ -286,6 +284,19 @@ impl simd::Vector for ulong3 {
   type Scalar = u64;
   type Boolean = long3;
 
+  type CharVector = char3;
+  type ShortVector = short3;
+  type IntVector = int3;
+  type LongVector = long3;
+
+  type UCharVector = uchar3;
+  type UShortVector = ushort3;
+  type UIntVector = uint3;
+  type ULongVector = ulong3;
+
+  type FloatVector = float3;
+  type DoubleVector = double3;
+
   #[inline(always)]
   fn abs(self) -> Self {
     return self;
@@ -299,6 +310,46 @@ impl simd::Vector for ulong3 {
   #[inline(always)]
   fn min(self, other: Self) -> Self {
     return simd::bitselect(simd::lt(other, self), self, other);
+  }
+
+  #[inline(always)]
+  fn to_char_sat(self) -> char3 {
+    return ulong3::to_char(simd::min(self, ulong3::broadcast(std::i8::MAX as u64)));
+  }
+
+  #[inline(always)]
+  fn to_uchar_sat(self) -> uchar3 {
+    return ulong3::to_uchar(simd::min(self, ulong3::broadcast(std::u8::MAX as u64)));
+  }
+
+  #[inline(always)]
+  fn to_short_sat(self) -> short3 {
+    return ulong3::to_short(simd::min(self, ulong3::broadcast(std::i16::MAX as u64)));
+  }
+
+  #[inline(always)]
+  fn to_ushort_sat(self) -> ushort3 {
+    return ulong3::to_ushort(simd::min(self, ulong3::broadcast(std::u16::MAX as u64)));
+  }
+
+  #[inline(always)]
+  fn to_int_sat(self) -> int3 {
+    return ulong3::to_int(simd::min(self, ulong3::broadcast(std::i32::MAX as u64)));
+  }
+
+  #[inline(always)]
+  fn to_uint_sat(self) -> uint3 {
+    return ulong3::to_uint(simd::min(self, ulong3::broadcast(std::u32::MAX as u64)));
+  }
+
+  #[inline(always)]
+  fn to_long_sat(self) -> long3 {
+    return ulong3::to_long(simd::min(self, ulong3::broadcast(std::i64::MAX as u64)));
+  }
+
+  #[inline(always)]
+  fn to_ulong_sat(self) -> ulong3 {
+    return self;
   }
 }
 
@@ -355,96 +406,6 @@ impl ulong3 {
   #[inline]
   pub fn madd(x: ulong3, y: ulong3, z: ulong3) -> ulong3 {
     return x * y + z;
-  }
-
-  #[inline]
-  pub fn to_char(x: ulong3) -> char3 {
-    return unsafe { simd_cast(x) };
-  }
-
-  #[inline]
-  pub fn to_char_sat(x: ulong3) -> char3 {
-    return ulong3::to_char(simd::min(x, ulong3::broadcast(std::i8::MAX as u64)));
-  }
-
-  #[inline]
-  pub fn to_uchar(x: ulong3) -> uchar3 {
-    return unsafe { simd_cast(x) };
-  }
-
-  #[inline]
-  pub fn to_uchar_sat(x: ulong3) -> uchar3 {
-    return ulong3::to_uchar(simd::min(x, ulong3::broadcast(std::u8::MAX as u64)));
-  }
-
-  #[inline]
-  pub fn to_short(x: ulong3) -> short3 {
-    return unsafe { simd_cast(x) };
-  }
-
-  #[inline]
-  pub fn to_short_sat(x: ulong3) -> short3 {
-    return ulong3::to_short(simd::min(x, ulong3::broadcast(std::i16::MAX as u64)));
-  }
-
-  #[inline]
-  pub fn to_ushort(x: ulong3) -> ushort3 {
-    return unsafe { simd_cast(x) };
-  }
-
-  #[inline]
-  pub fn to_ushort_sat(x: ulong3) -> ushort3 {
-    return ulong3::to_ushort(simd::min(x, ulong3::broadcast(std::u16::MAX as u64)));
-  }
-
-  #[inline]
-  pub fn to_int(x: ulong3) -> int3 {
-    return unsafe { simd_cast(x) };
-  }
-
-  #[inline]
-  pub fn to_int_sat(x: ulong3) -> int3 {
-    return ulong3::to_int(simd::min(x, ulong3::broadcast(std::i32::MAX as u64)));
-  }
-
-  #[inline]
-  pub fn to_uint(x: ulong3) -> uint3 {
-    return unsafe { simd_cast(x) };
-  }
-
-  #[inline]
-  pub fn to_uint_sat(x: ulong3) -> uint3 {
-    return ulong3::to_uint(simd::min(x, ulong3::broadcast(std::u32::MAX as u64)));
-  }
-
-  #[inline]
-  pub fn to_float(x: ulong3) -> float3 {
-    return unsafe { simd_cast(x) };
-  }
-
-  #[inline]
-  pub fn to_long(x: ulong3) -> long3 {
-    return unsafe { simd_cast(x) };
-  }
-
-  #[inline]
-  pub fn to_long_sat(x: ulong3) -> long3 {
-    return ulong3::to_long(simd::min(x, ulong3::broadcast(std::i64::MAX as u64)));
-  }
-
-  #[inline]
-  pub fn to_ulong(x: ulong3) -> ulong3 {
-    return unsafe { simd_cast(x) };
-  }
-
-  #[inline]
-  pub fn to_ulong_sat(x: ulong3) -> ulong3 {
-    return x;
-  }
-
-  #[inline]
-  pub fn to_double(x: ulong3) -> double3 {
-    return unsafe { simd_cast(x) };
   }
 
   #[inline]

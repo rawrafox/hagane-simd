@@ -14,8 +14,6 @@ extern "platform-intrinsic" {
   fn simd_and<T>(x: T, y: T) -> T;
   fn simd_or<T>(x: T, y: T) -> T;
   fn simd_xor<T>(x: T, y: T) -> T;
-
-  fn simd_cast<T, U>(x: T) -> U;
 }
 
 impl std::ops::Add for ulong4 {
@@ -286,6 +284,19 @@ impl simd::Vector for ulong4 {
   type Scalar = u64;
   type Boolean = long4;
 
+  type CharVector = char4;
+  type ShortVector = short4;
+  type IntVector = int4;
+  type LongVector = long4;
+
+  type UCharVector = uchar4;
+  type UShortVector = ushort4;
+  type UIntVector = uint4;
+  type ULongVector = ulong4;
+
+  type FloatVector = float4;
+  type DoubleVector = double4;
+
   #[inline(always)]
   fn abs(self) -> Self {
     return self;
@@ -299,6 +310,46 @@ impl simd::Vector for ulong4 {
   #[inline(always)]
   fn min(self, other: Self) -> Self {
     return simd::bitselect(simd::lt(other, self), self, other);
+  }
+
+  #[inline(always)]
+  fn to_char_sat(self) -> char4 {
+    return ulong4::to_char(simd::min(self, ulong4::broadcast(std::i8::MAX as u64)));
+  }
+
+  #[inline(always)]
+  fn to_uchar_sat(self) -> uchar4 {
+    return ulong4::to_uchar(simd::min(self, ulong4::broadcast(std::u8::MAX as u64)));
+  }
+
+  #[inline(always)]
+  fn to_short_sat(self) -> short4 {
+    return ulong4::to_short(simd::min(self, ulong4::broadcast(std::i16::MAX as u64)));
+  }
+
+  #[inline(always)]
+  fn to_ushort_sat(self) -> ushort4 {
+    return ulong4::to_ushort(simd::min(self, ulong4::broadcast(std::u16::MAX as u64)));
+  }
+
+  #[inline(always)]
+  fn to_int_sat(self) -> int4 {
+    return ulong4::to_int(simd::min(self, ulong4::broadcast(std::i32::MAX as u64)));
+  }
+
+  #[inline(always)]
+  fn to_uint_sat(self) -> uint4 {
+    return ulong4::to_uint(simd::min(self, ulong4::broadcast(std::u32::MAX as u64)));
+  }
+
+  #[inline(always)]
+  fn to_long_sat(self) -> long4 {
+    return ulong4::to_long(simd::min(self, ulong4::broadcast(std::i64::MAX as u64)));
+  }
+
+  #[inline(always)]
+  fn to_ulong_sat(self) -> ulong4 {
+    return self;
   }
 }
 
@@ -355,96 +406,6 @@ impl ulong4 {
   #[inline]
   pub fn madd(x: ulong4, y: ulong4, z: ulong4) -> ulong4 {
     return x * y + z;
-  }
-
-  #[inline]
-  pub fn to_char(x: ulong4) -> char4 {
-    return unsafe { simd_cast(x) };
-  }
-
-  #[inline]
-  pub fn to_char_sat(x: ulong4) -> char4 {
-    return ulong4::to_char(simd::min(x, ulong4::broadcast(std::i8::MAX as u64)));
-  }
-
-  #[inline]
-  pub fn to_uchar(x: ulong4) -> uchar4 {
-    return unsafe { simd_cast(x) };
-  }
-
-  #[inline]
-  pub fn to_uchar_sat(x: ulong4) -> uchar4 {
-    return ulong4::to_uchar(simd::min(x, ulong4::broadcast(std::u8::MAX as u64)));
-  }
-
-  #[inline]
-  pub fn to_short(x: ulong4) -> short4 {
-    return unsafe { simd_cast(x) };
-  }
-
-  #[inline]
-  pub fn to_short_sat(x: ulong4) -> short4 {
-    return ulong4::to_short(simd::min(x, ulong4::broadcast(std::i16::MAX as u64)));
-  }
-
-  #[inline]
-  pub fn to_ushort(x: ulong4) -> ushort4 {
-    return unsafe { simd_cast(x) };
-  }
-
-  #[inline]
-  pub fn to_ushort_sat(x: ulong4) -> ushort4 {
-    return ulong4::to_ushort(simd::min(x, ulong4::broadcast(std::u16::MAX as u64)));
-  }
-
-  #[inline]
-  pub fn to_int(x: ulong4) -> int4 {
-    return unsafe { simd_cast(x) };
-  }
-
-  #[inline]
-  pub fn to_int_sat(x: ulong4) -> int4 {
-    return ulong4::to_int(simd::min(x, ulong4::broadcast(std::i32::MAX as u64)));
-  }
-
-  #[inline]
-  pub fn to_uint(x: ulong4) -> uint4 {
-    return unsafe { simd_cast(x) };
-  }
-
-  #[inline]
-  pub fn to_uint_sat(x: ulong4) -> uint4 {
-    return ulong4::to_uint(simd::min(x, ulong4::broadcast(std::u32::MAX as u64)));
-  }
-
-  #[inline]
-  pub fn to_float(x: ulong4) -> float4 {
-    return unsafe { simd_cast(x) };
-  }
-
-  #[inline]
-  pub fn to_long(x: ulong4) -> long4 {
-    return unsafe { simd_cast(x) };
-  }
-
-  #[inline]
-  pub fn to_long_sat(x: ulong4) -> long4 {
-    return ulong4::to_long(simd::min(x, ulong4::broadcast(std::i64::MAX as u64)));
-  }
-
-  #[inline]
-  pub fn to_ulong(x: ulong4) -> ulong4 {
-    return unsafe { simd_cast(x) };
-  }
-
-  #[inline]
-  pub fn to_ulong_sat(x: ulong4) -> ulong4 {
-    return x;
-  }
-
-  #[inline]
-  pub fn to_double(x: ulong4) -> double4 {
-    return unsafe { simd_cast(x) };
   }
 
   #[inline]

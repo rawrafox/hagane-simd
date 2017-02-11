@@ -7,8 +7,6 @@ extern "platform-intrinsic" {
   fn simd_sub<T>(x: T, y: T) -> T;
   fn simd_mul<T>(x: T, y: T) -> T;
   fn simd_div<T>(x: T, y: T) -> T;
-
-  fn simd_cast<T, U>(x: T) -> U;
 }
 
 impl std::ops::Add for double2 {
@@ -135,6 +133,19 @@ impl simd::Vector for double2 {
   type Scalar = f64;
   type Boolean = long2;
 
+  type CharVector = char2;
+  type ShortVector = short2;
+  type IntVector = int2;
+  type LongVector = long2;
+
+  type UCharVector = uchar2;
+  type UShortVector = ushort2;
+  type UIntVector = uint2;
+  type ULongVector = ulong2;
+
+  type FloatVector = float2;
+  type DoubleVector = double2;
+
   #[inline(always)]
   fn abs(self) -> Self {
     return simd::bitselect(long2::broadcast(std::i64::MAX), double2::broadcast(0.0), self);
@@ -148,6 +159,46 @@ impl simd::Vector for double2 {
   #[inline(always)]
   fn min(self, other: Self) -> Self {
     return double2(self.0.min(other.0), self.1.min(other.1));
+  }
+
+  #[inline(always)]
+  fn to_char_sat(self) -> char2 {
+    return double2::to_char(simd::clamp(self, double2::broadcast(std::i8::MIN as f64), double2::broadcast(std::i8::MAX as f64)));
+  }
+
+  #[inline(always)]
+  fn to_uchar_sat(self) -> uchar2 {
+    return double2::to_uchar(simd::clamp(self, double2::broadcast(std::u8::MIN as f64), double2::broadcast(std::u8::MAX as f64)));
+  }
+
+  #[inline(always)]
+  fn to_short_sat(self) -> short2 {
+    return double2::to_short(simd::clamp(self, double2::broadcast(std::i16::MIN as f64), double2::broadcast(std::i16::MAX as f64)));
+  }
+
+  #[inline(always)]
+  fn to_ushort_sat(self) -> ushort2 {
+    return double2::to_ushort(simd::clamp(self, double2::broadcast(std::u16::MIN as f64), double2::broadcast(std::u16::MAX as f64)));
+  }
+
+  #[inline(always)]
+  fn to_int_sat(self) -> int2 {
+    return double2::to_int(simd::clamp(self, double2::broadcast(std::i32::MIN as f64), double2::broadcast(std::i32::MAX as f64)));
+  }
+
+  #[inline(always)]
+  fn to_uint_sat(self) -> uint2 {
+    return double2::to_uint(simd::clamp(self, double2::broadcast(std::u32::MIN as f64), double2::broadcast(std::u32::MAX as f64)));
+  }
+
+  #[inline(always)]
+  fn to_long_sat(self) -> long2 {
+    return double2::to_long(simd::clamp(self, double2::broadcast(std::i64::MIN as f64), double2::broadcast(std::i64::MAX as f64)));
+  }
+
+  #[inline(always)]
+  fn to_ulong_sat(self) -> ulong2 {
+    return double2::to_ulong(simd::clamp(self, double2::broadcast(std::u64::MIN as f64), double2::broadcast(std::u64::MAX as f64)));
   }
 }
 
@@ -332,96 +383,6 @@ impl double2 {
   #[inline]
   pub fn madd(x: double2, y: double2, z: double2) -> double2 {
     return x * y + z;
-  }
-
-  #[inline]
-  pub fn to_char(x: double2) -> char2 {
-    return unsafe { simd_cast(x) };
-  }
-
-  #[inline]
-  pub fn to_char_sat(x: double2) -> char2 {
-    return double2::to_char(simd::clamp(x, double2::broadcast(std::i8::MIN as f64), double2::broadcast(std::i8::MAX as f64)));
-  }
-
-  #[inline]
-  pub fn to_uchar(x: double2) -> uchar2 {
-    return unsafe { simd_cast(x) };
-  }
-
-  #[inline]
-  pub fn to_uchar_sat(x: double2) -> uchar2 {
-    return double2::to_uchar(simd::clamp(x, double2::broadcast(std::u8::MIN as f64), double2::broadcast(std::u8::MAX as f64)));
-  }
-
-  #[inline]
-  pub fn to_short(x: double2) -> short2 {
-    return unsafe { simd_cast(x) };
-  }
-
-  #[inline]
-  pub fn to_short_sat(x: double2) -> short2 {
-    return double2::to_short(simd::clamp(x, double2::broadcast(std::i16::MIN as f64), double2::broadcast(std::i16::MAX as f64)));
-  }
-
-  #[inline]
-  pub fn to_ushort(x: double2) -> ushort2 {
-    return unsafe { simd_cast(x) };
-  }
-
-  #[inline]
-  pub fn to_ushort_sat(x: double2) -> ushort2 {
-    return double2::to_ushort(simd::clamp(x, double2::broadcast(std::u16::MIN as f64), double2::broadcast(std::u16::MAX as f64)));
-  }
-
-  #[inline]
-  pub fn to_int(x: double2) -> int2 {
-    return unsafe { simd_cast(x) };
-  }
-
-  #[inline]
-  pub fn to_int_sat(x: double2) -> int2 {
-    return double2::to_int(simd::clamp(x, double2::broadcast(std::i32::MIN as f64), double2::broadcast(std::i32::MAX as f64)));
-  }
-
-  #[inline]
-  pub fn to_uint(x: double2) -> uint2 {
-    return unsafe { simd_cast(x) };
-  }
-
-  #[inline]
-  pub fn to_uint_sat(x: double2) -> uint2 {
-    return double2::to_uint(simd::clamp(x, double2::broadcast(std::u32::MIN as f64), double2::broadcast(std::u32::MAX as f64)));
-  }
-
-  #[inline]
-  pub fn to_float(x: double2) -> float2 {
-    return unsafe { simd_cast(x) };
-  }
-
-  #[inline]
-  pub fn to_long(x: double2) -> long2 {
-    return unsafe { simd_cast(x) };
-  }
-
-  #[inline]
-  pub fn to_long_sat(x: double2) -> long2 {
-    return double2::to_long(simd::clamp(x, double2::broadcast(std::i64::MIN as f64), double2::broadcast(std::i64::MAX as f64)));
-  }
-
-  #[inline]
-  pub fn to_ulong(x: double2) -> ulong2 {
-    return unsafe { simd_cast(x) };
-  }
-
-  #[inline]
-  pub fn to_ulong_sat(x: double2) -> ulong2 {
-    return double2::to_ulong(simd::clamp(x, double2::broadcast(std::u64::MIN as f64), double2::broadcast(std::u64::MAX as f64)));
-  }
-
-  #[inline]
-  pub fn to_double(x: double2) -> double2 {
-    return unsafe { simd_cast(x) };
   }
 
   #[inline]

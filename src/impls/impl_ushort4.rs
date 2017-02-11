@@ -14,8 +14,6 @@ extern "platform-intrinsic" {
   fn simd_and<T>(x: T, y: T) -> T;
   fn simd_or<T>(x: T, y: T) -> T;
   fn simd_xor<T>(x: T, y: T) -> T;
-
-  fn simd_cast<T, U>(x: T) -> U;
 }
 
 impl std::ops::Add for ushort4 {
@@ -286,6 +284,19 @@ impl simd::Vector for ushort4 {
   type Scalar = u16;
   type Boolean = short4;
 
+  type CharVector = char4;
+  type ShortVector = short4;
+  type IntVector = int4;
+  type LongVector = long4;
+
+  type UCharVector = uchar4;
+  type UShortVector = ushort4;
+  type UIntVector = uint4;
+  type ULongVector = ulong4;
+
+  type FloatVector = float4;
+  type DoubleVector = double4;
+
   #[inline(always)]
   fn abs(self) -> Self {
     return self;
@@ -299,6 +310,46 @@ impl simd::Vector for ushort4 {
   #[inline(always)]
   fn min(self, other: Self) -> Self {
     return simd::bitselect(simd::lt(other, self), self, other);
+  }
+
+  #[inline(always)]
+  fn to_char_sat(self) -> char4 {
+    return ushort4::to_char(simd::min(self, ushort4::broadcast(std::i8::MAX as u16)));
+  }
+
+  #[inline(always)]
+  fn to_uchar_sat(self) -> uchar4 {
+    return ushort4::to_uchar(simd::min(self, ushort4::broadcast(std::u8::MAX as u16)));
+  }
+
+  #[inline(always)]
+  fn to_short_sat(self) -> short4 {
+    return ushort4::to_short(simd::min(self, ushort4::broadcast(std::i16::MAX as u16)));
+  }
+
+  #[inline(always)]
+  fn to_ushort_sat(self) -> ushort4 {
+    return self;
+  }
+
+  #[inline(always)]
+  fn to_int_sat(self) -> int4 {
+    return ushort4::to_int(simd::min(self, ushort4::broadcast(std::i32::MAX as u16)));
+  }
+
+  #[inline(always)]
+  fn to_uint_sat(self) -> uint4 {
+    return ushort4::to_uint(self);
+  }
+
+  #[inline(always)]
+  fn to_long_sat(self) -> long4 {
+    return ushort4::to_long(simd::min(self, ushort4::broadcast(std::i64::MAX as u16)));
+  }
+
+  #[inline(always)]
+  fn to_ulong_sat(self) -> ulong4 {
+    return ushort4::to_ulong(self);
   }
 }
 
@@ -355,96 +406,6 @@ impl ushort4 {
   #[inline]
   pub fn madd(x: ushort4, y: ushort4, z: ushort4) -> ushort4 {
     return x * y + z;
-  }
-
-  #[inline]
-  pub fn to_char(x: ushort4) -> char4 {
-    return unsafe { simd_cast(x) };
-  }
-
-  #[inline]
-  pub fn to_char_sat(x: ushort4) -> char4 {
-    return ushort4::to_char(simd::min(x, ushort4::broadcast(std::i8::MAX as u16)));
-  }
-
-  #[inline]
-  pub fn to_uchar(x: ushort4) -> uchar4 {
-    return unsafe { simd_cast(x) };
-  }
-
-  #[inline]
-  pub fn to_uchar_sat(x: ushort4) -> uchar4 {
-    return ushort4::to_uchar(simd::min(x, ushort4::broadcast(std::u8::MAX as u16)));
-  }
-
-  #[inline]
-  pub fn to_short(x: ushort4) -> short4 {
-    return unsafe { simd_cast(x) };
-  }
-
-  #[inline]
-  pub fn to_short_sat(x: ushort4) -> short4 {
-    return ushort4::to_short(simd::min(x, ushort4::broadcast(std::i16::MAX as u16)));
-  }
-
-  #[inline]
-  pub fn to_ushort(x: ushort4) -> ushort4 {
-    return unsafe { simd_cast(x) };
-  }
-
-  #[inline]
-  pub fn to_ushort_sat(x: ushort4) -> ushort4 {
-    return x;
-  }
-
-  #[inline]
-  pub fn to_int(x: ushort4) -> int4 {
-    return unsafe { simd_cast(x) };
-  }
-
-  #[inline]
-  pub fn to_int_sat(x: ushort4) -> int4 {
-    return ushort4::to_int(simd::min(x, ushort4::broadcast(std::i32::MAX as u16)));
-  }
-
-  #[inline]
-  pub fn to_uint(x: ushort4) -> uint4 {
-    return unsafe { simd_cast(x) };
-  }
-
-  #[inline]
-  pub fn to_uint_sat(x: ushort4) -> uint4 {
-    return ushort4::to_uint(x);
-  }
-
-  #[inline]
-  pub fn to_float(x: ushort4) -> float4 {
-    return unsafe { simd_cast(x) };
-  }
-
-  #[inline]
-  pub fn to_long(x: ushort4) -> long4 {
-    return unsafe { simd_cast(x) };
-  }
-
-  #[inline]
-  pub fn to_long_sat(x: ushort4) -> long4 {
-    return ushort4::to_long(simd::min(x, ushort4::broadcast(std::i64::MAX as u16)));
-  }
-
-  #[inline]
-  pub fn to_ulong(x: ushort4) -> ulong4 {
-    return unsafe { simd_cast(x) };
-  }
-
-  #[inline]
-  pub fn to_ulong_sat(x: ushort4) -> ulong4 {
-    return ushort4::to_ulong(x);
-  }
-
-  #[inline]
-  pub fn to_double(x: ushort4) -> double4 {
-    return unsafe { simd_cast(x) };
   }
 
   #[inline]
