@@ -306,14 +306,40 @@ impl PartialEq for long4 {
 }
 
 impl simd::Vector for long4 {
+  type Scalar = i64;
+  #[inline(always)]
+  fn extract(self, i: u32) -> Self::Scalar {
+    return unsafe { simd_extract(self, i) };
+  }
+
+  #[inline(always)]
+  fn replace(self, i: u32, x: Self::Scalar) -> Self {
+    return unsafe { simd_insert(self, i, x) };
+  }
+
+  #[inline(always)]
+  fn abs(self) -> Self {
+    let mask = self >> 63;
+    return (self ^ mask) - mask;
+  }
+
+  #[inline(always)]
+  fn max(self, other: Self) -> Self {
+    return simd::bitselect(long4::gt(other, self), self, other);
+  }
+
+  #[inline(always)]
+  fn min(self, other: Self) -> Self {
+    return simd::bitselect(long4::lt(other, self), self, other);
+  }
 }
 
 impl simd::Dot for long4 {
   type Output = i64;
 
-  #[inline]
-  fn dot(self, other: long4) -> i64 {
-    return long4::reduce_add(self * other);
+  #[inline(always)]
+  fn dot(self, other: Self) -> Self::Output {
+    return simd::reduce_add(self * other);
   }
 }
 
@@ -329,6 +355,23 @@ impl simd::Logic for long4 {
   }
 }
 
+impl simd::Reduce for long4 {
+  #[inline(always)]
+  fn reduce_add(self) -> Self::Scalar {
+    return simd::reduce_add(self.lo() + self.hi());
+  }
+
+  #[inline(always)]
+  fn reduce_min(self) -> Self::Scalar {
+    return simd::reduce_min(simd::min(self.lo(), self.hi()));
+  }
+
+  #[inline(always)]
+  fn reduce_max(self) -> Self::Scalar {
+    return simd::reduce_max(simd::max(self.lo(), self.hi()));
+  }
+}
+
 impl simd::Select<long4> for long4 {
   #[inline(always)]
   fn select(self, a: long4, b: long4) -> long4 {
@@ -337,7 +380,7 @@ impl simd::Select<long4> for long4 {
 
   #[inline(always)]
   fn bitselect(self, a: long4, b: long4) -> long4 {
-    return (x & !z) | (y & z);
+    return (a & !self) | (b & self);
   }
 }
 
@@ -349,7 +392,7 @@ impl simd::Select<ulong4> for long4 {
 
   #[inline(always)]
   fn bitselect(self, a: ulong4, b: ulong4) -> ulong4 {
-    return ulong4::bitcast(self.bitselect(long4::bitcast(x), long4::bitcast(y)));
+    return ulong4::bitcast(self.bitselect(long4::bitcast(a), long4::bitcast(b)));
   }
 }
 
@@ -361,7 +404,7 @@ impl simd::Select<double4> for long4 {
 
   #[inline(always)]
   fn bitselect(self, a: double4, b: double4) -> double4 {
-    return double4::bitcast(self.bitselect(long4::bitcast(x), long4::bitcast(y)));
+    return double4::bitcast(self.bitselect(long4::bitcast(a), long4::bitcast(b)));
   }
 }
 
@@ -374,18 +417,8 @@ impl long4 {
   }
 
   #[inline]
-  pub fn broadcast(x: i64) -> long4 {
+  pub fn broadcast(x: i64) -> Self {
     return long4(x, x, x, x);
-  }
-
-  #[inline]
-  pub fn extract(self, i: u32) -> i64 {
-    return unsafe { simd_extract(self, i) };
-  }
-
-  #[inline]
-  pub fn replace(self, i: u32, x: i64) -> long4 {
-    return unsafe { simd_insert(self, i, x) };
   }
 
   #[inline]
@@ -424,49 +457,13 @@ impl long4 {
   }
 
   #[inline]
-  pub fn abs(x: long4) -> long4 {
-    let mask = x >> 63;
-    return (x ^ mask) - mask;
-  }
-
-  #[inline]
-  pub fn max(x: long4, y: long4) -> long4 {
-    return long4::bitselect(x, y, long4::gt(y, x));
-  }
-
-  #[inline]
-  pub fn min(x: long4, y: long4) -> long4 {
-    return long4::bitselect(x, y, long4::lt(y, x));
-  }
-
-  #[inline]
-  pub fn clamp(x: long4, min: long4, max: long4) -> long4 {
-    return long4::min(long4::max(x, min), max);
-  }
-
-  #[inline]
-  pub fn reduce_add(x: long4) -> i64 {
-    return long2::reduce_add(x.lo() + x.hi());
-  }
-
-  #[inline]
-  pub fn reduce_min(x: long4) -> i64 {
-    return long2::reduce_min(long2::min(x.lo(), x.hi()));
-  }
-
-  #[inline]
-  pub fn reduce_max(x: long4) -> i64 {
-    return long2::reduce_max(long2::max(x.lo(), x.hi()));
-  }
-
-  #[inline]
   pub fn to_char(x: long4) -> char4 {
     return unsafe { simd_cast(x) };
   }
 
   #[inline]
   pub fn to_char_sat(x: long4) -> char4 {
-    return long4::to_char(long4::clamp(x, long4::broadcast(std::i8::MIN as i64), long4::broadcast(std::i8::MAX as i64)));
+    return long4::to_char(simd::clamp(x, long4::broadcast(std::i8::MIN as i64), long4::broadcast(std::i8::MAX as i64)));
   }
 
   #[inline]
@@ -476,7 +473,7 @@ impl long4 {
 
   #[inline]
   pub fn to_uchar_sat(x: long4) -> uchar4 {
-    return long4::to_uchar(long4::clamp(x, long4::broadcast(std::u8::MIN as i64), long4::broadcast(std::u8::MAX as i64)));
+    return long4::to_uchar(simd::clamp(x, long4::broadcast(std::u8::MIN as i64), long4::broadcast(std::u8::MAX as i64)));
   }
 
   #[inline]
@@ -486,7 +483,7 @@ impl long4 {
 
   #[inline]
   pub fn to_short_sat(x: long4) -> short4 {
-    return long4::to_short(long4::clamp(x, long4::broadcast(std::i16::MIN as i64), long4::broadcast(std::i16::MAX as i64)));
+    return long4::to_short(simd::clamp(x, long4::broadcast(std::i16::MIN as i64), long4::broadcast(std::i16::MAX as i64)));
   }
 
   #[inline]
@@ -496,7 +493,7 @@ impl long4 {
 
   #[inline]
   pub fn to_ushort_sat(x: long4) -> ushort4 {
-    return long4::to_ushort(long4::clamp(x, long4::broadcast(std::u16::MIN as i64), long4::broadcast(std::u16::MAX as i64)));
+    return long4::to_ushort(simd::clamp(x, long4::broadcast(std::u16::MIN as i64), long4::broadcast(std::u16::MAX as i64)));
   }
 
   #[inline]
@@ -506,7 +503,7 @@ impl long4 {
 
   #[inline]
   pub fn to_int_sat(x: long4) -> int4 {
-    return long4::to_int(long4::clamp(x, long4::broadcast(std::i32::MIN as i64), long4::broadcast(std::i32::MAX as i64)));
+    return long4::to_int(simd::clamp(x, long4::broadcast(std::i32::MIN as i64), long4::broadcast(std::i32::MAX as i64)));
   }
 
   #[inline]
@@ -516,7 +513,7 @@ impl long4 {
 
   #[inline]
   pub fn to_uint_sat(x: long4) -> uint4 {
-    return long4::to_uint(long4::clamp(x, long4::broadcast(std::u32::MIN as i64), long4::broadcast(std::u32::MAX as i64)));
+    return long4::to_uint(simd::clamp(x, long4::broadcast(std::u32::MIN as i64), long4::broadcast(std::u32::MAX as i64)));
   }
 
   #[inline]
@@ -541,7 +538,7 @@ impl long4 {
 
   #[inline]
   pub fn to_ulong_sat(x: long4) -> ulong4 {
-    return long4::to_ulong(long4::max(x, long4::broadcast(0)));
+    return long4::to_ulong(simd::max(x, long4::broadcast(0)));
   }
 
   #[inline]

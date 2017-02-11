@@ -155,14 +155,97 @@ impl PartialEq for double3 {
 }
 
 impl simd::Vector for double3 {
+  type Scalar = f64;
+  #[inline(always)]
+  fn extract(self, i: u32) -> Self::Scalar {
+    return unsafe { simd_extract(self, i) };
+  }
+
+  #[inline(always)]
+  fn replace(self, i: u32, x: Self::Scalar) -> Self {
+    return unsafe { simd_insert(self, i, x) };
+  }
+
+  #[inline(always)]
+  fn abs(self) -> Self {
+    return simd::bitselect(long3::broadcast(std::i64::MAX), double3::broadcast(0.0), self);
+  }
+
+  #[inline(always)]
+  fn max(self, other: Self) -> Self {
+    return double3(self.0.max(other.0), self.1.max(other.1), self.2.max(other.2));
+  }
+
+  #[inline(always)]
+  fn min(self, other: Self) -> Self {
+    return double3(self.0.min(other.0), self.1.min(other.1), self.2.min(other.2));
+  }
 }
 
 impl simd::Dot for double3 {
   type Output = f64;
 
-  #[inline]
-  fn dot(self, other: double3) -> f64 {
-    return double3::reduce_add(self * other);
+  #[inline(always)]
+  fn dot(self, other: Self) -> Self::Output {
+    return simd::reduce_add(self * other);
+  }
+}
+
+impl simd::Float for double3 {
+  #[inline(always)]
+  fn sign(self) -> Self {
+    let (zero, one) = (double3::broadcast(0.0), double3::broadcast(1.0));
+
+    return simd::bitselect(double3::eq(self, zero) | double3::ne(self, self), double3::copysign(one, self), zero);
+  }
+
+  #[inline(always)]
+  fn mix(self, a: Self, b: Self) -> Self {
+    return a + self * (b - a);
+  }
+
+  #[inline(always)]
+  fn recip(self) -> Self {
+    return 1.0 / self;
+  }
+
+  #[inline(always)]
+  fn rsqrt(self) -> Self {
+    return 1.0 / double3::sqrt(self);
+  }
+
+  #[inline(always)]
+  fn fract(self) -> Self {
+    return double3(self.0.fract(), self.1.fract(), self.2.fract());
+  }
+
+  #[inline(always)]
+  fn step(self, edge: Self) -> Self {
+    return simd::bitselect(double3::lt(self, edge), double3::broadcast(1.0), double3::broadcast(0.0));
+  }
+
+  #[inline(always)]
+  fn smoothstep(self, edge0: Self, edge1: Self) -> Self {
+    let t = simd::clamp((self - edge0) / (edge1 - edge0), double3::broadcast(0.0), double3::broadcast(1.0));
+
+    return t * t * (3.0 - 2.0 * t);
+  }
+}
+
+impl simd::Reduce for double3 {
+  #[inline(always)]
+  fn reduce_add(self) -> Self::Scalar {
+    return self.0 + self.1 + self.2;
+  }
+
+  #[inline(always)]
+  fn reduce_min(self) -> Self::Scalar {
+    return self.2.min(simd::reduce_min(self.lo()));
+  }
+
+  #[inline(always)]
+  fn reduce_max(self) -> Self::Scalar {
+    return self.2.max(simd::reduce_max(self.lo()));
   }
 }
 
@@ -175,18 +258,8 @@ impl double3 {
   }
 
   #[inline]
-  pub fn broadcast(x: f64) -> double3 {
+  pub fn broadcast(x: f64) -> Self {
     return double3(x, x, x);
-  }
-
-  #[inline]
-  pub fn extract(self, i: u32) -> f64 {
-    return unsafe { simd_extract(self, i) };
-  }
-
-  #[inline]
-  pub fn replace(self, i: u32, x: f64) -> double3 {
-    return unsafe { simd_insert(self, i, x) };
   }
 
   #[inline]
@@ -225,81 +298,8 @@ impl double3 {
   }
 
   #[inline]
-  pub fn abs(x: double3) -> double3 {
-    return double3::bitselect(double3::broadcast(0.0), x, long3::broadcast(std::i64::MAX));
-  }
-
-  #[inline]
-  pub fn max(x: double3, y: double3) -> double3 {
-    return double3(x.0.max(y.0), x.1.max(y.1), x.2.max(y.2));
-  }
-
-  #[inline]
-  pub fn min(x: double3, y: double3) -> double3 {
-    return double3(x.0.min(y.0), x.1.min(y.1), x.2.min(y.2));
-  }
-
-  #[inline]
-  pub fn clamp(x: double3, min: double3, max: double3) -> double3 {
-    return double3::min(double3::max(x, min), max);
-  }
-
-  #[inline]
-  pub fn sign(x: double3) -> double3 {
-    let (zero, one) = (double3::broadcast(0.0), double3::broadcast(1.0));
-    return double3::bitselect(double3::copysign(one, x), zero, double3::eq(x, zero) | double3::ne(x, x));
-  }
-
-  #[inline]
-  pub fn mix(x: double3, y: double3, t: double3) -> double3 {
-    return x + t * (y - x);
-  }
-
-  #[inline]
-  pub fn recip(x: double3) -> double3 {
-    return 1.0 / x;
-  }
-
-  #[inline]
-  pub fn rsqrt(x: double3) -> double3 {
-    return 1.0 / double3::sqrt(x);
-  }
-
-  #[inline]
-  pub fn fract(x: double3) -> double3 {
-    return double3(x.0.fract(), x.1.fract(), x.2.fract());
-  }
-
-  #[inline]
-  pub fn step(edge: double3, x: double3) -> double3 {
-    return double3::bitselect(double3::broadcast(1.0), double3::broadcast(0.0), double3::lt(x, edge));
-  }
-
-  #[inline]
-  pub fn smoothstep(edge0: double3, edge1: double3, x: double3) -> double3 {
-    let t = double3::clamp((x - edge0) / (edge1 - edge0), double3::broadcast(0.0), double3::broadcast(1.0));
-
-    return t * t * (3.0 - 2.0 * t);
-  }
-
-  #[inline]
-  pub fn reduce_add(x: double3) -> f64 {
-    return x.0 + x.1 + x.2;
-  }
-
-  #[inline]
-  pub fn reduce_min(x: double3) -> f64 {
-    return x.2.min(double2::reduce_min(x.lo()));
-  }
-
-  #[inline]
-  pub fn reduce_max(x: double3) -> f64 {
-    return x.2.max(double2::reduce_max(x.lo()));
-  }
-
-  #[inline]
   pub fn copysign(x: double3, y: double3) -> double3 {
-    return double3::bitselect(y, x, long3::broadcast(std::i64::MAX));
+    return simd::bitselect(long3::broadcast(std::i64::MAX), y, x);
   }
 
   #[inline]
@@ -334,12 +334,12 @@ impl double3 {
 
   #[inline]
   pub fn dot(x: double3, y: double3) -> f64 {
-    return double3::reduce_add(x * y);
+    return simd::reduce_add(x * y);
   }
 
   #[inline]
   pub fn project(x: double3, y: double3) -> double3 {
-    return double3::dot(x, y) / double3::dot(y, y) * y;
+    return simd::dot(x, y) / simd::dot(y, y) * y;
   }
 
   #[inline]
@@ -354,12 +354,12 @@ impl double3 {
 
   #[inline]
   pub fn norm_one(x: double3) -> f64 {
-    return double3::reduce_add(double3::abs(x));
+    return simd::reduce_add(simd::abs(x));
   }
 
   #[inline]
   pub fn norm_inf(x: double3) -> f64 {
-    return double3::reduce_max(double3::abs(x));
+    return simd::reduce_max(simd::abs(x));
   }
 
   #[inline]
@@ -374,7 +374,7 @@ impl double3 {
 
   #[inline]
   pub fn normalize(x: double3) -> double3 {
-    return x * double3::rsqrt(double3::broadcast(double3::length_squared(x)));
+    return x * simd::rsqrt(double3::broadcast(double3::length_squared(x)));
   }
 
   #[inline]
@@ -402,7 +402,7 @@ impl double3 {
 
   #[inline]
   pub fn to_char_sat(x: double3) -> char3 {
-    return double3::to_char(double3::clamp(x, double3::broadcast(std::i8::MIN as f64), double3::broadcast(std::i8::MAX as f64)));
+    return double3::to_char(simd::clamp(x, double3::broadcast(std::i8::MIN as f64), double3::broadcast(std::i8::MAX as f64)));
   }
 
   #[inline]
@@ -412,7 +412,7 @@ impl double3 {
 
   #[inline]
   pub fn to_uchar_sat(x: double3) -> uchar3 {
-    return double3::to_uchar(double3::clamp(x, double3::broadcast(std::u8::MIN as f64), double3::broadcast(std::u8::MAX as f64)));
+    return double3::to_uchar(simd::clamp(x, double3::broadcast(std::u8::MIN as f64), double3::broadcast(std::u8::MAX as f64)));
   }
 
   #[inline]
@@ -422,7 +422,7 @@ impl double3 {
 
   #[inline]
   pub fn to_short_sat(x: double3) -> short3 {
-    return double3::to_short(double3::clamp(x, double3::broadcast(std::i16::MIN as f64), double3::broadcast(std::i16::MAX as f64)));
+    return double3::to_short(simd::clamp(x, double3::broadcast(std::i16::MIN as f64), double3::broadcast(std::i16::MAX as f64)));
   }
 
   #[inline]
@@ -432,7 +432,7 @@ impl double3 {
 
   #[inline]
   pub fn to_ushort_sat(x: double3) -> ushort3 {
-    return double3::to_ushort(double3::clamp(x, double3::broadcast(std::u16::MIN as f64), double3::broadcast(std::u16::MAX as f64)));
+    return double3::to_ushort(simd::clamp(x, double3::broadcast(std::u16::MIN as f64), double3::broadcast(std::u16::MAX as f64)));
   }
 
   #[inline]
@@ -442,7 +442,7 @@ impl double3 {
 
   #[inline]
   pub fn to_int_sat(x: double3) -> int3 {
-    return double3::to_int(double3::clamp(x, double3::broadcast(std::i32::MIN as f64), double3::broadcast(std::i32::MAX as f64)));
+    return double3::to_int(simd::clamp(x, double3::broadcast(std::i32::MIN as f64), double3::broadcast(std::i32::MAX as f64)));
   }
 
   #[inline]
@@ -452,7 +452,7 @@ impl double3 {
 
   #[inline]
   pub fn to_uint_sat(x: double3) -> uint3 {
-    return double3::to_uint(double3::clamp(x, double3::broadcast(std::u32::MIN as f64), double3::broadcast(std::u32::MAX as f64)));
+    return double3::to_uint(simd::clamp(x, double3::broadcast(std::u32::MIN as f64), double3::broadcast(std::u32::MAX as f64)));
   }
 
   #[inline]
@@ -467,7 +467,7 @@ impl double3 {
 
   #[inline]
   pub fn to_long_sat(x: double3) -> long3 {
-    return double3::to_long(double3::clamp(x, double3::broadcast(std::i64::MIN as f64), double3::broadcast(std::i64::MAX as f64)));
+    return double3::to_long(simd::clamp(x, double3::broadcast(std::i64::MIN as f64), double3::broadcast(std::i64::MAX as f64)));
   }
 
   #[inline]
@@ -477,7 +477,7 @@ impl double3 {
 
   #[inline]
   pub fn to_ulong_sat(x: double3) -> ulong3 {
-    return double3::to_ulong(double3::clamp(x, double3::broadcast(std::u64::MIN as f64), double3::broadcast(std::u64::MAX as f64)));
+    return double3::to_ulong(simd::clamp(x, double3::broadcast(std::u64::MIN as f64), double3::broadcast(std::u64::MAX as f64)));
   }
 
   #[inline]

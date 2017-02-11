@@ -306,14 +306,39 @@ impl PartialEq for uchar2 {
 }
 
 impl simd::Vector for uchar2 {
+  type Scalar = u8;
+  #[inline(always)]
+  fn extract(self, i: u32) -> Self::Scalar {
+    return unsafe { simd_extract(self, i) };
+  }
+
+  #[inline(always)]
+  fn replace(self, i: u32, x: Self::Scalar) -> Self {
+    return unsafe { simd_insert(self, i, x) };
+  }
+
+  #[inline(always)]
+  fn abs(self) -> Self {
+    return self;
+  }
+
+  #[inline(always)]
+  fn max(self, other: Self) -> Self {
+    return simd::bitselect(uchar2::gt(other, self), self, other);
+  }
+
+  #[inline(always)]
+  fn min(self, other: Self) -> Self {
+    return simd::bitselect(uchar2::lt(other, self), self, other);
+  }
 }
 
 impl simd::Dot for uchar2 {
   type Output = u8;
 
-  #[inline]
-  fn dot(self, other: uchar2) -> u8 {
-    return uchar2::reduce_add(self * other);
+  #[inline(always)]
+  fn dot(self, other: Self) -> Self::Output {
+    return simd::reduce_add(self * other);
   }
 }
 
@@ -329,6 +354,23 @@ impl simd::Logic for uchar2 {
   }
 }
 
+impl simd::Reduce for uchar2 {
+  #[inline(always)]
+  fn reduce_add(self) -> Self::Scalar {
+    return self.0 + self.1;
+  }
+
+  #[inline(always)]
+  fn reduce_min(self) -> Self::Scalar {
+    return std::cmp::min(self.0, self.1);
+  }
+
+  #[inline(always)]
+  fn reduce_max(self) -> Self::Scalar {
+    return std::cmp::max(self.0, self.1);
+  }
+}
+
 impl uchar2 {
   #[inline]
   pub fn bitcast<T>(x: T) -> uchar2 {
@@ -338,18 +380,8 @@ impl uchar2 {
   }
 
   #[inline]
-  pub fn broadcast(x: u8) -> uchar2 {
+  pub fn broadcast(x: u8) -> Self {
     return uchar2(x, x);
-  }
-
-  #[inline]
-  pub fn extract(self, i: u32) -> u8 {
-    return unsafe { simd_extract(self, i) };
-  }
-
-  #[inline]
-  pub fn replace(self, i: u32, x: u8) -> uchar2 {
-    return unsafe { simd_insert(self, i, x) };
   }
 
   #[inline]
@@ -388,48 +420,13 @@ impl uchar2 {
   }
 
   #[inline]
-  pub fn abs(x: uchar2) -> uchar2 {
-    return x;
-  }
-
-  #[inline]
-  pub fn max(x: uchar2, y: uchar2) -> uchar2 {
-    return uchar2::bitselect(x, y, uchar2::gt(y, x));
-  }
-
-  #[inline]
-  pub fn min(x: uchar2, y: uchar2) -> uchar2 {
-    return uchar2::bitselect(x, y, uchar2::lt(y, x));
-  }
-
-  #[inline]
-  pub fn clamp(x: uchar2, min: uchar2, max: uchar2) -> uchar2 {
-    return uchar2::min(uchar2::max(x, min), max);
-  }
-
-  #[inline]
-  pub fn reduce_add(x: uchar2) -> u8 {
-    return x.0 + x.1;
-  }
-
-  #[inline]
-  pub fn reduce_min(x: uchar2) -> u8 {
-    return std::cmp::min(x.0, x.1);
-  }
-
-  #[inline]
-  pub fn reduce_max(x: uchar2) -> u8 {
-    return std::cmp::max(x.0, x.1);
-  }
-
-  #[inline]
   pub fn to_char(x: uchar2) -> char2 {
     return unsafe { simd_cast(x) };
   }
 
   #[inline]
   pub fn to_char_sat(x: uchar2) -> char2 {
-    return uchar2::to_char(uchar2::min(x, uchar2::broadcast(std::i8::MAX as u8)));
+    return uchar2::to_char(simd::min(x, uchar2::broadcast(std::i8::MAX as u8)));
   }
 
   #[inline]
@@ -449,7 +446,7 @@ impl uchar2 {
 
   #[inline]
   pub fn to_short_sat(x: uchar2) -> short2 {
-    return uchar2::to_short(uchar2::min(x, uchar2::broadcast(std::i16::MAX as u8)));
+    return uchar2::to_short(simd::min(x, uchar2::broadcast(std::i16::MAX as u8)));
   }
 
   #[inline]
@@ -469,7 +466,7 @@ impl uchar2 {
 
   #[inline]
   pub fn to_int_sat(x: uchar2) -> int2 {
-    return uchar2::to_int(uchar2::min(x, uchar2::broadcast(std::i32::MAX as u8)));
+    return uchar2::to_int(simd::min(x, uchar2::broadcast(std::i32::MAX as u8)));
   }
 
   #[inline]
@@ -494,7 +491,7 @@ impl uchar2 {
 
   #[inline]
   pub fn to_long_sat(x: uchar2) -> long2 {
-    return uchar2::to_long(uchar2::min(x, uchar2::broadcast(std::i64::MAX as u8)));
+    return uchar2::to_long(simd::min(x, uchar2::broadcast(std::i64::MAX as u8)));
   }
 
   #[inline]

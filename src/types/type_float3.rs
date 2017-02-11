@@ -155,14 +155,97 @@ impl PartialEq for float3 {
 }
 
 impl simd::Vector for float3 {
+  type Scalar = f32;
+  #[inline(always)]
+  fn extract(self, i: u32) -> Self::Scalar {
+    return unsafe { simd_extract(self, i) };
+  }
+
+  #[inline(always)]
+  fn replace(self, i: u32, x: Self::Scalar) -> Self {
+    return unsafe { simd_insert(self, i, x) };
+  }
+
+  #[inline(always)]
+  fn abs(self) -> Self {
+    return simd::bitselect(int3::broadcast(std::i32::MAX), float3::broadcast(0.0), self);
+  }
+
+  #[inline(always)]
+  fn max(self, other: Self) -> Self {
+    return float3(self.0.max(other.0), self.1.max(other.1), self.2.max(other.2));
+  }
+
+  #[inline(always)]
+  fn min(self, other: Self) -> Self {
+    return float3(self.0.min(other.0), self.1.min(other.1), self.2.min(other.2));
+  }
 }
 
 impl simd::Dot for float3 {
   type Output = f32;
 
-  #[inline]
-  fn dot(self, other: float3) -> f32 {
-    return float3::reduce_add(self * other);
+  #[inline(always)]
+  fn dot(self, other: Self) -> Self::Output {
+    return simd::reduce_add(self * other);
+  }
+}
+
+impl simd::Float for float3 {
+  #[inline(always)]
+  fn sign(self) -> Self {
+    let (zero, one) = (float3::broadcast(0.0), float3::broadcast(1.0));
+
+    return simd::bitselect(float3::eq(self, zero) | float3::ne(self, self), float3::copysign(one, self), zero);
+  }
+
+  #[inline(always)]
+  fn mix(self, a: Self, b: Self) -> Self {
+    return a + self * (b - a);
+  }
+
+  #[inline(always)]
+  fn recip(self) -> Self {
+    return 1.0 / self;
+  }
+
+  #[inline(always)]
+  fn rsqrt(self) -> Self {
+    return 1.0 / float3::sqrt(self);
+  }
+
+  #[inline(always)]
+  fn fract(self) -> Self {
+    return float3(self.0.fract(), self.1.fract(), self.2.fract());
+  }
+
+  #[inline(always)]
+  fn step(self, edge: Self) -> Self {
+    return simd::bitselect(float3::lt(self, edge), float3::broadcast(1.0), float3::broadcast(0.0));
+  }
+
+  #[inline(always)]
+  fn smoothstep(self, edge0: Self, edge1: Self) -> Self {
+    let t = simd::clamp((self - edge0) / (edge1 - edge0), float3::broadcast(0.0), float3::broadcast(1.0));
+
+    return t * t * (3.0 - 2.0 * t);
+  }
+}
+
+impl simd::Reduce for float3 {
+  #[inline(always)]
+  fn reduce_add(self) -> Self::Scalar {
+    return self.0 + self.1 + self.2;
+  }
+
+  #[inline(always)]
+  fn reduce_min(self) -> Self::Scalar {
+    return self.2.min(simd::reduce_min(self.lo()));
+  }
+
+  #[inline(always)]
+  fn reduce_max(self) -> Self::Scalar {
+    return self.2.max(simd::reduce_max(self.lo()));
   }
 }
 
@@ -175,18 +258,8 @@ impl float3 {
   }
 
   #[inline]
-  pub fn broadcast(x: f32) -> float3 {
+  pub fn broadcast(x: f32) -> Self {
     return float3(x, x, x);
-  }
-
-  #[inline]
-  pub fn extract(self, i: u32) -> f32 {
-    return unsafe { simd_extract(self, i) };
-  }
-
-  #[inline]
-  pub fn replace(self, i: u32, x: f32) -> float3 {
-    return unsafe { simd_insert(self, i, x) };
   }
 
   #[inline]
@@ -225,81 +298,8 @@ impl float3 {
   }
 
   #[inline]
-  pub fn abs(x: float3) -> float3 {
-    return float3::bitselect(float3::broadcast(0.0), x, int3::broadcast(std::i32::MAX));
-  }
-
-  #[inline]
-  pub fn max(x: float3, y: float3) -> float3 {
-    return float3(x.0.max(y.0), x.1.max(y.1), x.2.max(y.2));
-  }
-
-  #[inline]
-  pub fn min(x: float3, y: float3) -> float3 {
-    return float3(x.0.min(y.0), x.1.min(y.1), x.2.min(y.2));
-  }
-
-  #[inline]
-  pub fn clamp(x: float3, min: float3, max: float3) -> float3 {
-    return float3::min(float3::max(x, min), max);
-  }
-
-  #[inline]
-  pub fn sign(x: float3) -> float3 {
-    let (zero, one) = (float3::broadcast(0.0), float3::broadcast(1.0));
-    return float3::bitselect(float3::copysign(one, x), zero, float3::eq(x, zero) | float3::ne(x, x));
-  }
-
-  #[inline]
-  pub fn mix(x: float3, y: float3, t: float3) -> float3 {
-    return x + t * (y - x);
-  }
-
-  #[inline]
-  pub fn recip(x: float3) -> float3 {
-    return 1.0 / x;
-  }
-
-  #[inline]
-  pub fn rsqrt(x: float3) -> float3 {
-    return 1.0 / float3::sqrt(x);
-  }
-
-  #[inline]
-  pub fn fract(x: float3) -> float3 {
-    return float3(x.0.fract(), x.1.fract(), x.2.fract());
-  }
-
-  #[inline]
-  pub fn step(edge: float3, x: float3) -> float3 {
-    return float3::bitselect(float3::broadcast(1.0), float3::broadcast(0.0), float3::lt(x, edge));
-  }
-
-  #[inline]
-  pub fn smoothstep(edge0: float3, edge1: float3, x: float3) -> float3 {
-    let t = float3::clamp((x - edge0) / (edge1 - edge0), float3::broadcast(0.0), float3::broadcast(1.0));
-
-    return t * t * (3.0 - 2.0 * t);
-  }
-
-  #[inline]
-  pub fn reduce_add(x: float3) -> f32 {
-    return x.0 + x.1 + x.2;
-  }
-
-  #[inline]
-  pub fn reduce_min(x: float3) -> f32 {
-    return x.2.min(float2::reduce_min(x.lo()));
-  }
-
-  #[inline]
-  pub fn reduce_max(x: float3) -> f32 {
-    return x.2.max(float2::reduce_max(x.lo()));
-  }
-
-  #[inline]
   pub fn copysign(x: float3, y: float3) -> float3 {
-    return float3::bitselect(y, x, int3::broadcast(std::i32::MAX));
+    return simd::bitselect(int3::broadcast(std::i32::MAX), y, x);
   }
 
   #[inline]
@@ -334,12 +334,12 @@ impl float3 {
 
   #[inline]
   pub fn dot(x: float3, y: float3) -> f32 {
-    return float3::reduce_add(x * y);
+    return simd::reduce_add(x * y);
   }
 
   #[inline]
   pub fn project(x: float3, y: float3) -> float3 {
-    return float3::dot(x, y) / float3::dot(y, y) * y;
+    return simd::dot(x, y) / simd::dot(y, y) * y;
   }
 
   #[inline]
@@ -354,12 +354,12 @@ impl float3 {
 
   #[inline]
   pub fn norm_one(x: float3) -> f32 {
-    return float3::reduce_add(float3::abs(x));
+    return simd::reduce_add(simd::abs(x));
   }
 
   #[inline]
   pub fn norm_inf(x: float3) -> f32 {
-    return float3::reduce_max(float3::abs(x));
+    return simd::reduce_max(simd::abs(x));
   }
 
   #[inline]
@@ -374,7 +374,7 @@ impl float3 {
 
   #[inline]
   pub fn normalize(x: float3) -> float3 {
-    return x * float3::rsqrt(float3::broadcast(float3::length_squared(x)));
+    return x * simd::rsqrt(float3::broadcast(float3::length_squared(x)));
   }
 
   #[inline]
@@ -402,7 +402,7 @@ impl float3 {
 
   #[inline]
   pub fn to_char_sat(x: float3) -> char3 {
-    return float3::to_char(float3::clamp(x, float3::broadcast(std::i8::MIN as f32), float3::broadcast(std::i8::MAX as f32)));
+    return float3::to_char(simd::clamp(x, float3::broadcast(std::i8::MIN as f32), float3::broadcast(std::i8::MAX as f32)));
   }
 
   #[inline]
@@ -412,7 +412,7 @@ impl float3 {
 
   #[inline]
   pub fn to_uchar_sat(x: float3) -> uchar3 {
-    return float3::to_uchar(float3::clamp(x, float3::broadcast(std::u8::MIN as f32), float3::broadcast(std::u8::MAX as f32)));
+    return float3::to_uchar(simd::clamp(x, float3::broadcast(std::u8::MIN as f32), float3::broadcast(std::u8::MAX as f32)));
   }
 
   #[inline]
@@ -422,7 +422,7 @@ impl float3 {
 
   #[inline]
   pub fn to_short_sat(x: float3) -> short3 {
-    return float3::to_short(float3::clamp(x, float3::broadcast(std::i16::MIN as f32), float3::broadcast(std::i16::MAX as f32)));
+    return float3::to_short(simd::clamp(x, float3::broadcast(std::i16::MIN as f32), float3::broadcast(std::i16::MAX as f32)));
   }
 
   #[inline]
@@ -432,7 +432,7 @@ impl float3 {
 
   #[inline]
   pub fn to_ushort_sat(x: float3) -> ushort3 {
-    return float3::to_ushort(float3::clamp(x, float3::broadcast(std::u16::MIN as f32), float3::broadcast(std::u16::MAX as f32)));
+    return float3::to_ushort(simd::clamp(x, float3::broadcast(std::u16::MIN as f32), float3::broadcast(std::u16::MAX as f32)));
   }
 
   #[inline]
@@ -442,7 +442,7 @@ impl float3 {
 
   #[inline]
   pub fn to_int_sat(x: float3) -> int3 {
-    return float3::to_int(float3::clamp(x, float3::broadcast(std::i32::MIN as f32), float3::broadcast(std::i32::MAX as f32)));
+    return float3::to_int(simd::clamp(x, float3::broadcast(std::i32::MIN as f32), float3::broadcast(std::i32::MAX as f32)));
   }
 
   #[inline]
@@ -452,7 +452,7 @@ impl float3 {
 
   #[inline]
   pub fn to_uint_sat(x: float3) -> uint3 {
-    return float3::to_uint(float3::clamp(x, float3::broadcast(std::u32::MIN as f32), float3::broadcast(std::u32::MAX as f32)));
+    return float3::to_uint(simd::clamp(x, float3::broadcast(std::u32::MIN as f32), float3::broadcast(std::u32::MAX as f32)));
   }
 
   #[inline]
@@ -467,7 +467,7 @@ impl float3 {
 
   #[inline]
   pub fn to_long_sat(x: float3) -> long3 {
-    return float3::to_long(float3::clamp(x, float3::broadcast(std::i64::MIN as f32), float3::broadcast(std::i64::MAX as f32)));
+    return float3::to_long(simd::clamp(x, float3::broadcast(std::i64::MIN as f32), float3::broadcast(std::i64::MAX as f32)));
   }
 
   #[inline]
@@ -477,7 +477,7 @@ impl float3 {
 
   #[inline]
   pub fn to_ulong_sat(x: float3) -> ulong3 {
-    return float3::to_ulong(float3::clamp(x, float3::broadcast(std::u64::MIN as f32), float3::broadcast(std::u64::MAX as f32)));
+    return float3::to_ulong(simd::clamp(x, float3::broadcast(std::u64::MIN as f32), float3::broadcast(std::u64::MAX as f32)));
   }
 
   #[inline]

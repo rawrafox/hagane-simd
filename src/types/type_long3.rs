@@ -306,14 +306,40 @@ impl PartialEq for long3 {
 }
 
 impl simd::Vector for long3 {
+  type Scalar = i64;
+  #[inline(always)]
+  fn extract(self, i: u32) -> Self::Scalar {
+    return unsafe { simd_extract(self, i) };
+  }
+
+  #[inline(always)]
+  fn replace(self, i: u32, x: Self::Scalar) -> Self {
+    return unsafe { simd_insert(self, i, x) };
+  }
+
+  #[inline(always)]
+  fn abs(self) -> Self {
+    let mask = self >> 63;
+    return (self ^ mask) - mask;
+  }
+
+  #[inline(always)]
+  fn max(self, other: Self) -> Self {
+    return simd::bitselect(long3::gt(other, self), self, other);
+  }
+
+  #[inline(always)]
+  fn min(self, other: Self) -> Self {
+    return simd::bitselect(long3::lt(other, self), self, other);
+  }
 }
 
 impl simd::Dot for long3 {
   type Output = i64;
 
-  #[inline]
-  fn dot(self, other: long3) -> i64 {
-    return long3::reduce_add(self * other);
+  #[inline(always)]
+  fn dot(self, other: Self) -> Self::Output {
+    return simd::reduce_add(self * other);
   }
 }
 
@@ -329,6 +355,23 @@ impl simd::Logic for long3 {
   }
 }
 
+impl simd::Reduce for long3 {
+  #[inline(always)]
+  fn reduce_add(self) -> Self::Scalar {
+    return self.0 + self.1 + self.2;
+  }
+
+  #[inline(always)]
+  fn reduce_min(self) -> Self::Scalar {
+    return std::cmp::min(simd::reduce_min(self.lo()), self.2);
+  }
+
+  #[inline(always)]
+  fn reduce_max(self) -> Self::Scalar {
+    return std::cmp::max(simd::reduce_max(self.lo()), self.2);
+  }
+}
+
 impl simd::Select<long3> for long3 {
   #[inline(always)]
   fn select(self, a: long3, b: long3) -> long3 {
@@ -337,7 +380,7 @@ impl simd::Select<long3> for long3 {
 
   #[inline(always)]
   fn bitselect(self, a: long3, b: long3) -> long3 {
-    return (x & !z) | (y & z);
+    return (a & !self) | (b & self);
   }
 }
 
@@ -349,7 +392,7 @@ impl simd::Select<ulong3> for long3 {
 
   #[inline(always)]
   fn bitselect(self, a: ulong3, b: ulong3) -> ulong3 {
-    return ulong3::bitcast(self.bitselect(long3::bitcast(x), long3::bitcast(y)));
+    return ulong3::bitcast(self.bitselect(long3::bitcast(a), long3::bitcast(b)));
   }
 }
 
@@ -361,7 +404,7 @@ impl simd::Select<double3> for long3 {
 
   #[inline(always)]
   fn bitselect(self, a: double3, b: double3) -> double3 {
-    return double3::bitcast(self.bitselect(long3::bitcast(x), long3::bitcast(y)));
+    return double3::bitcast(self.bitselect(long3::bitcast(a), long3::bitcast(b)));
   }
 }
 
@@ -374,18 +417,8 @@ impl long3 {
   }
 
   #[inline]
-  pub fn broadcast(x: i64) -> long3 {
+  pub fn broadcast(x: i64) -> Self {
     return long3(x, x, x);
-  }
-
-  #[inline]
-  pub fn extract(self, i: u32) -> i64 {
-    return unsafe { simd_extract(self, i) };
-  }
-
-  #[inline]
-  pub fn replace(self, i: u32, x: i64) -> long3 {
-    return unsafe { simd_insert(self, i, x) };
   }
 
   #[inline]
@@ -424,49 +457,13 @@ impl long3 {
   }
 
   #[inline]
-  pub fn abs(x: long3) -> long3 {
-    let mask = x >> 63;
-    return (x ^ mask) - mask;
-  }
-
-  #[inline]
-  pub fn max(x: long3, y: long3) -> long3 {
-    return long3::bitselect(x, y, long3::gt(y, x));
-  }
-
-  #[inline]
-  pub fn min(x: long3, y: long3) -> long3 {
-    return long3::bitselect(x, y, long3::lt(y, x));
-  }
-
-  #[inline]
-  pub fn clamp(x: long3, min: long3, max: long3) -> long3 {
-    return long3::min(long3::max(x, min), max);
-  }
-
-  #[inline]
-  pub fn reduce_add(x: long3) -> i64 {
-    return x.0 + x.1 + x.2;
-  }
-
-  #[inline]
-  pub fn reduce_min(x: long3) -> i64 {
-    return std::cmp::min(long2::reduce_min(x.lo()), x.2);
-  }
-
-  #[inline]
-  pub fn reduce_max(x: long3) -> i64 {
-    return std::cmp::max(long2::reduce_max(x.lo()), x.2);
-  }
-
-  #[inline]
   pub fn to_char(x: long3) -> char3 {
     return unsafe { simd_cast(x) };
   }
 
   #[inline]
   pub fn to_char_sat(x: long3) -> char3 {
-    return long3::to_char(long3::clamp(x, long3::broadcast(std::i8::MIN as i64), long3::broadcast(std::i8::MAX as i64)));
+    return long3::to_char(simd::clamp(x, long3::broadcast(std::i8::MIN as i64), long3::broadcast(std::i8::MAX as i64)));
   }
 
   #[inline]
@@ -476,7 +473,7 @@ impl long3 {
 
   #[inline]
   pub fn to_uchar_sat(x: long3) -> uchar3 {
-    return long3::to_uchar(long3::clamp(x, long3::broadcast(std::u8::MIN as i64), long3::broadcast(std::u8::MAX as i64)));
+    return long3::to_uchar(simd::clamp(x, long3::broadcast(std::u8::MIN as i64), long3::broadcast(std::u8::MAX as i64)));
   }
 
   #[inline]
@@ -486,7 +483,7 @@ impl long3 {
 
   #[inline]
   pub fn to_short_sat(x: long3) -> short3 {
-    return long3::to_short(long3::clamp(x, long3::broadcast(std::i16::MIN as i64), long3::broadcast(std::i16::MAX as i64)));
+    return long3::to_short(simd::clamp(x, long3::broadcast(std::i16::MIN as i64), long3::broadcast(std::i16::MAX as i64)));
   }
 
   #[inline]
@@ -496,7 +493,7 @@ impl long3 {
 
   #[inline]
   pub fn to_ushort_sat(x: long3) -> ushort3 {
-    return long3::to_ushort(long3::clamp(x, long3::broadcast(std::u16::MIN as i64), long3::broadcast(std::u16::MAX as i64)));
+    return long3::to_ushort(simd::clamp(x, long3::broadcast(std::u16::MIN as i64), long3::broadcast(std::u16::MAX as i64)));
   }
 
   #[inline]
@@ -506,7 +503,7 @@ impl long3 {
 
   #[inline]
   pub fn to_int_sat(x: long3) -> int3 {
-    return long3::to_int(long3::clamp(x, long3::broadcast(std::i32::MIN as i64), long3::broadcast(std::i32::MAX as i64)));
+    return long3::to_int(simd::clamp(x, long3::broadcast(std::i32::MIN as i64), long3::broadcast(std::i32::MAX as i64)));
   }
 
   #[inline]
@@ -516,7 +513,7 @@ impl long3 {
 
   #[inline]
   pub fn to_uint_sat(x: long3) -> uint3 {
-    return long3::to_uint(long3::clamp(x, long3::broadcast(std::u32::MIN as i64), long3::broadcast(std::u32::MAX as i64)));
+    return long3::to_uint(simd::clamp(x, long3::broadcast(std::u32::MIN as i64), long3::broadcast(std::u32::MAX as i64)));
   }
 
   #[inline]
@@ -541,7 +538,7 @@ impl long3 {
 
   #[inline]
   pub fn to_ulong_sat(x: long3) -> ulong3 {
-    return long3::to_ulong(long3::max(x, long3::broadcast(0)));
+    return long3::to_ulong(simd::max(x, long3::broadcast(0)));
   }
 
   #[inline]

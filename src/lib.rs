@@ -146,10 +146,11 @@ pub mod objc;
 
 pub mod simd {
   pub trait Vector : Sized {
+    type Scalar;
 
-  }
+    fn extract(self, i: u32) -> Self::Scalar;
+    fn replace(self, i: u32, value: Self::Scalar) -> Self;
 
-  pub trait Common : Vector {
     fn abs(self) -> Self;
     fn max(self, other: Self) -> Self;
     fn min(self, other: Self) -> Self;
@@ -161,22 +162,32 @@ pub mod simd {
   }
 
   #[inline(always)]
-  pub fn abs<T: Common>(x: T) -> T {
+  pub fn extract<T: Vector>(x: T, i: u32) -> T::Scalar {
+    return x.extract(i);
+  }
+
+  #[inline(always)]
+  pub fn replace<T: Vector>(x: T, i: u32, value: T::Scalar) -> T {
+    return x.replace(i, value);
+  }
+
+  #[inline(always)]
+  pub fn abs<T: Vector>(x: T) -> T {
     return x.abs();
   }
 
   #[inline(always)]
-  pub fn max<T: Common>(x: T, y: T) -> T {
+  pub fn max<T: Vector>(x: T, y: T) -> T {
     return x.max(y);
   }
 
   #[inline(always)]
-  pub fn min<T: Common>(x: T, y: T) -> T {
+  pub fn min<T: Vector>(x: T, y: T) -> T {
     return x.min(y);
   }
 
   #[inline(always)]
-  pub fn clamp<T: Common>(t: T, min: T, max: T) -> T {
+  pub fn clamp<T: Vector>(t: T, min: T, max: T) -> T {
     return t.clamp(min, max);
   }
 
@@ -243,8 +254,6 @@ pub mod simd {
   }
 
   pub trait Geometry : Vector {
-    type Scalar;
-
     fn project(self, onto: Self) -> Self;
     fn length(self) -> Self::Scalar;
     fn length_squared(self) -> Self::Scalar;
@@ -322,26 +331,24 @@ pub mod simd {
     return x.any();
   }
 
-  pub trait Reduction : Vector {
-    type Output;
-
-    fn reduce_add(self) -> Self::Output;
-    fn reduce_max(self) -> Self::Output;
-    fn reduce_min(self) -> Self::Output;
+  pub trait Reduce : Vector {
+    fn reduce_add(self) -> Self::Scalar;
+    fn reduce_max(self) -> Self::Scalar;
+    fn reduce_min(self) -> Self::Scalar;
   }
 
   #[inline(always)]
-  pub fn reduce_add<T: Reduction>(x: T) -> T::Output {
+  pub fn reduce_add<T: Reduce>(x: T) -> T::Scalar {
     return x.reduce_add();
   }
 
   #[inline(always)]
-  pub fn reduce_max<T: Reduction>(x: T) -> T::Output {
+  pub fn reduce_max<T: Reduce>(x: T) -> T::Scalar {
     return x.reduce_max();
   }
 
   #[inline(always)]
-  pub fn reduce_min<T: Reduction>(x: T) -> T::Output {
+  pub fn reduce_min<T: Reduce>(x: T) -> T::Scalar {
     return x.reduce_min();
   }
 

@@ -155,14 +155,97 @@ impl PartialEq for double2 {
 }
 
 impl simd::Vector for double2 {
+  type Scalar = f64;
+  #[inline(always)]
+  fn extract(self, i: u32) -> Self::Scalar {
+    return unsafe { simd_extract(self, i) };
+  }
+
+  #[inline(always)]
+  fn replace(self, i: u32, x: Self::Scalar) -> Self {
+    return unsafe { simd_insert(self, i, x) };
+  }
+
+  #[inline(always)]
+  fn abs(self) -> Self {
+    return simd::bitselect(long2::broadcast(std::i64::MAX), double2::broadcast(0.0), self);
+  }
+
+  #[inline(always)]
+  fn max(self, other: Self) -> Self {
+    return double2(self.0.max(other.0), self.1.max(other.1));
+  }
+
+  #[inline(always)]
+  fn min(self, other: Self) -> Self {
+    return double2(self.0.min(other.0), self.1.min(other.1));
+  }
 }
 
 impl simd::Dot for double2 {
   type Output = f64;
 
-  #[inline]
-  fn dot(self, other: double2) -> f64 {
-    return double2::reduce_add(self * other);
+  #[inline(always)]
+  fn dot(self, other: Self) -> Self::Output {
+    return simd::reduce_add(self * other);
+  }
+}
+
+impl simd::Float for double2 {
+  #[inline(always)]
+  fn sign(self) -> Self {
+    let (zero, one) = (double2::broadcast(0.0), double2::broadcast(1.0));
+
+    return simd::bitselect(double2::eq(self, zero) | double2::ne(self, self), double2::copysign(one, self), zero);
+  }
+
+  #[inline(always)]
+  fn mix(self, a: Self, b: Self) -> Self {
+    return a + self * (b - a);
+  }
+
+  #[inline(always)]
+  fn recip(self) -> Self {
+    return 1.0 / self;
+  }
+
+  #[inline(always)]
+  fn rsqrt(self) -> Self {
+    return 1.0 / double2::sqrt(self);
+  }
+
+  #[inline(always)]
+  fn fract(self) -> Self {
+    return double2(self.0.fract(), self.1.fract());
+  }
+
+  #[inline(always)]
+  fn step(self, edge: Self) -> Self {
+    return simd::bitselect(double2::lt(self, edge), double2::broadcast(1.0), double2::broadcast(0.0));
+  }
+
+  #[inline(always)]
+  fn smoothstep(self, edge0: Self, edge1: Self) -> Self {
+    let t = simd::clamp((self - edge0) / (edge1 - edge0), double2::broadcast(0.0), double2::broadcast(1.0));
+
+    return t * t * (3.0 - 2.0 * t);
+  }
+}
+
+impl simd::Reduce for double2 {
+  #[inline(always)]
+  fn reduce_add(self) -> Self::Scalar {
+    return self.0 + self.1;
+  }
+
+  #[inline(always)]
+  fn reduce_min(self) -> Self::Scalar {
+    return self.0.min(self.1);
+  }
+
+  #[inline(always)]
+  fn reduce_max(self) -> Self::Scalar {
+    return self.0.max(self.1);
   }
 }
 
@@ -175,18 +258,8 @@ impl double2 {
   }
 
   #[inline]
-  pub fn broadcast(x: f64) -> double2 {
+  pub fn broadcast(x: f64) -> Self {
     return double2(x, x);
-  }
-
-  #[inline]
-  pub fn extract(self, i: u32) -> f64 {
-    return unsafe { simd_extract(self, i) };
-  }
-
-  #[inline]
-  pub fn replace(self, i: u32, x: f64) -> double2 {
-    return unsafe { simd_insert(self, i, x) };
   }
 
   #[inline]
@@ -225,81 +298,8 @@ impl double2 {
   }
 
   #[inline]
-  pub fn abs(x: double2) -> double2 {
-    return double2::bitselect(double2::broadcast(0.0), x, long2::broadcast(std::i64::MAX));
-  }
-
-  #[inline]
-  pub fn max(x: double2, y: double2) -> double2 {
-    return double2(x.0.max(y.0), x.1.max(y.1));
-  }
-
-  #[inline]
-  pub fn min(x: double2, y: double2) -> double2 {
-    return double2(x.0.min(y.0), x.1.min(y.1));
-  }
-
-  #[inline]
-  pub fn clamp(x: double2, min: double2, max: double2) -> double2 {
-    return double2::min(double2::max(x, min), max);
-  }
-
-  #[inline]
-  pub fn sign(x: double2) -> double2 {
-    let (zero, one) = (double2::broadcast(0.0), double2::broadcast(1.0));
-    return double2::bitselect(double2::copysign(one, x), zero, double2::eq(x, zero) | double2::ne(x, x));
-  }
-
-  #[inline]
-  pub fn mix(x: double2, y: double2, t: double2) -> double2 {
-    return x + t * (y - x);
-  }
-
-  #[inline]
-  pub fn recip(x: double2) -> double2 {
-    return 1.0 / x;
-  }
-
-  #[inline]
-  pub fn rsqrt(x: double2) -> double2 {
-    return 1.0 / double2::sqrt(x);
-  }
-
-  #[inline]
-  pub fn fract(x: double2) -> double2 {
-    return double2(x.0.fract(), x.1.fract());
-  }
-
-  #[inline]
-  pub fn step(edge: double2, x: double2) -> double2 {
-    return double2::bitselect(double2::broadcast(1.0), double2::broadcast(0.0), double2::lt(x, edge));
-  }
-
-  #[inline]
-  pub fn smoothstep(edge0: double2, edge1: double2, x: double2) -> double2 {
-    let t = double2::clamp((x - edge0) / (edge1 - edge0), double2::broadcast(0.0), double2::broadcast(1.0));
-
-    return t * t * (3.0 - 2.0 * t);
-  }
-
-  #[inline]
-  pub fn reduce_add(x: double2) -> f64 {
-    return x.0 + x.1;
-  }
-
-  #[inline]
-  pub fn reduce_min(x: double2) -> f64 {
-    return x.0.min(x.1);
-  }
-
-  #[inline]
-  pub fn reduce_max(x: double2) -> f64 {
-    return x.0.max(x.1);
-  }
-
-  #[inline]
   pub fn copysign(x: double2, y: double2) -> double2 {
-    return double2::bitselect(y, x, long2::broadcast(std::i64::MAX));
+    return simd::bitselect(long2::broadcast(std::i64::MAX), y, x);
   }
 
   #[inline]
@@ -334,12 +334,12 @@ impl double2 {
 
   #[inline]
   pub fn dot(x: double2, y: double2) -> f64 {
-    return double2::reduce_add(x * y);
+    return simd::reduce_add(x * y);
   }
 
   #[inline]
   pub fn project(x: double2, y: double2) -> double2 {
-    return double2::dot(x, y) / double2::dot(y, y) * y;
+    return simd::dot(x, y) / simd::dot(y, y) * y;
   }
 
   #[inline]
@@ -354,12 +354,12 @@ impl double2 {
 
   #[inline]
   pub fn norm_one(x: double2) -> f64 {
-    return double2::reduce_add(double2::abs(x));
+    return simd::reduce_add(simd::abs(x));
   }
 
   #[inline]
   pub fn norm_inf(x: double2) -> f64 {
-    return double2::reduce_max(double2::abs(x));
+    return simd::reduce_max(simd::abs(x));
   }
 
   #[inline]
@@ -374,7 +374,7 @@ impl double2 {
 
   #[inline]
   pub fn normalize(x: double2) -> double2 {
-    return x * double2::rsqrt(double2::broadcast(double2::length_squared(x)));
+    return x * simd::rsqrt(double2::broadcast(double2::length_squared(x)));
   }
 
   #[inline]
@@ -401,7 +401,7 @@ impl double2 {
 
   #[inline]
   pub fn to_char_sat(x: double2) -> char2 {
-    return double2::to_char(double2::clamp(x, double2::broadcast(std::i8::MIN as f64), double2::broadcast(std::i8::MAX as f64)));
+    return double2::to_char(simd::clamp(x, double2::broadcast(std::i8::MIN as f64), double2::broadcast(std::i8::MAX as f64)));
   }
 
   #[inline]
@@ -411,7 +411,7 @@ impl double2 {
 
   #[inline]
   pub fn to_uchar_sat(x: double2) -> uchar2 {
-    return double2::to_uchar(double2::clamp(x, double2::broadcast(std::u8::MIN as f64), double2::broadcast(std::u8::MAX as f64)));
+    return double2::to_uchar(simd::clamp(x, double2::broadcast(std::u8::MIN as f64), double2::broadcast(std::u8::MAX as f64)));
   }
 
   #[inline]
@@ -421,7 +421,7 @@ impl double2 {
 
   #[inline]
   pub fn to_short_sat(x: double2) -> short2 {
-    return double2::to_short(double2::clamp(x, double2::broadcast(std::i16::MIN as f64), double2::broadcast(std::i16::MAX as f64)));
+    return double2::to_short(simd::clamp(x, double2::broadcast(std::i16::MIN as f64), double2::broadcast(std::i16::MAX as f64)));
   }
 
   #[inline]
@@ -431,7 +431,7 @@ impl double2 {
 
   #[inline]
   pub fn to_ushort_sat(x: double2) -> ushort2 {
-    return double2::to_ushort(double2::clamp(x, double2::broadcast(std::u16::MIN as f64), double2::broadcast(std::u16::MAX as f64)));
+    return double2::to_ushort(simd::clamp(x, double2::broadcast(std::u16::MIN as f64), double2::broadcast(std::u16::MAX as f64)));
   }
 
   #[inline]
@@ -441,7 +441,7 @@ impl double2 {
 
   #[inline]
   pub fn to_int_sat(x: double2) -> int2 {
-    return double2::to_int(double2::clamp(x, double2::broadcast(std::i32::MIN as f64), double2::broadcast(std::i32::MAX as f64)));
+    return double2::to_int(simd::clamp(x, double2::broadcast(std::i32::MIN as f64), double2::broadcast(std::i32::MAX as f64)));
   }
 
   #[inline]
@@ -451,7 +451,7 @@ impl double2 {
 
   #[inline]
   pub fn to_uint_sat(x: double2) -> uint2 {
-    return double2::to_uint(double2::clamp(x, double2::broadcast(std::u32::MIN as f64), double2::broadcast(std::u32::MAX as f64)));
+    return double2::to_uint(simd::clamp(x, double2::broadcast(std::u32::MIN as f64), double2::broadcast(std::u32::MAX as f64)));
   }
 
   #[inline]
@@ -466,7 +466,7 @@ impl double2 {
 
   #[inline]
   pub fn to_long_sat(x: double2) -> long2 {
-    return double2::to_long(double2::clamp(x, double2::broadcast(std::i64::MIN as f64), double2::broadcast(std::i64::MAX as f64)));
+    return double2::to_long(simd::clamp(x, double2::broadcast(std::i64::MIN as f64), double2::broadcast(std::i64::MAX as f64)));
   }
 
   #[inline]
@@ -476,7 +476,7 @@ impl double2 {
 
   #[inline]
   pub fn to_ulong_sat(x: double2) -> ulong2 {
-    return double2::to_ulong(double2::clamp(x, double2::broadcast(std::u64::MIN as f64), double2::broadcast(std::u64::MAX as f64)));
+    return double2::to_ulong(simd::clamp(x, double2::broadcast(std::u64::MIN as f64), double2::broadcast(std::u64::MAX as f64)));
   }
 
   #[inline]

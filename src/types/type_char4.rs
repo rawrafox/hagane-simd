@@ -306,14 +306,40 @@ impl PartialEq for char4 {
 }
 
 impl simd::Vector for char4 {
+  type Scalar = i8;
+  #[inline(always)]
+  fn extract(self, i: u32) -> Self::Scalar {
+    return unsafe { simd_extract(self, i) };
+  }
+
+  #[inline(always)]
+  fn replace(self, i: u32, x: Self::Scalar) -> Self {
+    return unsafe { simd_insert(self, i, x) };
+  }
+
+  #[inline(always)]
+  fn abs(self) -> Self {
+    let mask = self >> 7;
+    return (self ^ mask) - mask;
+  }
+
+  #[inline(always)]
+  fn max(self, other: Self) -> Self {
+    return simd::bitselect(char4::gt(other, self), self, other);
+  }
+
+  #[inline(always)]
+  fn min(self, other: Self) -> Self {
+    return simd::bitselect(char4::lt(other, self), self, other);
+  }
 }
 
 impl simd::Dot for char4 {
   type Output = i8;
 
-  #[inline]
-  fn dot(self, other: char4) -> i8 {
-    return char4::reduce_add(self * other);
+  #[inline(always)]
+  fn dot(self, other: Self) -> Self::Output {
+    return simd::reduce_add(self * other);
   }
 }
 
@@ -329,6 +355,23 @@ impl simd::Logic for char4 {
   }
 }
 
+impl simd::Reduce for char4 {
+  #[inline(always)]
+  fn reduce_add(self) -> Self::Scalar {
+    return simd::reduce_add(self.lo() + self.hi());
+  }
+
+  #[inline(always)]
+  fn reduce_min(self) -> Self::Scalar {
+    return simd::reduce_min(simd::min(self.lo(), self.hi()));
+  }
+
+  #[inline(always)]
+  fn reduce_max(self) -> Self::Scalar {
+    return simd::reduce_max(simd::max(self.lo(), self.hi()));
+  }
+}
+
 impl simd::Select<char4> for char4 {
   #[inline(always)]
   fn select(self, a: char4, b: char4) -> char4 {
@@ -337,7 +380,7 @@ impl simd::Select<char4> for char4 {
 
   #[inline(always)]
   fn bitselect(self, a: char4, b: char4) -> char4 {
-    return (x & !z) | (y & z);
+    return (a & !self) | (b & self);
   }
 }
 
@@ -349,7 +392,7 @@ impl simd::Select<uchar4> for char4 {
 
   #[inline(always)]
   fn bitselect(self, a: uchar4, b: uchar4) -> uchar4 {
-    return uchar4::bitcast(self.bitselect(char4::bitcast(x), char4::bitcast(y)));
+    return uchar4::bitcast(self.bitselect(char4::bitcast(a), char4::bitcast(b)));
   }
 }
 
@@ -362,18 +405,8 @@ impl char4 {
   }
 
   #[inline]
-  pub fn broadcast(x: i8) -> char4 {
+  pub fn broadcast(x: i8) -> Self {
     return char4(x, x, x, x);
-  }
-
-  #[inline]
-  pub fn extract(self, i: u32) -> i8 {
-    return unsafe { simd_extract(self, i) };
-  }
-
-  #[inline]
-  pub fn replace(self, i: u32, x: i8) -> char4 {
-    return unsafe { simd_insert(self, i, x) };
   }
 
   #[inline]
@@ -412,42 +445,6 @@ impl char4 {
   }
 
   #[inline]
-  pub fn abs(x: char4) -> char4 {
-    let mask = x >> 7;
-    return (x ^ mask) - mask;
-  }
-
-  #[inline]
-  pub fn max(x: char4, y: char4) -> char4 {
-    return char4::bitselect(x, y, char4::gt(y, x));
-  }
-
-  #[inline]
-  pub fn min(x: char4, y: char4) -> char4 {
-    return char4::bitselect(x, y, char4::lt(y, x));
-  }
-
-  #[inline]
-  pub fn clamp(x: char4, min: char4, max: char4) -> char4 {
-    return char4::min(char4::max(x, min), max);
-  }
-
-  #[inline]
-  pub fn reduce_add(x: char4) -> i8 {
-    return char2::reduce_add(x.lo() + x.hi());
-  }
-
-  #[inline]
-  pub fn reduce_min(x: char4) -> i8 {
-    return char2::reduce_min(char2::min(x.lo(), x.hi()));
-  }
-
-  #[inline]
-  pub fn reduce_max(x: char4) -> i8 {
-    return char2::reduce_max(char2::max(x.lo(), x.hi()));
-  }
-
-  #[inline]
   pub fn to_char(x: char4) -> char4 {
     return unsafe { simd_cast(x) };
   }
@@ -464,7 +461,7 @@ impl char4 {
 
   #[inline]
   pub fn to_uchar_sat(x: char4) -> uchar4 {
-    return char4::to_uchar(char4::max(x, char4::broadcast(0)));
+    return char4::to_uchar(simd::max(x, char4::broadcast(0)));
   }
 
   #[inline]
@@ -484,7 +481,7 @@ impl char4 {
 
   #[inline]
   pub fn to_ushort_sat(x: char4) -> ushort4 {
-    return char4::to_ushort(char4::max(x, char4::broadcast(0)));
+    return char4::to_ushort(simd::max(x, char4::broadcast(0)));
   }
 
   #[inline]
@@ -504,7 +501,7 @@ impl char4 {
 
   #[inline]
   pub fn to_uint_sat(x: char4) -> uint4 {
-    return char4::to_uint(char4::max(x, char4::broadcast(0)));
+    return char4::to_uint(simd::max(x, char4::broadcast(0)));
   }
 
   #[inline]
@@ -529,7 +526,7 @@ impl char4 {
 
   #[inline]
   pub fn to_ulong_sat(x: char4) -> ulong4 {
-    return char4::to_ulong(char4::max(x, char4::broadcast(0)));
+    return char4::to_ulong(simd::max(x, char4::broadcast(0)));
   }
 
   #[inline]

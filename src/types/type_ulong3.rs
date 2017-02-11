@@ -306,14 +306,39 @@ impl PartialEq for ulong3 {
 }
 
 impl simd::Vector for ulong3 {
+  type Scalar = u64;
+  #[inline(always)]
+  fn extract(self, i: u32) -> Self::Scalar {
+    return unsafe { simd_extract(self, i) };
+  }
+
+  #[inline(always)]
+  fn replace(self, i: u32, x: Self::Scalar) -> Self {
+    return unsafe { simd_insert(self, i, x) };
+  }
+
+  #[inline(always)]
+  fn abs(self) -> Self {
+    return self;
+  }
+
+  #[inline(always)]
+  fn max(self, other: Self) -> Self {
+    return simd::bitselect(ulong3::gt(other, self), self, other);
+  }
+
+  #[inline(always)]
+  fn min(self, other: Self) -> Self {
+    return simd::bitselect(ulong3::lt(other, self), self, other);
+  }
 }
 
 impl simd::Dot for ulong3 {
   type Output = u64;
 
-  #[inline]
-  fn dot(self, other: ulong3) -> u64 {
-    return ulong3::reduce_add(self * other);
+  #[inline(always)]
+  fn dot(self, other: Self) -> Self::Output {
+    return simd::reduce_add(self * other);
   }
 }
 
@@ -329,6 +354,23 @@ impl simd::Logic for ulong3 {
   }
 }
 
+impl simd::Reduce for ulong3 {
+  #[inline(always)]
+  fn reduce_add(self) -> Self::Scalar {
+    return self.0 + self.1 + self.2;
+  }
+
+  #[inline(always)]
+  fn reduce_min(self) -> Self::Scalar {
+    return std::cmp::min(simd::reduce_min(self.lo()), self.2);
+  }
+
+  #[inline(always)]
+  fn reduce_max(self) -> Self::Scalar {
+    return std::cmp::max(simd::reduce_max(self.lo()), self.2);
+  }
+}
+
 impl ulong3 {
   #[inline]
   pub fn bitcast<T>(x: T) -> ulong3 {
@@ -338,18 +380,8 @@ impl ulong3 {
   }
 
   #[inline]
-  pub fn broadcast(x: u64) -> ulong3 {
+  pub fn broadcast(x: u64) -> Self {
     return ulong3(x, x, x);
-  }
-
-  #[inline]
-  pub fn extract(self, i: u32) -> u64 {
-    return unsafe { simd_extract(self, i) };
-  }
-
-  #[inline]
-  pub fn replace(self, i: u32, x: u64) -> ulong3 {
-    return unsafe { simd_insert(self, i, x) };
   }
 
   #[inline]
@@ -388,48 +420,13 @@ impl ulong3 {
   }
 
   #[inline]
-  pub fn abs(x: ulong3) -> ulong3 {
-    return x;
-  }
-
-  #[inline]
-  pub fn max(x: ulong3, y: ulong3) -> ulong3 {
-    return ulong3::bitselect(x, y, ulong3::gt(y, x));
-  }
-
-  #[inline]
-  pub fn min(x: ulong3, y: ulong3) -> ulong3 {
-    return ulong3::bitselect(x, y, ulong3::lt(y, x));
-  }
-
-  #[inline]
-  pub fn clamp(x: ulong3, min: ulong3, max: ulong3) -> ulong3 {
-    return ulong3::min(ulong3::max(x, min), max);
-  }
-
-  #[inline]
-  pub fn reduce_add(x: ulong3) -> u64 {
-    return x.0 + x.1 + x.2;
-  }
-
-  #[inline]
-  pub fn reduce_min(x: ulong3) -> u64 {
-    return std::cmp::min(ulong2::reduce_min(x.lo()), x.2);
-  }
-
-  #[inline]
-  pub fn reduce_max(x: ulong3) -> u64 {
-    return std::cmp::max(ulong2::reduce_max(x.lo()), x.2);
-  }
-
-  #[inline]
   pub fn to_char(x: ulong3) -> char3 {
     return unsafe { simd_cast(x) };
   }
 
   #[inline]
   pub fn to_char_sat(x: ulong3) -> char3 {
-    return ulong3::to_char(ulong3::min(x, ulong3::broadcast(std::i8::MAX as u64)));
+    return ulong3::to_char(simd::min(x, ulong3::broadcast(std::i8::MAX as u64)));
   }
 
   #[inline]
@@ -439,7 +436,7 @@ impl ulong3 {
 
   #[inline]
   pub fn to_uchar_sat(x: ulong3) -> uchar3 {
-    return ulong3::to_uchar(ulong3::min(x, ulong3::broadcast(std::u8::MAX as u64)));
+    return ulong3::to_uchar(simd::min(x, ulong3::broadcast(std::u8::MAX as u64)));
   }
 
   #[inline]
@@ -449,7 +446,7 @@ impl ulong3 {
 
   #[inline]
   pub fn to_short_sat(x: ulong3) -> short3 {
-    return ulong3::to_short(ulong3::min(x, ulong3::broadcast(std::i16::MAX as u64)));
+    return ulong3::to_short(simd::min(x, ulong3::broadcast(std::i16::MAX as u64)));
   }
 
   #[inline]
@@ -459,7 +456,7 @@ impl ulong3 {
 
   #[inline]
   pub fn to_ushort_sat(x: ulong3) -> ushort3 {
-    return ulong3::to_ushort(ulong3::min(x, ulong3::broadcast(std::u16::MAX as u64)));
+    return ulong3::to_ushort(simd::min(x, ulong3::broadcast(std::u16::MAX as u64)));
   }
 
   #[inline]
@@ -469,7 +466,7 @@ impl ulong3 {
 
   #[inline]
   pub fn to_int_sat(x: ulong3) -> int3 {
-    return ulong3::to_int(ulong3::min(x, ulong3::broadcast(std::i32::MAX as u64)));
+    return ulong3::to_int(simd::min(x, ulong3::broadcast(std::i32::MAX as u64)));
   }
 
   #[inline]
@@ -479,7 +476,7 @@ impl ulong3 {
 
   #[inline]
   pub fn to_uint_sat(x: ulong3) -> uint3 {
-    return ulong3::to_uint(ulong3::min(x, ulong3::broadcast(std::u32::MAX as u64)));
+    return ulong3::to_uint(simd::min(x, ulong3::broadcast(std::u32::MAX as u64)));
   }
 
   #[inline]
@@ -494,7 +491,7 @@ impl ulong3 {
 
   #[inline]
   pub fn to_long_sat(x: ulong3) -> long3 {
-    return ulong3::to_long(ulong3::min(x, ulong3::broadcast(std::i64::MAX as u64)));
+    return ulong3::to_long(simd::min(x, ulong3::broadcast(std::i64::MAX as u64)));
   }
 
   #[inline]

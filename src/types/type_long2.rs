@@ -306,14 +306,40 @@ impl PartialEq for long2 {
 }
 
 impl simd::Vector for long2 {
+  type Scalar = i64;
+  #[inline(always)]
+  fn extract(self, i: u32) -> Self::Scalar {
+    return unsafe { simd_extract(self, i) };
+  }
+
+  #[inline(always)]
+  fn replace(self, i: u32, x: Self::Scalar) -> Self {
+    return unsafe { simd_insert(self, i, x) };
+  }
+
+  #[inline(always)]
+  fn abs(self) -> Self {
+    let mask = self >> 63;
+    return (self ^ mask) - mask;
+  }
+
+  #[inline(always)]
+  fn max(self, other: Self) -> Self {
+    return simd::bitselect(long2::gt(other, self), self, other);
+  }
+
+  #[inline(always)]
+  fn min(self, other: Self) -> Self {
+    return simd::bitselect(long2::lt(other, self), self, other);
+  }
 }
 
 impl simd::Dot for long2 {
   type Output = i64;
 
-  #[inline]
-  fn dot(self, other: long2) -> i64 {
-    return long2::reduce_add(self * other);
+  #[inline(always)]
+  fn dot(self, other: Self) -> Self::Output {
+    return simd::reduce_add(self * other);
   }
 }
 
@@ -329,6 +355,23 @@ impl simd::Logic for long2 {
   }
 }
 
+impl simd::Reduce for long2 {
+  #[inline(always)]
+  fn reduce_add(self) -> Self::Scalar {
+    return self.0 + self.1;
+  }
+
+  #[inline(always)]
+  fn reduce_min(self) -> Self::Scalar {
+    return std::cmp::min(self.0, self.1);
+  }
+
+  #[inline(always)]
+  fn reduce_max(self) -> Self::Scalar {
+    return std::cmp::max(self.0, self.1);
+  }
+}
+
 impl simd::Select<long2> for long2 {
   #[inline(always)]
   fn select(self, a: long2, b: long2) -> long2 {
@@ -337,7 +380,7 @@ impl simd::Select<long2> for long2 {
 
   #[inline(always)]
   fn bitselect(self, a: long2, b: long2) -> long2 {
-    return (x & !z) | (y & z);
+    return (a & !self) | (b & self);
   }
 }
 
@@ -349,7 +392,7 @@ impl simd::Select<ulong2> for long2 {
 
   #[inline(always)]
   fn bitselect(self, a: ulong2, b: ulong2) -> ulong2 {
-    return ulong2::bitcast(self.bitselect(long2::bitcast(x), long2::bitcast(y)));
+    return ulong2::bitcast(self.bitselect(long2::bitcast(a), long2::bitcast(b)));
   }
 }
 
@@ -361,7 +404,7 @@ impl simd::Select<double2> for long2 {
 
   #[inline(always)]
   fn bitselect(self, a: double2, b: double2) -> double2 {
-    return double2::bitcast(self.bitselect(long2::bitcast(x), long2::bitcast(y)));
+    return double2::bitcast(self.bitselect(long2::bitcast(a), long2::bitcast(b)));
   }
 }
 
@@ -374,18 +417,8 @@ impl long2 {
   }
 
   #[inline]
-  pub fn broadcast(x: i64) -> long2 {
+  pub fn broadcast(x: i64) -> Self {
     return long2(x, x);
-  }
-
-  #[inline]
-  pub fn extract(self, i: u32) -> i64 {
-    return unsafe { simd_extract(self, i) };
-  }
-
-  #[inline]
-  pub fn replace(self, i: u32, x: i64) -> long2 {
-    return unsafe { simd_insert(self, i, x) };
   }
 
   #[inline]
@@ -424,49 +457,13 @@ impl long2 {
   }
 
   #[inline]
-  pub fn abs(x: long2) -> long2 {
-    let mask = x >> 63;
-    return (x ^ mask) - mask;
-  }
-
-  #[inline]
-  pub fn max(x: long2, y: long2) -> long2 {
-    return long2::bitselect(x, y, long2::gt(y, x));
-  }
-
-  #[inline]
-  pub fn min(x: long2, y: long2) -> long2 {
-    return long2::bitselect(x, y, long2::lt(y, x));
-  }
-
-  #[inline]
-  pub fn clamp(x: long2, min: long2, max: long2) -> long2 {
-    return long2::min(long2::max(x, min), max);
-  }
-
-  #[inline]
-  pub fn reduce_add(x: long2) -> i64 {
-    return x.0 + x.1;
-  }
-
-  #[inline]
-  pub fn reduce_min(x: long2) -> i64 {
-    return std::cmp::min(x.0, x.1);
-  }
-
-  #[inline]
-  pub fn reduce_max(x: long2) -> i64 {
-    return std::cmp::max(x.0, x.1);
-  }
-
-  #[inline]
   pub fn to_char(x: long2) -> char2 {
     return unsafe { simd_cast(x) };
   }
 
   #[inline]
   pub fn to_char_sat(x: long2) -> char2 {
-    return long2::to_char(long2::clamp(x, long2::broadcast(std::i8::MIN as i64), long2::broadcast(std::i8::MAX as i64)));
+    return long2::to_char(simd::clamp(x, long2::broadcast(std::i8::MIN as i64), long2::broadcast(std::i8::MAX as i64)));
   }
 
   #[inline]
@@ -476,7 +473,7 @@ impl long2 {
 
   #[inline]
   pub fn to_uchar_sat(x: long2) -> uchar2 {
-    return long2::to_uchar(long2::clamp(x, long2::broadcast(std::u8::MIN as i64), long2::broadcast(std::u8::MAX as i64)));
+    return long2::to_uchar(simd::clamp(x, long2::broadcast(std::u8::MIN as i64), long2::broadcast(std::u8::MAX as i64)));
   }
 
   #[inline]
@@ -486,7 +483,7 @@ impl long2 {
 
   #[inline]
   pub fn to_short_sat(x: long2) -> short2 {
-    return long2::to_short(long2::clamp(x, long2::broadcast(std::i16::MIN as i64), long2::broadcast(std::i16::MAX as i64)));
+    return long2::to_short(simd::clamp(x, long2::broadcast(std::i16::MIN as i64), long2::broadcast(std::i16::MAX as i64)));
   }
 
   #[inline]
@@ -496,7 +493,7 @@ impl long2 {
 
   #[inline]
   pub fn to_ushort_sat(x: long2) -> ushort2 {
-    return long2::to_ushort(long2::clamp(x, long2::broadcast(std::u16::MIN as i64), long2::broadcast(std::u16::MAX as i64)));
+    return long2::to_ushort(simd::clamp(x, long2::broadcast(std::u16::MIN as i64), long2::broadcast(std::u16::MAX as i64)));
   }
 
   #[inline]
@@ -506,7 +503,7 @@ impl long2 {
 
   #[inline]
   pub fn to_int_sat(x: long2) -> int2 {
-    return long2::to_int(long2::clamp(x, long2::broadcast(std::i32::MIN as i64), long2::broadcast(std::i32::MAX as i64)));
+    return long2::to_int(simd::clamp(x, long2::broadcast(std::i32::MIN as i64), long2::broadcast(std::i32::MAX as i64)));
   }
 
   #[inline]
@@ -516,7 +513,7 @@ impl long2 {
 
   #[inline]
   pub fn to_uint_sat(x: long2) -> uint2 {
-    return long2::to_uint(long2::clamp(x, long2::broadcast(std::u32::MIN as i64), long2::broadcast(std::u32::MAX as i64)));
+    return long2::to_uint(simd::clamp(x, long2::broadcast(std::u32::MIN as i64), long2::broadcast(std::u32::MAX as i64)));
   }
 
   #[inline]
@@ -541,7 +538,7 @@ impl long2 {
 
   #[inline]
   pub fn to_ulong_sat(x: long2) -> ulong2 {
-    return long2::to_ulong(long2::max(x, long2::broadcast(0)));
+    return long2::to_ulong(simd::max(x, long2::broadcast(0)));
   }
 
   #[inline]

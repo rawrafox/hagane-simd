@@ -155,14 +155,97 @@ impl PartialEq for float2 {
 }
 
 impl simd::Vector for float2 {
+  type Scalar = f32;
+  #[inline(always)]
+  fn extract(self, i: u32) -> Self::Scalar {
+    return unsafe { simd_extract(self, i) };
+  }
+
+  #[inline(always)]
+  fn replace(self, i: u32, x: Self::Scalar) -> Self {
+    return unsafe { simd_insert(self, i, x) };
+  }
+
+  #[inline(always)]
+  fn abs(self) -> Self {
+    return simd::bitselect(int2::broadcast(std::i32::MAX), float2::broadcast(0.0), self);
+  }
+
+  #[inline(always)]
+  fn max(self, other: Self) -> Self {
+    return float2(self.0.max(other.0), self.1.max(other.1));
+  }
+
+  #[inline(always)]
+  fn min(self, other: Self) -> Self {
+    return float2(self.0.min(other.0), self.1.min(other.1));
+  }
 }
 
 impl simd::Dot for float2 {
   type Output = f32;
 
-  #[inline]
-  fn dot(self, other: float2) -> f32 {
-    return float2::reduce_add(self * other);
+  #[inline(always)]
+  fn dot(self, other: Self) -> Self::Output {
+    return simd::reduce_add(self * other);
+  }
+}
+
+impl simd::Float for float2 {
+  #[inline(always)]
+  fn sign(self) -> Self {
+    let (zero, one) = (float2::broadcast(0.0), float2::broadcast(1.0));
+
+    return simd::bitselect(float2::eq(self, zero) | float2::ne(self, self), float2::copysign(one, self), zero);
+  }
+
+  #[inline(always)]
+  fn mix(self, a: Self, b: Self) -> Self {
+    return a + self * (b - a);
+  }
+
+  #[inline(always)]
+  fn recip(self) -> Self {
+    return 1.0 / self;
+  }
+
+  #[inline(always)]
+  fn rsqrt(self) -> Self {
+    return 1.0 / float2::sqrt(self);
+  }
+
+  #[inline(always)]
+  fn fract(self) -> Self {
+    return float2(self.0.fract(), self.1.fract());
+  }
+
+  #[inline(always)]
+  fn step(self, edge: Self) -> Self {
+    return simd::bitselect(float2::lt(self, edge), float2::broadcast(1.0), float2::broadcast(0.0));
+  }
+
+  #[inline(always)]
+  fn smoothstep(self, edge0: Self, edge1: Self) -> Self {
+    let t = simd::clamp((self - edge0) / (edge1 - edge0), float2::broadcast(0.0), float2::broadcast(1.0));
+
+    return t * t * (3.0 - 2.0 * t);
+  }
+}
+
+impl simd::Reduce for float2 {
+  #[inline(always)]
+  fn reduce_add(self) -> Self::Scalar {
+    return self.0 + self.1;
+  }
+
+  #[inline(always)]
+  fn reduce_min(self) -> Self::Scalar {
+    return self.0.min(self.1);
+  }
+
+  #[inline(always)]
+  fn reduce_max(self) -> Self::Scalar {
+    return self.0.max(self.1);
   }
 }
 
@@ -175,18 +258,8 @@ impl float2 {
   }
 
   #[inline]
-  pub fn broadcast(x: f32) -> float2 {
+  pub fn broadcast(x: f32) -> Self {
     return float2(x, x);
-  }
-
-  #[inline]
-  pub fn extract(self, i: u32) -> f32 {
-    return unsafe { simd_extract(self, i) };
-  }
-
-  #[inline]
-  pub fn replace(self, i: u32, x: f32) -> float2 {
-    return unsafe { simd_insert(self, i, x) };
   }
 
   #[inline]
@@ -225,81 +298,8 @@ impl float2 {
   }
 
   #[inline]
-  pub fn abs(x: float2) -> float2 {
-    return float2::bitselect(float2::broadcast(0.0), x, int2::broadcast(std::i32::MAX));
-  }
-
-  #[inline]
-  pub fn max(x: float2, y: float2) -> float2 {
-    return float2(x.0.max(y.0), x.1.max(y.1));
-  }
-
-  #[inline]
-  pub fn min(x: float2, y: float2) -> float2 {
-    return float2(x.0.min(y.0), x.1.min(y.1));
-  }
-
-  #[inline]
-  pub fn clamp(x: float2, min: float2, max: float2) -> float2 {
-    return float2::min(float2::max(x, min), max);
-  }
-
-  #[inline]
-  pub fn sign(x: float2) -> float2 {
-    let (zero, one) = (float2::broadcast(0.0), float2::broadcast(1.0));
-    return float2::bitselect(float2::copysign(one, x), zero, float2::eq(x, zero) | float2::ne(x, x));
-  }
-
-  #[inline]
-  pub fn mix(x: float2, y: float2, t: float2) -> float2 {
-    return x + t * (y - x);
-  }
-
-  #[inline]
-  pub fn recip(x: float2) -> float2 {
-    return 1.0 / x;
-  }
-
-  #[inline]
-  pub fn rsqrt(x: float2) -> float2 {
-    return 1.0 / float2::sqrt(x);
-  }
-
-  #[inline]
-  pub fn fract(x: float2) -> float2 {
-    return float2(x.0.fract(), x.1.fract());
-  }
-
-  #[inline]
-  pub fn step(edge: float2, x: float2) -> float2 {
-    return float2::bitselect(float2::broadcast(1.0), float2::broadcast(0.0), float2::lt(x, edge));
-  }
-
-  #[inline]
-  pub fn smoothstep(edge0: float2, edge1: float2, x: float2) -> float2 {
-    let t = float2::clamp((x - edge0) / (edge1 - edge0), float2::broadcast(0.0), float2::broadcast(1.0));
-
-    return t * t * (3.0 - 2.0 * t);
-  }
-
-  #[inline]
-  pub fn reduce_add(x: float2) -> f32 {
-    return x.0 + x.1;
-  }
-
-  #[inline]
-  pub fn reduce_min(x: float2) -> f32 {
-    return x.0.min(x.1);
-  }
-
-  #[inline]
-  pub fn reduce_max(x: float2) -> f32 {
-    return x.0.max(x.1);
-  }
-
-  #[inline]
   pub fn copysign(x: float2, y: float2) -> float2 {
-    return float2::bitselect(y, x, int2::broadcast(std::i32::MAX));
+    return simd::bitselect(int2::broadcast(std::i32::MAX), y, x);
   }
 
   #[inline]
@@ -334,12 +334,12 @@ impl float2 {
 
   #[inline]
   pub fn dot(x: float2, y: float2) -> f32 {
-    return float2::reduce_add(x * y);
+    return simd::reduce_add(x * y);
   }
 
   #[inline]
   pub fn project(x: float2, y: float2) -> float2 {
-    return float2::dot(x, y) / float2::dot(y, y) * y;
+    return simd::dot(x, y) / simd::dot(y, y) * y;
   }
 
   #[inline]
@@ -354,12 +354,12 @@ impl float2 {
 
   #[inline]
   pub fn norm_one(x: float2) -> f32 {
-    return float2::reduce_add(float2::abs(x));
+    return simd::reduce_add(simd::abs(x));
   }
 
   #[inline]
   pub fn norm_inf(x: float2) -> f32 {
-    return float2::reduce_max(float2::abs(x));
+    return simd::reduce_max(simd::abs(x));
   }
 
   #[inline]
@@ -374,7 +374,7 @@ impl float2 {
 
   #[inline]
   pub fn normalize(x: float2) -> float2 {
-    return x * float2::rsqrt(float2::broadcast(float2::length_squared(x)));
+    return x * simd::rsqrt(float2::broadcast(float2::length_squared(x)));
   }
 
   #[inline]
@@ -401,7 +401,7 @@ impl float2 {
 
   #[inline]
   pub fn to_char_sat(x: float2) -> char2 {
-    return float2::to_char(float2::clamp(x, float2::broadcast(std::i8::MIN as f32), float2::broadcast(std::i8::MAX as f32)));
+    return float2::to_char(simd::clamp(x, float2::broadcast(std::i8::MIN as f32), float2::broadcast(std::i8::MAX as f32)));
   }
 
   #[inline]
@@ -411,7 +411,7 @@ impl float2 {
 
   #[inline]
   pub fn to_uchar_sat(x: float2) -> uchar2 {
-    return float2::to_uchar(float2::clamp(x, float2::broadcast(std::u8::MIN as f32), float2::broadcast(std::u8::MAX as f32)));
+    return float2::to_uchar(simd::clamp(x, float2::broadcast(std::u8::MIN as f32), float2::broadcast(std::u8::MAX as f32)));
   }
 
   #[inline]
@@ -421,7 +421,7 @@ impl float2 {
 
   #[inline]
   pub fn to_short_sat(x: float2) -> short2 {
-    return float2::to_short(float2::clamp(x, float2::broadcast(std::i16::MIN as f32), float2::broadcast(std::i16::MAX as f32)));
+    return float2::to_short(simd::clamp(x, float2::broadcast(std::i16::MIN as f32), float2::broadcast(std::i16::MAX as f32)));
   }
 
   #[inline]
@@ -431,7 +431,7 @@ impl float2 {
 
   #[inline]
   pub fn to_ushort_sat(x: float2) -> ushort2 {
-    return float2::to_ushort(float2::clamp(x, float2::broadcast(std::u16::MIN as f32), float2::broadcast(std::u16::MAX as f32)));
+    return float2::to_ushort(simd::clamp(x, float2::broadcast(std::u16::MIN as f32), float2::broadcast(std::u16::MAX as f32)));
   }
 
   #[inline]
@@ -441,7 +441,7 @@ impl float2 {
 
   #[inline]
   pub fn to_int_sat(x: float2) -> int2 {
-    return float2::to_int(float2::clamp(x, float2::broadcast(std::i32::MIN as f32), float2::broadcast(std::i32::MAX as f32)));
+    return float2::to_int(simd::clamp(x, float2::broadcast(std::i32::MIN as f32), float2::broadcast(std::i32::MAX as f32)));
   }
 
   #[inline]
@@ -451,7 +451,7 @@ impl float2 {
 
   #[inline]
   pub fn to_uint_sat(x: float2) -> uint2 {
-    return float2::to_uint(float2::clamp(x, float2::broadcast(std::u32::MIN as f32), float2::broadcast(std::u32::MAX as f32)));
+    return float2::to_uint(simd::clamp(x, float2::broadcast(std::u32::MIN as f32), float2::broadcast(std::u32::MAX as f32)));
   }
 
   #[inline]
@@ -466,7 +466,7 @@ impl float2 {
 
   #[inline]
   pub fn to_long_sat(x: float2) -> long2 {
-    return float2::to_long(float2::clamp(x, float2::broadcast(std::i64::MIN as f32), float2::broadcast(std::i64::MAX as f32)));
+    return float2::to_long(simd::clamp(x, float2::broadcast(std::i64::MIN as f32), float2::broadcast(std::i64::MAX as f32)));
   }
 
   #[inline]
@@ -476,7 +476,7 @@ impl float2 {
 
   #[inline]
   pub fn to_ulong_sat(x: float2) -> ulong2 {
-    return float2::to_ulong(float2::clamp(x, float2::broadcast(std::u64::MIN as f32), float2::broadcast(std::u64::MAX as f32)));
+    return float2::to_ulong(simd::clamp(x, float2::broadcast(std::u64::MIN as f32), float2::broadcast(std::u64::MAX as f32)));
   }
 
   #[inline]

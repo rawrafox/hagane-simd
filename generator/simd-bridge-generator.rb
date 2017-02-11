@@ -206,14 +206,105 @@ module Bridge
             end
 
             o.block("impl simd::Vector for #{name}", pad: true) do |o|
+              o.puts("type Scalar = #{scalar};")
+
+              o.puts("#[inline(always)]", pad: true)
+              o.block("fn extract(self, i: u32) -> Self::Scalar") do |o|
+                o.puts("return unsafe { simd_extract(self, i) };")
+              end
+
+              o.puts("#[inline(always)]", pad: true)
+              o.block("fn replace(self, i: u32, x: Self::Scalar) -> Self") do |o|
+                o.puts("return unsafe { simd_insert(self, i, x) };")
+              end
+
+              o.puts("#[inline(always)]", pad: true)
+              o.block("fn abs(self) -> Self") do |o|
+                if kind.include?(:signed)
+                  o.puts("let mask = self >> #{attributes.fetch(:size) * 8 - 1};")
+
+                  o.puts("return (self ^ mask) - mask;")
+                elsif kind.include?(:float)
+                  o.puts("return simd::bitselect(#{bool_name}::broadcast(std::#{TYPES_BY_NAME[bool][:type]}::MAX), #{name}::broadcast(0.0), self);")
+                else
+                  o.puts("return self;")
+                end
+              end
+
+              o.puts("#[inline(always)]", pad: true)
+              o.block("fn max(self, other: Self) -> Self") do |o|
+                if kind.include?(:float)
+                  result = width.times.map { |i| "self.#{i}.max(other.#{i})" }.join(", ")
+
+                  o.puts("return #{name}(#{result});")
+                else
+                  o.puts("return simd::bitselect(#{name}::gt(other, self), self, other);")
+                end
+              end
+
+              o.puts("#[inline(always)]", pad: true)
+              o.block("fn min(self, other: Self) -> Self") do |o|
+                if kind.include?(:float)
+                  result = width.times.map { |i| "self.#{i}.min(other.#{i})" }.join(", ")
+
+                  o.puts("return #{name}(#{result});")
+                else
+                  o.puts("return simd::bitselect(#{name}::lt(other, self), self, other);")
+                end
+              end
             end
 
             o.block("impl simd::Dot for #{name}", pad: true) do |o|
               o.puts("type Output = #{scalar};")
               o.puts
-              o.puts("#[inline]")
-              o.block("fn dot(self, other: #{name}) -> #{scalar}") do |o|
-                o.puts("return #{name}::reduce_add(self * other);")
+              o.puts("#[inline(always)]")
+              o.block("fn dot(self, other: Self) -> Self::Output") do |o|
+                o.puts("return simd::reduce_add(self * other);")
+              end
+            end
+            
+            if kind.include?(:float)
+              o.block("impl simd::Float for #{name}", pad: true) do |o|
+                o.puts("#[inline(always)]", pad: true)
+                o.block("fn sign(self) -> Self") do |o|
+                  o.puts("let (zero, one) = (#{name}::broadcast(0.0), #{name}::broadcast(1.0));")
+                  o.puts
+                  o.puts("return simd::bitselect(#{name}::eq(self, zero) | #{name}::ne(self, self), #{name}::copysign(one, self), zero);")
+                end
+
+                o.puts("#[inline(always)]", pad: true)
+                o.block("fn mix(self, a: Self, b: Self) -> Self") do |o|
+                  o.puts("return a + self * (b - a);")
+                end
+
+                o.puts("#[inline(always)]", pad: true)
+                o.block("fn recip(self) -> Self") do |o|
+                  o.puts("return 1.0 / self;")
+                end
+
+                o.puts("#[inline(always)]", pad: true)
+                o.block("fn rsqrt(self) -> Self") do |o|
+                  o.puts("return 1.0 / #{name}::sqrt(self);")
+                end
+
+                o.puts("#[inline(always)]", pad: true)
+                o.block("fn fract(self) -> Self") do |o|
+                  result = width.times.map { |i| "self.#{i}.fract()" }.join(", ")
+
+                  o.puts("return #{name}(#{result});")
+                end
+
+                o.puts("#[inline(always)]", pad: true)
+                o.block("fn step(self, edge: Self) -> Self") do |o|
+                  o.puts("return simd::bitselect(#{name}::lt(self, edge), #{name}::broadcast(1.0), #{name}::broadcast(0.0));")
+                end
+
+                o.puts("#[inline(always)]", pad: true)
+                o.block("fn smoothstep(self, edge0: Self, edge1: Self) -> Self") do |o|
+                  o.puts("let t = simd::clamp((self - edge0) / (edge1 - edge0), #{name}::broadcast(0.0), #{name}::broadcast(1.0));")
+                  o.puts
+                  o.puts("return t * t * (3.0 - 2.0 * t);")
+                end
               end
             end
 
@@ -233,6 +324,60 @@ module Bridge
                   result = width.times.map { |i| "self.#{i}" }.join(" | ")
 
                   o.puts("return (#{result}) & #{constant} != 0;")
+                end
+              end
+            end
+
+            o.block("impl simd::Reduce for #{name}", pad: true) do |o|
+              o.puts("#[inline(always)]", pad: true)
+              o.block("fn reduce_add(self) -> Self::Scalar") do |o|
+                case width
+                when 2
+                  o.puts("return self.0 + self.1;")
+                when 3
+                  o.puts("return self.0 + self.1 + self.2;")
+                else
+                  o.puts("return simd::reduce_add(self.lo() + self.hi());")
+                end
+              end
+
+              o.puts("#[inline(always)]", pad: true)
+              o.block("fn reduce_min(self) -> Self::Scalar") do |o|
+                case width
+                when 2
+                  if kind.include?(:float)
+                    o.puts("return self.0.min(self.1);")
+                  else
+                    o.puts("return std::cmp::min(self.0, self.1);")
+                  end
+                when 3
+                  if kind.include?(:float)
+                    o.puts("return self.2.min(simd::reduce_min(self.lo()));")
+                  else
+                    o.puts("return std::cmp::min(simd::reduce_min(self.lo()), self.2);")
+                  end
+                else
+                  o.puts("return simd::reduce_min(simd::min(self.lo(), self.hi()));")
+                end
+              end
+
+              o.puts("#[inline(always)]", pad: true)
+              o.block("fn reduce_max(self) -> Self::Scalar") do |o|
+                case width
+                when 2
+                  if kind.include?(:float)
+                    o.puts("return self.0.max(self.1);")
+                  else
+                    o.puts("return std::cmp::max(self.0, self.1);")
+                  end
+                when 3
+                  if kind.include?(:float)
+                    o.puts("return self.2.max(simd::reduce_max(self.lo()));")
+                  else
+                    o.puts("return std::cmp::max(simd::reduce_max(self.lo()), self.2);")
+                  end
+                else
+                  o.puts("return simd::reduce_max(simd::max(self.lo(), self.hi()));")
                 end
               end
             end
@@ -268,18 +413,8 @@ module Bridge
               end
 
               o.puts("#[inline]", pad: true)
-              o.block("pub fn broadcast(x: #{scalar}) -> #{name}") do |o|
+              o.block("pub fn broadcast(x: #{scalar}) -> Self") do |o|
                 o.puts("return #{name}(#{(["x"] * width).join(", ")});")
-              end
-
-              o.puts("#[inline]", pad: true)
-              o.block("pub fn extract(self, i: u32) -> #{scalar}") do |o|
-                o.puts("return unsafe { simd_extract(self, i) };")
-              end
-
-              o.puts("#[inline]", pad: true)
-              o.block("pub fn replace(self, i: u32, x: #{scalar}) -> #{name}") do |o|
-                o.puts("return unsafe { simd_insert(self, i, x) };")
               end
 
               # Comparison
@@ -298,163 +433,12 @@ module Bridge
                 o.puts("return x * y + z;")
               end
 
-              # Common
-
-              if kind.include?(:signed)
-                o.puts("#[inline]", pad: true)
-                o.block("pub fn abs(x: #{name}) -> #{name}") do |o|
-                  o.puts("let mask = x >> #{attributes.fetch(:size) * 8 - 1};")
-
-                  o.puts("return (x ^ mask) - mask;")
-                end
-              elsif kind.include?(:float)
-                o.puts("#[inline]", pad: true)
-                o.block("pub fn abs(x: #{name}) -> #{name}") do |o|
-                  o.puts("return #{name}::bitselect(#{name}::broadcast(0.0), x, #{bool_name}::broadcast(std::#{TYPES_BY_NAME[bool][:type]}::MAX));")
-                end
-              else
-                o.puts("#[inline]", pad: true)
-                o.block("pub fn abs(x: #{name}) -> #{name}") do |o|
-                  o.puts("return x;")
-                end
-              end
-
-              if kind.include?(:integer)
-                o.puts("#[inline]", pad: true)
-                o.block("pub fn max(x: #{name}, y: #{name}) -> #{name}") do |o|
-                  o.puts("return #{name}::bitselect(x, y, #{name}::gt(y, x));")
-                end
-
-                o.puts("#[inline]", pad: true)
-                o.block("pub fn min(x: #{name}, y: #{name}) -> #{name}") do |o|
-                  o.puts("return #{name}::bitselect(x, y, #{name}::lt(y, x));")
-                end
-              elsif kind.include?(:float)
-                o.puts("#[inline]", pad: true)
-                o.block("pub fn max(x: #{name}, y: #{name}) -> #{name}") do |o|
-                  result = width.times.map { |i| "x.#{i}.max(y.#{i})" }.join(", ")
-
-                  o.puts("return #{name}(#{result});")
-                end
-
-                o.puts("#[inline]", pad: true)
-                o.block("pub fn min(x: #{name}, y: #{name}) -> #{name}") do |o|
-                  result = width.times.map { |i| "x.#{i}.min(y.#{i})" }.join(", ")
-
-                  o.puts("return #{name}(#{result});")
-                end
-              end
-
-              o.puts("#[inline]", pad: true)
-              o.block("pub fn clamp(x: #{name}, min: #{name}, max: #{name}) -> #{name}") do |o|
-                o.puts("return #{name}::min(#{name}::max(x, min), max);")
-              end
-
-              if kind.include?(:float)
-                o.puts("#[inline]", pad: true)
-                o.block("pub fn sign(x: #{name}) -> #{name}") do |o|
-                  o.puts("let (zero, one) = (#{name}::broadcast(0.0), #{name}::broadcast(1.0));")
-
-                  o.puts("return #{name}::bitselect(#{name}::copysign(one, x), zero, #{name}::eq(x, zero) | #{name}::ne(x, x));")
-                end
-
-                o.puts("#[inline]", pad: true)
-                o.block("pub fn mix(x: #{name}, y: #{name}, t: #{name}) -> #{name}") do |o|
-                  result = width.times.map { |i| "x.#{i}.signum()" }.join(", ")
-
-                  o.puts("return x + t * (y - x);")
-                end
-
-                o.puts("#[inline]", pad: true)
-                o.block("pub fn recip(x: #{name}) -> #{name}") do |o|
-                  o.puts("return 1.0 / x;")
-                end
-
-                o.puts("#[inline]", pad: true)
-                o.block("pub fn rsqrt(x: #{name}) -> #{name}") do |o|
-                  result = width.times.map { |i| "1.0 / x.#{i}.sqrt()" }.join(", ")
-
-                  o.puts("return 1.0 / #{name}::sqrt(x);")
-                end
-
-                o.puts("#[inline]", pad: true)
-                o.block("pub fn fract(x: #{name}) -> #{name}") do |o|
-                  result = width.times.map { |i| "x.#{i}.fract()" }.join(", ")
-
-                  o.puts("return #{name}(#{result});")
-                end
-
-                o.puts("#[inline]", pad: true)
-                o.block("pub fn step(edge: #{name}, x: #{name}) -> #{name}") do |o|
-                  o.puts("return #{name}::bitselect(#{name}::broadcast(1.0), #{name}::broadcast(0.0), #{name}::lt(x, edge));")
-                end
-
-                o.puts("#[inline]", pad: true)
-                o.block("pub fn smoothstep(edge0: #{name}, edge1: #{name}, x: #{name}) -> #{name}") do |o|
-                  o.puts("let t = #{name}::clamp((x - edge0) / (edge1 - edge0), #{name}::broadcast(0.0), #{name}::broadcast(1.0));")
-                  o.puts
-                  o.puts("return t * t * (3.0 - 2.0 * t);")
-                end
-              end
-
-              o.puts("#[inline]", pad: true)
-              o.block("pub fn reduce_add(x: #{name}) -> #{scalar}") do |o|
-                case width
-                when 2
-                  o.puts("return x.0 + x.1;")
-                when 3
-                  o.puts("return x.0 + x.1 + x.2;")
-                else
-                  o.puts("return #{type}#{width / 2}::reduce_add(x.lo() + x.hi());")
-                end
-              end
-
-              o.puts("#[inline]", pad: true)
-              o.block("pub fn reduce_min(x: #{name}) -> #{scalar}") do |o|
-                case width
-                when 2
-                  if kind.include?(:float)
-                    o.puts("return x.0.min(x.1);")
-                  else
-                    o.puts("return std::cmp::min(x.0, x.1);")
-                  end
-                when 3
-                  if kind.include?(:float)
-                    o.puts("return x.2.min(#{type}2::reduce_min(x.lo()));")
-                  else
-                    o.puts("return std::cmp::min(#{type}2::reduce_min(x.lo()), x.2);")
-                  end
-                else
-                  o.puts("return #{type}#{width / 2}::reduce_min(#{type}#{width / 2}::min(x.lo(), x.hi()));")
-                end
-              end
-
-              o.puts("#[inline]", pad: true)
-              o.block("pub fn reduce_max(x: #{name}) -> #{scalar}") do |o|
-                case width
-                when 2
-                  if kind.include?(:float)
-                    o.puts("return x.0.max(x.1);")
-                  else
-                    o.puts("return std::cmp::max(x.0, x.1);")
-                  end
-                when 3
-                  if kind.include?(:float)
-                    o.puts("return x.2.max(#{type}2::reduce_max(x.lo()));")
-                  else
-                    o.puts("return std::cmp::max(#{type}2::reduce_max(x.lo()), x.2);")
-                  end
-                else
-                  o.puts("return #{type}#{width / 2}::reduce_max(#{type}#{width / 2}::max(x.lo(), x.hi()));")
-                end
-              end
-
               # Math
 
               if kind.include?(:float)
                 o.puts("#[inline]", pad: true)
                 o.block("pub fn copysign(x: #{name}, y: #{name}) -> #{name}") do |o|
-                  o.puts("return #{name}::bitselect(y, x, #{bool_name}::broadcast(std::#{TYPES_BY_NAME[bool][:type]}::MAX));")
+                  o.puts("return simd::bitselect(#{bool_name}::broadcast(std::#{TYPES_BY_NAME[bool][:type]}::MAX), y, x);")
                 end
 
                 o.puts("#[inline]", pad: true)
@@ -514,12 +498,12 @@ module Bridge
               if kind.include?(:float)
                 o.puts("#[inline]", pad: true)
                 o.block("pub fn dot(x: #{name}, y: #{name}) -> #{scalar}") do |o|
-                  o.puts("return #{name}::reduce_add(x * y);")
+                  o.puts("return simd::reduce_add(x * y);")
                 end
 
                 o.puts("#[inline]", pad: true)
                 o.block("pub fn project(x: #{name}, y: #{name}) -> #{name}") do |o|
-                  o.puts("return #{name}::dot(x, y) / #{name}::dot(y, y) * y;")
+                  o.puts("return simd::dot(x, y) / simd::dot(y, y) * y;")
                 end
 
                 o.puts("#[inline]", pad: true)
@@ -534,12 +518,12 @@ module Bridge
 
                 o.puts("#[inline]", pad: true)
                 o.block("pub fn norm_one(x: #{name}) -> #{scalar}") do |o|
-                  o.puts("return #{name}::reduce_add(#{name}::abs(x));")
+                  o.puts("return simd::reduce_add(simd::abs(x));")
                 end
 
                 o.puts("#[inline]", pad: true)
                 o.block("pub fn norm_inf(x: #{name}) -> #{scalar}") do |o|
-                  o.puts("return #{name}::reduce_max(#{name}::abs(x));")
+                  o.puts("return simd::reduce_max(simd::abs(x));")
                 end
 
                 o.puts("#[inline]", pad: true)
@@ -554,7 +538,7 @@ module Bridge
 
                 o.puts("#[inline]", pad: true)
                 o.block("pub fn normalize(x: #{name}) -> #{name}") do |o|
-                  o.puts("return x * #{name}::rsqrt(#{name}::broadcast(#{name}::length_squared(x)));")
+                  o.puts("return x * simd::rsqrt(#{name}::broadcast(#{name}::length_squared(x)));")
                 end
 
                 case width
@@ -911,11 +895,11 @@ module Bridge
           elsif in_kind == out_kind && in_size < out_size
             o.puts("return #{in_name}::to_#{out_type}(x);")
           elsif in_kind.include?(:signed) && out_kind.include?(:unsigned) && in_size <= out_size
-            o.puts("return #{in_name}::to_#{out_type}(#{in_name}::max(x, #{in_name}::broadcast(0)));")
+            o.puts("return #{in_name}::to_#{out_type}(simd::max(x, #{in_name}::broadcast(0)));")
           elsif in_kind.include?(:unsigned)
-            o.puts("return #{in_name}::to_#{out_type}(#{in_name}::min(x, #{max}));")
+            o.puts("return #{in_name}::to_#{out_type}(simd::min(x, #{max}));")
           else
-            o.puts("return #{in_name}::to_#{out_type}(#{in_name}::clamp(x, #{min}, #{max}));")
+            o.puts("return #{in_name}::to_#{out_type}(simd::clamp(x, #{min}, #{max}));")
           end
         else
           if width == 3 && !in_kind.include?(:float) && in_size < out_size # TODO: Fix this compiler bug
