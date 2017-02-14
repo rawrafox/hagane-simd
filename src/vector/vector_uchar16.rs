@@ -18,11 +18,6 @@ impl Vector for uchar16 {
   type FloatVector = float16;
   type DoubleVector = double16;
 
-  const ZERO: Self = uchar16(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
-  const ONE: Self = uchar16(1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1);
-  const TWO: Self = uchar16(2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2);
-  const THREE: Self = uchar16(3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3);
-
   #[inline(always)]
   fn abs(self) -> Self {
     return self;

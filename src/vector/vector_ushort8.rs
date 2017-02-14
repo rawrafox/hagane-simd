@@ -18,11 +18,6 @@ impl Vector for ushort8 {
   type FloatVector = float8;
   type DoubleVector = double8;
 
-  const ZERO: Self = ushort8(0, 0, 0, 0, 0, 0, 0, 0);
-  const ONE: Self = ushort8(1, 1, 1, 1, 1, 1, 1, 1);
-  const TWO: Self = ushort8(2, 2, 2, 2, 2, 2, 2, 2);
-  const THREE: Self = ushort8(3, 3, 3, 3, 3, 3, 3, 3);
-
   #[inline(always)]
   fn abs(self) -> Self {
     return self;

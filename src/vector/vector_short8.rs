@@ -18,11 +18,6 @@ impl Vector for short8 {
   type FloatVector = float8;
   type DoubleVector = double8;
 
-  const ZERO: Self = short8(0, 0, 0, 0, 0, 0, 0, 0);
-  const ONE: Self = short8(1, 1, 1, 1, 1, 1, 1, 1);
-  const TWO: Self = short8(2, 2, 2, 2, 2, 2, 2, 2);
-  const THREE: Self = short8(3, 3, 3, 3, 3, 3, 3, 3);
-
   #[inline(always)]
   fn abs(self) -> Self {
     let mask = self >> 15;
@@ -72,7 +67,7 @@ impl Vector for short8 {
 
   #[inline(always)]
   fn to_ushort_sat(self) -> ushort8 {
-    return short8::to_ushort(max(self, Self::ZERO));
+    return short8::to_ushort(max(self, broadcast::<isize, Self>(0isize)));
   }
 
   #[inline(always)]
@@ -82,7 +77,7 @@ impl Vector for short8 {
 
   #[inline(always)]
   fn to_uint_sat(self) -> uint8 {
-    return short8::to_uint(max(self, Self::ZERO));
+    return short8::to_uint(max(self, broadcast::<isize, Self>(0isize)));
   }
 
   #[inline(always)]
@@ -92,7 +87,7 @@ impl Vector for short8 {
 
   #[inline(always)]
   fn to_ulong_sat(self) -> ulong8 {
-    return short8::to_ulong(max(self, Self::ZERO));
+    return short8::to_ulong(max(self, broadcast::<isize, Self>(0isize)));
   }
 }
 

@@ -18,11 +18,6 @@ impl Vector for long4 {
   type FloatVector = float4;
   type DoubleVector = double4;
 
-  const ZERO: Self = long4(0, 0, 0, 0);
-  const ONE: Self = long4(1, 1, 1, 1);
-  const TWO: Self = long4(2, 2, 2, 2);
-  const THREE: Self = long4(3, 3, 3, 3);
-
   #[inline(always)]
   fn abs(self) -> Self {
     let mask = self >> 63;
@@ -92,7 +87,7 @@ impl Vector for long4 {
 
   #[inline(always)]
   fn to_ulong_sat(self) -> ulong4 {
-    return long4::to_ulong(max(self, Self::ZERO));
+    return long4::to_ulong(max(self, broadcast::<isize, Self>(0isize)));
   }
 }
 

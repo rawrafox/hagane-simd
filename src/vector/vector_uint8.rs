@@ -18,11 +18,6 @@ impl Vector for uint8 {
   type FloatVector = float8;
   type DoubleVector = double8;
 
-  const ZERO: Self = uint8(0, 0, 0, 0, 0, 0, 0, 0);
-  const ONE: Self = uint8(1, 1, 1, 1, 1, 1, 1, 1);
-  const TWO: Self = uint8(2, 2, 2, 2, 2, 2, 2, 2);
-  const THREE: Self = uint8(3, 3, 3, 3, 3, 3, 3, 3);
-
   #[inline(always)]
   fn abs(self) -> Self {
     return self;

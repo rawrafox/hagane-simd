@@ -18,11 +18,6 @@ impl Vector for long16 {
   type FloatVector = float16;
   type DoubleVector = double16;
 
-  const ZERO: Self = long16(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
-  const ONE: Self = long16(1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1);
-  const TWO: Self = long16(2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2);
-  const THREE: Self = long16(3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3);
-
   #[inline(always)]
   fn abs(self) -> Self {
     let mask = self >> 63;
@@ -92,7 +87,7 @@ impl Vector for long16 {
 
   #[inline(always)]
   fn to_ulong_sat(self) -> ulong16 {
-    return long16::to_ulong(max(self, Self::ZERO));
+    return long16::to_ulong(max(self, broadcast::<isize, Self>(0isize)));
   }
 }
 

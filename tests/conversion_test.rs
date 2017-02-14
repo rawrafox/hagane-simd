@@ -1,4 +1,4 @@
-extern crate aventine_simd as simd;
+extern crate hagane_simd as simd;
 
 use simd::*;
 

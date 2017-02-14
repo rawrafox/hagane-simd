@@ -18,16 +18,11 @@ impl Vector for double3 {
   type FloatVector = float3;
   type DoubleVector = double3;
 
-  const ZERO: Self = double3(0.0, 0.0, 0.0);
-  const ONE: Self = double3(1.0, 1.0, 1.0);
-  const TWO: Self = double3(2.0, 2.0, 2.0);
-  const THREE: Self = double3(3.0, 3.0, 3.0);
-
   #[inline(always)]
   fn abs(self) -> Self {
-    let x: Self::Boolean = std::i64::MAX.broadcast();
+    let x: Self::Boolean = broadcast(std::i64::MAX);
 
-    return x.bitselect(Self::ZERO, self);
+    return x.bitselect(Self::from(0), self);
   }
 
   #[inline(always)]
@@ -118,7 +113,7 @@ impl Dot<double3> for double3 {
 impl Float for double3 {
   #[inline(always)]
   fn copysign(self, magnitude: Self) -> Self {
-    let x: Self::Boolean = std::i64::MAX.broadcast();
+    let x: Self::Boolean = broadcast(std::i64::MAX);
 
     return x.bitselect(magnitude, self);
   }
@@ -161,38 +156,8 @@ impl Float for double3 {
 
 impl Geometry for double3 {
   #[inline(always)]
-  fn project(self, onto: Self) -> Self {
-    return (self.dot(onto) / onto.dot(onto)) * onto;
-  }
-
-  #[inline(always)]
   fn length(self) -> Self::Scalar {
     return self.length_squared().sqrt();
-  }
-
-  #[inline(always)]
-  fn length_squared(self) -> Self::Scalar {
-    return self.dot(self);
-  }
-
-  #[inline(always)]
-  fn normalize(self) -> Self {
-    let x: Self = self.length_squared().broadcast();
-
-    return self * x.rsqrt();
-  }
-
-  #[inline(always)]
-  fn reflect(self, n: Self) -> Self {
-    return self - 2.0 * self.dot(n) * n;
-  }
-
-  #[inline(always)]
-  fn refract(self, n: Self, eta: Self::Scalar) -> Self {
-    let dp = self.dot(n);
-    let k = 1.0 - eta * eta * (1.0 - dp * dp);
-
-    return if k >= 0.0 { eta * self - (eta * dp + k.sqrt()) } else { Self::ZERO };
   }
 }
 

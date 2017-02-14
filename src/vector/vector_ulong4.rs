@@ -18,11 +18,6 @@ impl Vector for ulong4 {
   type FloatVector = float4;
   type DoubleVector = double4;
 
-  const ZERO: Self = ulong4(0, 0, 0, 0);
-  const ONE: Self = ulong4(1, 1, 1, 1);
-  const TWO: Self = ulong4(2, 2, 2, 2);
-  const THREE: Self = ulong4(3, 3, 3, 3);
-
   #[inline(always)]
   fn abs(self) -> Self {
     return self;

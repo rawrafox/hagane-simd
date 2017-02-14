@@ -6,7 +6,7 @@ impl std::ops::Add for float2x3 {
 
   #[inline]
   fn add(self, other: Self) -> Self {
-    return float2x3::add(self, other);
+    return float2x3(self.0 + other.0, self.1 + other.1);
   }
 }
 
@@ -15,7 +15,7 @@ impl std::ops::Sub for float2x3 {
 
   #[inline]
   fn sub(self, other: Self) -> Self {
-    return float2x3::sub(self, other);
+    return float2x3(self.0 - other.0, self.1 - other.1);
   }
 }
 
@@ -24,28 +24,18 @@ impl std::ops::Mul<f32> for float2x3 {
 
   #[inline]
   fn mul(self, other: f32) -> Self {
-    return float2x3::scale(other, self);
+    let a: float3 = broadcast(other);
+
+    return float2x3(a * self.0, a * self.1);
   }
 }
 
 impl float2x3 {
   #[inline]
-  pub fn scale(a: f32, x: float2x3) -> float2x3 {
-    let a: float3 = a.broadcast();
-
-    return float2x3(a * x.0, a * x.1);
-  }
-
-  #[inline]
   pub fn linear_combination(a: f32, x: float2x3, b: f32, y: float2x3) -> float2x3 {
-    let a: float3 = a.broadcast();
-    let b: float3 = b.broadcast();
+    let a: float3 = broadcast(a);
+    let b: float3 = broadcast(b);
     return float2x3(a * x.0 + b * y.0, a * x.1 + b * y.1);
-  }
-
-  #[inline]
-  pub fn add(x: float2x3, y: float2x3) -> float2x3 {
-    return float2x3(x.0 + y.0, x.1 + y.1);
   }
 
   #[inline]

@@ -18,11 +18,6 @@ impl Vector for char2 {
   type FloatVector = float2;
   type DoubleVector = double2;
 
-  const ZERO: Self = char2(0, 0);
-  const ONE: Self = char2(1, 1);
-  const TWO: Self = char2(2, 2);
-  const THREE: Self = char2(3, 3);
-
   #[inline(always)]
   fn abs(self) -> Self {
     let mask = self >> 7;
@@ -62,7 +57,7 @@ impl Vector for char2 {
 
   #[inline(always)]
   fn to_uchar_sat(self) -> uchar2 {
-    return char2::to_uchar(max(self, Self::ZERO));
+    return char2::to_uchar(max(self, broadcast::<isize, Self>(0isize)));
   }
 
   #[inline(always)]
@@ -72,7 +67,7 @@ impl Vector for char2 {
 
   #[inline(always)]
   fn to_ushort_sat(self) -> ushort2 {
-    return char2::to_ushort(max(self, Self::ZERO));
+    return char2::to_ushort(max(self, broadcast::<isize, Self>(0isize)));
   }
 
   #[inline(always)]
@@ -82,7 +77,7 @@ impl Vector for char2 {
 
   #[inline(always)]
   fn to_uint_sat(self) -> uint2 {
-    return char2::to_uint(max(self, Self::ZERO));
+    return char2::to_uint(max(self, broadcast::<isize, Self>(0isize)));
   }
 
   #[inline(always)]
@@ -92,7 +87,7 @@ impl Vector for char2 {
 
   #[inline(always)]
   fn to_ulong_sat(self) -> ulong2 {
-    return char2::to_ulong(max(self, Self::ZERO));
+    return char2::to_ulong(max(self, broadcast::<isize, Self>(0isize)));
   }
 }
 

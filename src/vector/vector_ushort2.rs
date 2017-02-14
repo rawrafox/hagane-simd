@@ -18,11 +18,6 @@ impl Vector for ushort2 {
   type FloatVector = float2;
   type DoubleVector = double2;
 
-  const ZERO: Self = ushort2(0, 0);
-  const ONE: Self = ushort2(1, 1);
-  const TWO: Self = ushort2(2, 2);
-  const THREE: Self = ushort2(3, 3);
-
   #[inline(always)]
   fn abs(self) -> Self {
     return self;

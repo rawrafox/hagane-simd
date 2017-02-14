@@ -6,7 +6,7 @@ impl std::ops::Add for double2x4 {
 
   #[inline]
   fn add(self, other: Self) -> Self {
-    return double2x4::add(self, other);
+    return double2x4(self.0 + other.0, self.1 + other.1);
   }
 }
 
@@ -15,7 +15,7 @@ impl std::ops::Sub for double2x4 {
 
   #[inline]
   fn sub(self, other: Self) -> Self {
-    return double2x4::sub(self, other);
+    return double2x4(self.0 - other.0, self.1 - other.1);
   }
 }
 
@@ -24,28 +24,18 @@ impl std::ops::Mul<f64> for double2x4 {
 
   #[inline]
   fn mul(self, other: f64) -> Self {
-    return double2x4::scale(other, self);
+    let a: double4 = broadcast(other);
+
+    return double2x4(a * self.0, a * self.1);
   }
 }
 
 impl double2x4 {
   #[inline]
-  pub fn scale(a: f64, x: double2x4) -> double2x4 {
-    let a: double4 = a.broadcast();
-
-    return double2x4(a * x.0, a * x.1);
-  }
-
-  #[inline]
   pub fn linear_combination(a: f64, x: double2x4, b: f64, y: double2x4) -> double2x4 {
-    let a: double4 = a.broadcast();
-    let b: double4 = b.broadcast();
+    let a: double4 = broadcast(a);
+    let b: double4 = broadcast(b);
     return double2x4(a * x.0 + b * y.0, a * x.1 + b * y.1);
-  }
-
-  #[inline]
-  pub fn add(x: double2x4, y: double2x4) -> double2x4 {
-    return double2x4(x.0 + y.0, x.1 + y.1);
   }
 
   #[inline]

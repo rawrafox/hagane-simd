@@ -66,11 +66,6 @@ module Bridge
             two = (["2#{".0" if kind.include?(:float)}"] * width).join(", ")
             three = (["3#{".0" if kind.include?(:float)}"] * width).join(", ")
 
-            o.puts("const ZERO: Self = #{name}(#{zero});", pad: true)
-            o.puts("const ONE: Self = #{name}(#{one});")
-            o.puts("const TWO: Self = #{name}(#{two});")
-            o.puts("const THREE: Self = #{name}(#{three});")
-
             o.puts("#[inline(always)]", pad: true)
             o.block("fn abs(self) -> Self") do |o|
               if kind.include?(:signed)
@@ -78,9 +73,9 @@ module Bridge
 
                 o.puts("return (self ^ mask) - mask;", pad: true)
               elsif kind.include?(:float)
-                o.puts("let x: Self::Boolean = std::#{TYPES_BY_NAME[bool][:type]}::MAX.broadcast();", pad: true)
+                o.puts("let x: Self::Boolean = broadcast(std::#{TYPES_BY_NAME[bool][:type]}::MAX);", pad: true)
 
-                o.puts("return x.bitselect(Self::ZERO, self);", pad: true)
+                o.puts("return x.bitselect(Self::from(0), self);", pad: true)
               else
                 o.puts("return self;")
               end
@@ -210,7 +205,7 @@ module Bridge
             o.block("impl Float for #{name}", pad: true) do |o|
               o.puts("#[inline(always)]", pad: true)
               o.block("fn copysign(self, magnitude: Self) -> Self") do |o|
-                o.puts("let x: Self::Boolean = std::#{TYPES_BY_NAME[bool][:type]}::MAX.broadcast();", pad: true)
+                o.puts("let x: Self::Boolean = broadcast(std::#{TYPES_BY_NAME[bool][:type]}::MAX);", pad: true)
 
                 o.puts("return x.bitselect(magnitude, self);", pad: true)
               end
@@ -269,38 +264,8 @@ module Bridge
           if kind.include?(:float)
             o.block("impl Geometry for #{name}", pad: true) do |o|
               o.puts("#[inline(always)]", pad: true)
-              o.block("fn project(self, onto: Self) -> Self") do |o|
-                o.puts("return (self.dot(onto) / onto.dot(onto)) * onto;")
-              end
-
-              o.puts("#[inline(always)]", pad: true)
               o.block("fn length(self) -> Self::Scalar") do |o|
                 o.puts("return self.length_squared().sqrt();")
-              end
-
-              o.puts("#[inline(always)]", pad: true)
-              o.block("fn length_squared(self) -> Self::Scalar") do |o|
-                o.puts("return self.dot(self);")
-              end
-
-              o.puts("#[inline(always)]", pad: true)
-              o.block("fn normalize(self) -> Self") do |o|
-                o.puts("let x: Self = self.length_squared().broadcast();", pad: true)
-
-                o.puts("return self * x.rsqrt();", pad: true)
-              end
-
-              o.puts("#[inline(always)]", pad: true)
-              o.block("fn reflect(self, n: Self) -> Self") do |o|
-                o.puts("return self - 2.0 * self.dot(n) * n;")
-              end
-
-              o.puts("#[inline(always)]", pad: true)
-              o.block("fn refract(self, n: Self, eta: Self::Scalar) -> Self") do |o|
-                o.puts("let dp = self.dot(n);", pad: true)
-                o.puts("let k = 1.0 - eta * eta * (1.0 - dp * dp);")
-
-                o.puts("return if k >= 0.0 { eta * self - (eta * dp + k.sqrt()) } else { Self::ZERO };", pad: true)
               end
             end
           end
@@ -492,7 +457,7 @@ module Bridge
               o.puts
               o.puts("#[inline]")
               o.block("fn add(self, other: Self) -> Self") do |o|
-                o.puts("return #{name}::add(self, other);")
+                o.puts("return #{name}(#{j.times.map { |k| "self.#{k} + other.#{k}" }.join(", ")});")
               end
             end
 
@@ -501,11 +466,11 @@ module Bridge
               o.puts
               o.puts("#[inline]")
               o.block("fn sub(self, other: Self) -> Self") do |o|
-                o.puts("return #{name}::sub(self, other);")
+                o.puts("return #{name}(#{j.times.map { |k| "self.#{k} - other.#{k}" }.join(", ")});")
               end
             end
 
-            if kind.include?(:float) && i == j # TODO: Implement this for i != j
+            if i == j # TODO: Implement this for i != j
               o.block("impl std::ops::Mul for #{name}", pad: true) do |o|
                 o.puts("type Output = Self;")
                 o.puts
@@ -530,11 +495,13 @@ module Bridge
               o.puts
               o.puts("#[inline]")
               o.block("fn mul(self, other: #{scalar}) -> Self") do |o|
-                o.puts("return #{name}::scale(other, self);")
+                o.puts("let a: #{vector_name} = broadcast(other);")
+                o.puts
+                o.puts("return #{name}(#{j.times.map { |k| "a * self.#{k}" }.join(", ")});")
               end
             end
 
-            if kind.include?(:float) && i == j
+            if i == j
               o.block("impl Dot<#{name}> for #{name}", pad: true) do |o|
                 o.puts("type DotProduct = #{name};")
                 o.puts
@@ -565,23 +532,11 @@ module Bridge
               end
 
               o.puts("#[inline]", pad: true)
-              o.block("pub fn scale(a: #{scalar}, x: #{name}) -> #{name}") do |o|
-                o.puts("let a: #{vector_name} = a.broadcast();")
-                o.puts
-                o.puts("return #{name}(#{j.times.map { |k| "a * x.#{k}" }.join(", ")});")
-              end
-
-              o.puts("#[inline]", pad: true)
               o.block("pub fn linear_combination(a: #{scalar}, x: #{name}, b: #{scalar}, y: #{name}) -> #{name}") do |o|
-                o.puts("let a: #{vector_name} = a.broadcast();")
-                o.puts("let b: #{vector_name} = b.broadcast();")
+                o.puts("let a: #{vector_name} = broadcast(a);")
+                o.puts("let b: #{vector_name} = broadcast(b);")
 
                 o.puts("return #{name}(#{j.times.map { |k| "a * x.#{k} + b * y.#{k}" }.join(", ")});")
-              end
-
-              o.puts("#[inline]", pad: true)
-              o.block("pub fn add(x: #{name}, y: #{name}) -> #{name}") do |o|
-                o.puts("return #{name}(#{j.times.map { |k| "x.#{k} + y.#{k}" }.join(", ")});")
               end
 
               o.puts("#[inline]", pad: true)
@@ -662,7 +617,7 @@ module Bridge
           elsif in_kind == out_kind && in_size < out_size
             o.puts("return #{in_name}::to_#{out_type}(self);")
           elsif in_kind.include?(:signed) && out_kind.include?(:unsigned) && in_size <= out_size
-            o.puts("return #{in_name}::to_#{out_type}(max(self, Self::ZERO));")
+            o.puts("return #{in_name}::to_#{out_type}(max(self, broadcast::<isize, Self>(0isize)));")
           elsif in_kind.include?(:unsigned)
             o.puts("return #{in_name}::to_#{out_type}(min(self, #{max}));")
           else

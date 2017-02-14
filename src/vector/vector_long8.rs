@@ -18,11 +18,6 @@ impl Vector for long8 {
   type FloatVector = float8;
   type DoubleVector = double8;
 
-  const ZERO: Self = long8(0, 0, 0, 0, 0, 0, 0, 0);
-  const ONE: Self = long8(1, 1, 1, 1, 1, 1, 1, 1);
-  const TWO: Self = long8(2, 2, 2, 2, 2, 2, 2, 2);
-  const THREE: Self = long8(3, 3, 3, 3, 3, 3, 3, 3);
-
   #[inline(always)]
   fn abs(self) -> Self {
     let mask = self >> 63;
@@ -92,7 +87,7 @@ impl Vector for long8 {
 
   #[inline(always)]
   fn to_ulong_sat(self) -> ulong8 {
-    return long8::to_ulong(max(self, Self::ZERO));
+    return long8::to_ulong(max(self, broadcast::<isize, Self>(0isize)));
   }
 }
 

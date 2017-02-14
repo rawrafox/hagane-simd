@@ -10,7 +10,7 @@ impl std::ops::Add for double3x3 {
 
   #[inline]
   fn add(self, other: Self) -> Self {
-    return double3x3::add(self, other);
+    return double3x3(self.0 + other.0, self.1 + other.1, self.2 + other.2);
   }
 }
 
@@ -19,7 +19,7 @@ impl std::ops::Sub for double3x3 {
 
   #[inline]
   fn sub(self, other: Self) -> Self {
-    return double3x3::sub(self, other);
+    return double3x3(self.0 - other.0, self.1 - other.1, self.2 - other.2);
   }
 }
 
@@ -46,7 +46,9 @@ impl std::ops::Mul<f64> for double3x3 {
 
   #[inline]
   fn mul(self, other: f64) -> Self {
-    return double3x3::scale(other, self);
+    let a: double3 = broadcast(other);
+
+    return double3x3(a * self.0, a * self.1, a * self.2);
   }
 }
 
@@ -75,22 +77,10 @@ impl double3x3 {
   }
 
   #[inline]
-  pub fn scale(a: f64, x: double3x3) -> double3x3 {
-    let a: double3 = a.broadcast();
-
-    return double3x3(a * x.0, a * x.1, a * x.2);
-  }
-
-  #[inline]
   pub fn linear_combination(a: f64, x: double3x3, b: f64, y: double3x3) -> double3x3 {
-    let a: double3 = a.broadcast();
-    let b: double3 = b.broadcast();
+    let a: double3 = broadcast(a);
+    let b: double3 = broadcast(b);
     return double3x3(a * x.0 + b * y.0, a * x.1 + b * y.1, a * x.2 + b * y.2);
-  }
-
-  #[inline]
-  pub fn add(x: double3x3, y: double3x3) -> double3x3 {
-    return double3x3(x.0 + y.0, x.1 + y.1, x.2 + y.2);
   }
 
   #[inline]

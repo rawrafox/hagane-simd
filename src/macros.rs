@@ -7,8 +7,16 @@ macro_rules! declare_vector {
 
     impl_vector!($name2, $scalar, $kind);
 
-    impl Broadcast<$name2> for $scalar  {
-      fn broadcast(self) -> $name2 {
+    impl From<isize> for $name2  {
+      #[inline(always)]
+      fn from(x: isize) -> $name2 {
+        return $name2(x as $scalar, x as $scalar);
+      }
+    }
+
+    impl Into<$name2> for $scalar  {
+      #[inline(always)]
+      fn into(self) -> $name2 {
         return $name2(self, self);
       }
     }
@@ -20,8 +28,16 @@ macro_rules! declare_vector {
 
     impl_vector!($name3, $scalar, $kind);
 
-    impl Broadcast<$name3> for $scalar  {
-      fn broadcast(self) -> $name3 {
+    impl From<isize> for $name3  {
+      #[inline(always)]
+      fn from(x: isize) -> $name3 {
+        return $name3(x as $scalar, x as $scalar, x as $scalar);
+      }
+    }
+
+    impl Into<$name3> for $scalar  {
+      #[inline(always)]
+      fn into(self) -> $name3 {
         return $name3(self, self, self);
       }
     }
@@ -33,8 +49,16 @@ macro_rules! declare_vector {
 
     impl_vector!($name4, $scalar, $kind);
 
-    impl Broadcast<$name4> for $scalar  {
-      fn broadcast(self) -> $name4 {
+    impl From<isize> for $name4  {
+      #[inline(always)]
+      fn from(x: isize) -> $name4 {
+        return $name4(x as $scalar, x as $scalar, x as $scalar, x as $scalar);
+      }
+    }
+
+    impl Into<$name4> for $scalar  {
+      #[inline(always)]
+      fn into(self) -> $name4 {
         return $name4(self, self, self, self);
       }
     }
@@ -46,8 +70,16 @@ macro_rules! declare_vector {
 
     impl_vector!($name8, $scalar, $kind);
 
-    impl Broadcast<$name8> for $scalar  {
-      fn broadcast(self) -> $name8 {
+    impl From<isize> for $name8  {
+      #[inline(always)]
+      fn from(x: isize) -> $name8 {
+        return $name8(x as $scalar, x as $scalar, x as $scalar, x as $scalar, x as $scalar, x as $scalar, x as $scalar, x as $scalar);
+      }
+    }
+
+    impl Into<$name8> for $scalar  {
+      #[inline(always)]
+      fn into(self) -> $name8 {
         return $name8(self, self, self, self, self, self, self, self);
       }
     }
@@ -59,8 +91,16 @@ macro_rules! declare_vector {
 
     impl_vector!($name16, $scalar, $kind);
 
-    impl Broadcast<$name16> for $scalar  {
-      fn broadcast(self) -> $name16 {
+    impl From<isize> for $name16  {
+      #[inline(always)]
+      fn from(x: isize) -> $name16 {
+        return $name16(x as $scalar, x as $scalar, x as $scalar, x as $scalar, x as $scalar, x as $scalar, x as $scalar, x as $scalar, x as $scalar, x as $scalar, x as $scalar, x as $scalar, x as $scalar, x as $scalar, x as $scalar, x as $scalar);
+      }
+    }
+
+    impl Into<$name16> for $scalar  {
+      #[inline(always)]
+      fn into(self) -> $name16 {
         return $name16(self, self, self, self, self, self, self, self, self, self, self, self, self, self, self, self);
       }
     }
@@ -72,7 +112,7 @@ macro_rules! impl_trait {
     impl $trait_name<$vector> for $vector {
       type Output = Self;
 
-      #[inline]
+      #[inline(always)]
       fn $fn_name(self, other: Self) -> Self {
         return unsafe { $intrinsic(self, other) };
       }
@@ -81,7 +121,7 @@ macro_rules! impl_trait {
     impl $trait_name<$scalar> for $vector {
       type Output = Self;
 
-      #[inline]
+      #[inline(always)]
       fn $fn_name(self, other: $scalar) -> Self {
         return unsafe { $intrinsic(self, broadcast(other)) };
       }
@@ -90,7 +130,7 @@ macro_rules! impl_trait {
     impl $trait_name<$vector> for $scalar {
       type Output = $vector;
 
-      #[inline]
+      #[inline(always)]
       fn $fn_name(self, other: $vector) -> $vector {
         return unsafe { $intrinsic(broadcast(self), other) };
       }

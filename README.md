@@ -1,6 +1,6 @@
-# Aventine SIMD vector library #
+# Hagane SIMD vector library #
 
-This is a crate that provides an SIMD vector library for Rust, it's nowhere near as polished or complete as the language support in Clang / OpenCL (compiler limitations) but it's intended to be a start to get us out and be productive at least.
+This is a crate that provides an SIMD vector library for Rust and specifically the ObjC bridge `hagane`, it's nowhere near as polished or complete as the language support in Clang / OpenCL but it's intended to be a start to get us out and be productive at least.
 
 The main goal is to be ABI compatible with the Apple standard library `simd` for use on macOS and iOS. Right now it only builds on Apple platforms since we depend on `libSystem`, but the goal is to replace those bits as soon as possible.
 
@@ -82,23 +82,12 @@ This is a TODO list, a check means that it is "done".
      - [ ] `tanpi`
      - [ ] `tgamma`
  - [ ] Matrices
-   - [ ] Types
-     - [x] `float`
-     - [ ] `double`
    - [ ] Constructors
      - [x] Basic
      - [ ] From columns
      - [ ] From rows
      - [ ] From diagonal
-   - [ ] Operators
    - [ ] Functions
-     - [ ] `scale`
-     - [ ] `linear_combination`
-     - [ ] `add`
-     - [ ] `sub`
-     - [ ] `transpose`
-     - [ ] `invert`
-     - [ ] `multiply`
      - [ ] `equal`
      - [ ] `almost_equal_elements`
      - [ ] `almost_equal_elements_relative`

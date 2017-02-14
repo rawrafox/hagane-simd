@@ -18,16 +18,11 @@ impl Vector for float2 {
   type FloatVector = float2;
   type DoubleVector = double2;
 
-  const ZERO: Self = float2(0.0, 0.0);
-  const ONE: Self = float2(1.0, 1.0);
-  const TWO: Self = float2(2.0, 2.0);
-  const THREE: Self = float2(3.0, 3.0);
-
   #[inline(always)]
   fn abs(self) -> Self {
-    let x: Self::Boolean = std::i32::MAX.broadcast();
+    let x: Self::Boolean = broadcast(std::i32::MAX);
 
-    return x.bitselect(Self::ZERO, self);
+    return x.bitselect(Self::from(0), self);
   }
 
   #[inline(always)]
@@ -116,7 +111,7 @@ impl Dot<float2> for float2 {
 impl Float for float2 {
   #[inline(always)]
   fn copysign(self, magnitude: Self) -> Self {
-    let x: Self::Boolean = std::i32::MAX.broadcast();
+    let x: Self::Boolean = broadcast(std::i32::MAX);
 
     return x.bitselect(magnitude, self);
   }
@@ -159,38 +154,8 @@ impl Float for float2 {
 
 impl Geometry for float2 {
   #[inline(always)]
-  fn project(self, onto: Self) -> Self {
-    return (self.dot(onto) / onto.dot(onto)) * onto;
-  }
-
-  #[inline(always)]
   fn length(self) -> Self::Scalar {
     return self.length_squared().sqrt();
-  }
-
-  #[inline(always)]
-  fn length_squared(self) -> Self::Scalar {
-    return self.dot(self);
-  }
-
-  #[inline(always)]
-  fn normalize(self) -> Self {
-    let x: Self = self.length_squared().broadcast();
-
-    return self * x.rsqrt();
-  }
-
-  #[inline(always)]
-  fn reflect(self, n: Self) -> Self {
-    return self - 2.0 * self.dot(n) * n;
-  }
-
-  #[inline(always)]
-  fn refract(self, n: Self, eta: Self::Scalar) -> Self {
-    let dp = self.dot(n);
-    let k = 1.0 - eta * eta * (1.0 - dp * dp);
-
-    return if k >= 0.0 { eta * self - (eta * dp + k.sqrt()) } else { Self::ZERO };
   }
 }
 

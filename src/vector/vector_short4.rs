@@ -18,11 +18,6 @@ impl Vector for short4 {
   type FloatVector = float4;
   type DoubleVector = double4;
 
-  const ZERO: Self = short4(0, 0, 0, 0);
-  const ONE: Self = short4(1, 1, 1, 1);
-  const TWO: Self = short4(2, 2, 2, 2);
-  const THREE: Self = short4(3, 3, 3, 3);
-
   #[inline(always)]
   fn abs(self) -> Self {
     let mask = self >> 15;
@@ -72,7 +67,7 @@ impl Vector for short4 {
 
   #[inline(always)]
   fn to_ushort_sat(self) -> ushort4 {
-    return short4::to_ushort(max(self, Self::ZERO));
+    return short4::to_ushort(max(self, broadcast::<isize, Self>(0isize)));
   }
 
   #[inline(always)]
@@ -82,7 +77,7 @@ impl Vector for short4 {
 
   #[inline(always)]
   fn to_uint_sat(self) -> uint4 {
-    return short4::to_uint(max(self, Self::ZERO));
+    return short4::to_uint(max(self, broadcast::<isize, Self>(0isize)));
   }
 
   #[inline(always)]
@@ -92,7 +87,7 @@ impl Vector for short4 {
 
   #[inline(always)]
   fn to_ulong_sat(self) -> ulong4 {
-    return short4::to_ulong(max(self, Self::ZERO));
+    return short4::to_ulong(max(self, broadcast::<isize, Self>(0isize)));
   }
 }
 

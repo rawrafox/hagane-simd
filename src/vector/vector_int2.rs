@@ -18,11 +18,6 @@ impl Vector for int2 {
   type FloatVector = float2;
   type DoubleVector = double2;
 
-  const ZERO: Self = int2(0, 0);
-  const ONE: Self = int2(1, 1);
-  const TWO: Self = int2(2, 2);
-  const THREE: Self = int2(3, 3);
-
   #[inline(always)]
   fn abs(self) -> Self {
     let mask = self >> 31;
@@ -82,7 +77,7 @@ impl Vector for int2 {
 
   #[inline(always)]
   fn to_uint_sat(self) -> uint2 {
-    return int2::to_uint(max(self, Self::ZERO));
+    return int2::to_uint(max(self, broadcast::<isize, Self>(0isize)));
   }
 
   #[inline(always)]
@@ -92,7 +87,7 @@ impl Vector for int2 {
 
   #[inline(always)]
   fn to_ulong_sat(self) -> ulong2 {
-    return int2::to_ulong(max(self, Self::ZERO));
+    return int2::to_ulong(max(self, broadcast::<isize, Self>(0isize)));
   }
 }
 

@@ -18,11 +18,6 @@ impl Vector for short16 {
   type FloatVector = float16;
   type DoubleVector = double16;
 
-  const ZERO: Self = short16(0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0, 0);
-  const ONE: Self = short16(1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1, 1);
-  const TWO: Self = short16(2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2, 2);
-  const THREE: Self = short16(3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3, 3);
-
   #[inline(always)]
   fn abs(self) -> Self {
     let mask = self >> 15;
@@ -72,7 +67,7 @@ impl Vector for short16 {
 
   #[inline(always)]
   fn to_ushort_sat(self) -> ushort16 {
-    return short16::to_ushort(max(self, Self::ZERO));
+    return short16::to_ushort(max(self, broadcast::<isize, Self>(0isize)));
   }
 
   #[inline(always)]
@@ -82,7 +77,7 @@ impl Vector for short16 {
 
   #[inline(always)]
   fn to_uint_sat(self) -> uint16 {
-    return short16::to_uint(max(self, Self::ZERO));
+    return short16::to_uint(max(self, broadcast::<isize, Self>(0isize)));
   }
 
   #[inline(always)]
@@ -92,7 +87,7 @@ impl Vector for short16 {
 
   #[inline(always)]
   fn to_ulong_sat(self) -> ulong16 {
-    return short16::to_ulong(max(self, Self::ZERO));
+    return short16::to_ulong(max(self, broadcast::<isize, Self>(0isize)));
   }
 }
 

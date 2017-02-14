@@ -18,11 +18,6 @@ impl Vector for short3 {
   type FloatVector = float3;
   type DoubleVector = double3;
 
-  const ZERO: Self = short3(0, 0, 0);
-  const ONE: Self = short3(1, 1, 1);
-  const TWO: Self = short3(2, 2, 2);
-  const THREE: Self = short3(3, 3, 3);
-
   #[inline(always)]
   fn abs(self) -> Self {
     let mask = self >> 15;
@@ -72,7 +67,7 @@ impl Vector for short3 {
 
   #[inline(always)]
   fn to_ushort_sat(self) -> ushort3 {
-    return short3::to_ushort(max(self, Self::ZERO));
+    return short3::to_ushort(max(self, broadcast::<isize, Self>(0isize)));
   }
 
   #[inline(always)]
@@ -92,7 +87,7 @@ impl Vector for short3 {
 
   #[inline(always)]
   fn to_uint_sat(self) -> uint3 {
-    return short3::to_uint(max(self, Self::ZERO));
+    return short3::to_uint(max(self, broadcast::<isize, Self>(0isize)));
   }
 
   #[inline(always)]
@@ -117,7 +112,7 @@ impl Vector for short3 {
 
   #[inline(always)]
   fn to_ulong_sat(self) -> ulong3 {
-    return short3::to_ulong(max(self, Self::ZERO));
+    return short3::to_ulong(max(self, broadcast::<isize, Self>(0isize)));
   }
 
   #[inline(always)]

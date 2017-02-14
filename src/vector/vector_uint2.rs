@@ -18,11 +18,6 @@ impl Vector for uint2 {
   type FloatVector = float2;
   type DoubleVector = double2;
 
-  const ZERO: Self = uint2(0, 0);
-  const ONE: Self = uint2(1, 1);
-  const TWO: Self = uint2(2, 2);
-  const THREE: Self = uint2(3, 3);
-
   #[inline(always)]
   fn abs(self) -> Self {
     return self;

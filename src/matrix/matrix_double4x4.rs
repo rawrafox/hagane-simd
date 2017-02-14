@@ -10,7 +10,7 @@ impl std::ops::Add for double4x4 {
 
   #[inline]
   fn add(self, other: Self) -> Self {
-    return double4x4::add(self, other);
+    return double4x4(self.0 + other.0, self.1 + other.1, self.2 + other.2, self.3 + other.3);
   }
 }
 
@@ -19,7 +19,7 @@ impl std::ops::Sub for double4x4 {
 
   #[inline]
   fn sub(self, other: Self) -> Self {
-    return double4x4::sub(self, other);
+    return double4x4(self.0 - other.0, self.1 - other.1, self.2 - other.2, self.3 - other.3);
   }
 }
 
@@ -46,7 +46,9 @@ impl std::ops::Mul<f64> for double4x4 {
 
   #[inline]
   fn mul(self, other: f64) -> Self {
-    return double4x4::scale(other, self);
+    let a: double4 = broadcast(other);
+
+    return double4x4(a * self.0, a * self.1, a * self.2, a * self.3);
   }
 }
 
@@ -75,22 +77,10 @@ impl double4x4 {
   }
 
   #[inline]
-  pub fn scale(a: f64, x: double4x4) -> double4x4 {
-    let a: double4 = a.broadcast();
-
-    return double4x4(a * x.0, a * x.1, a * x.2, a * x.3);
-  }
-
-  #[inline]
   pub fn linear_combination(a: f64, x: double4x4, b: f64, y: double4x4) -> double4x4 {
-    let a: double4 = a.broadcast();
-    let b: double4 = b.broadcast();
+    let a: double4 = broadcast(a);
+    let b: double4 = broadcast(b);
     return double4x4(a * x.0 + b * y.0, a * x.1 + b * y.1, a * x.2 + b * y.2, a * x.3 + b * y.3);
-  }
-
-  #[inline]
-  pub fn add(x: double4x4, y: double4x4) -> double4x4 {
-    return double4x4(x.0 + y.0, x.1 + y.1, x.2 + y.2, x.3 + y.3);
   }
 
   #[inline]

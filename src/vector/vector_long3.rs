@@ -18,11 +18,6 @@ impl Vector for long3 {
   type FloatVector = float3;
   type DoubleVector = double3;
 
-  const ZERO: Self = long3(0, 0, 0);
-  const ONE: Self = long3(1, 1, 1);
-  const TWO: Self = long3(2, 2, 2);
-  const THREE: Self = long3(3, 3, 3);
-
   #[inline(always)]
   fn abs(self) -> Self {
     let mask = self >> 63;
@@ -92,7 +87,7 @@ impl Vector for long3 {
 
   #[inline(always)]
   fn to_ulong_sat(self) -> ulong3 {
-    return long3::to_ulong(max(self, Self::ZERO));
+    return long3::to_ulong(max(self, broadcast::<isize, Self>(0isize)));
   }
 }
 
