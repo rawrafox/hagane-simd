@@ -100,13 +100,6 @@ impl Geometry for float8 {
 
 impl float8 {
   #[inline(always)]
-  pub fn bitcast<T>(x: T) -> float8 {
-    assert_eq!(std::mem::size_of::<T>(), std::mem::size_of::<Self>());
-
-    return unsafe { std::mem::transmute_copy(&x) };
-  }
-
-  #[inline(always)]
   pub fn lo(self) -> float4 {
     return float4(self.0, self.1, self.2, self.3);
   }

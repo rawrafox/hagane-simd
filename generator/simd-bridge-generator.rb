@@ -167,10 +167,7 @@ module Bridge
               other_name = "#{other.fetch(:opencl)}#{width}"
 
               o.block("impl Select<#{other_name}> for #{name}", pad: true) do |o|
-                o.puts("#[inline(always)]", pad: true)
-                o.block("fn select(self, a: #{other_name}, b: #{other_name}) -> #{other_name}") do |o|
-                  o.puts("return (self >> #{attributes.fetch(:size) * 8 - 1}).bitselect(a, b);")
-                end
+                o.puts("const MASK_SHIFT: #{scalar} = #{attributes.fetch(:size) * 8 - 1};", pad: true)
 
                 o.puts("#[inline(always)]", pad: true)
                 o.block("fn bitselect(self, a: #{other_name}, b: #{other_name}) -> #{other_name}") do |o|
@@ -185,15 +182,6 @@ module Bridge
           end
 
           o.block("impl #{name}", pad: true) do |o|
-            o.puts("#[inline(always)]", pad: true)
-            o.block("pub fn bitcast<T>(x: T) -> #{name}") do |o|
-              o.puts("assert_eq!(std::mem::size_of::<T>(), std::mem::size_of::<Self>());")
-              o.puts
-              o.puts("return unsafe { std::mem::transmute_copy(&x) };")
-            end
-
-            # Swizzles
-
             case width
             when 2
               o.puts("#[inline(always)]", pad: true)

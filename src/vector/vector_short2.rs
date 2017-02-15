@@ -96,10 +96,7 @@ impl Integer for short2 {
 }
 
 impl Select<short2> for short2 {
-  #[inline(always)]
-  fn select(self, a: short2, b: short2) -> short2 {
-    return (self >> 15).bitselect(a, b);
-  }
+  const MASK_SHIFT: i16 = 15;
 
   #[inline(always)]
   fn bitselect(self, a: short2, b: short2) -> short2 {
@@ -108,10 +105,7 @@ impl Select<short2> for short2 {
 }
 
 impl Select<ushort2> for short2 {
-  #[inline(always)]
-  fn select(self, a: ushort2, b: ushort2) -> ushort2 {
-    return (self >> 15).bitselect(a, b);
-  }
+  const MASK_SHIFT: i16 = 15;
 
   #[inline(always)]
   fn bitselect(self, a: ushort2, b: ushort2) -> ushort2 {
@@ -120,13 +114,6 @@ impl Select<ushort2> for short2 {
 }
 
 impl short2 {
-  #[inline(always)]
-  pub fn bitcast<T>(x: T) -> short2 {
-    assert_eq!(std::mem::size_of::<T>(), std::mem::size_of::<Self>());
-
-    return unsafe { std::mem::transmute_copy(&x) };
-  }
-
   #[inline(always)]
   pub fn lo(self) -> i16 {
     return self.0;

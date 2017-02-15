@@ -100,13 +100,6 @@ impl Geometry for double4 {
 
 impl double4 {
   #[inline(always)]
-  pub fn bitcast<T>(x: T) -> double4 {
-    assert_eq!(std::mem::size_of::<T>(), std::mem::size_of::<Self>());
-
-    return unsafe { std::mem::transmute_copy(&x) };
-  }
-
-  #[inline(always)]
   pub fn lo(self) -> double2 {
     return double2(self.0, self.1);
   }

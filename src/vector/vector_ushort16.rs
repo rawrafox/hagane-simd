@@ -95,13 +95,6 @@ impl Integer for ushort16 {
 
 impl ushort16 {
   #[inline(always)]
-  pub fn bitcast<T>(x: T) -> ushort16 {
-    assert_eq!(std::mem::size_of::<T>(), std::mem::size_of::<Self>());
-
-    return unsafe { std::mem::transmute_copy(&x) };
-  }
-
-  #[inline(always)]
   pub fn lo(self) -> ushort8 {
     return ushort8(self.0, self.1, self.2, self.3, self.4, self.5, self.6, self.7);
   }

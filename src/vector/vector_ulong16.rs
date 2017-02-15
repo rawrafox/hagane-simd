@@ -95,13 +95,6 @@ impl Integer for ulong16 {
 
 impl ulong16 {
   #[inline(always)]
-  pub fn bitcast<T>(x: T) -> ulong16 {
-    assert_eq!(std::mem::size_of::<T>(), std::mem::size_of::<Self>());
-
-    return unsafe { std::mem::transmute_copy(&x) };
-  }
-
-  #[inline(always)]
   pub fn lo(self) -> ulong8 {
     return ulong8(self.0, self.1, self.2, self.3, self.4, self.5, self.6, self.7);
   }

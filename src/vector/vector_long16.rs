@@ -96,10 +96,7 @@ impl Integer for long16 {
 }
 
 impl Select<long16> for long16 {
-  #[inline(always)]
-  fn select(self, a: long16, b: long16) -> long16 {
-    return (self >> 63).bitselect(a, b);
-  }
+  const MASK_SHIFT: i64 = 63;
 
   #[inline(always)]
   fn bitselect(self, a: long16, b: long16) -> long16 {
@@ -108,10 +105,7 @@ impl Select<long16> for long16 {
 }
 
 impl Select<ulong16> for long16 {
-  #[inline(always)]
-  fn select(self, a: ulong16, b: ulong16) -> ulong16 {
-    return (self >> 63).bitselect(a, b);
-  }
+  const MASK_SHIFT: i64 = 63;
 
   #[inline(always)]
   fn bitselect(self, a: ulong16, b: ulong16) -> ulong16 {
@@ -120,10 +114,7 @@ impl Select<ulong16> for long16 {
 }
 
 impl Select<double16> for long16 {
-  #[inline(always)]
-  fn select(self, a: double16, b: double16) -> double16 {
-    return (self >> 63).bitselect(a, b);
-  }
+  const MASK_SHIFT: i64 = 63;
 
   #[inline(always)]
   fn bitselect(self, a: double16, b: double16) -> double16 {
@@ -132,13 +123,6 @@ impl Select<double16> for long16 {
 }
 
 impl long16 {
-  #[inline(always)]
-  pub fn bitcast<T>(x: T) -> long16 {
-    assert_eq!(std::mem::size_of::<T>(), std::mem::size_of::<Self>());
-
-    return unsafe { std::mem::transmute_copy(&x) };
-  }
-
   #[inline(always)]
   pub fn lo(self) -> long8 {
     return long8(self.0, self.1, self.2, self.3, self.4, self.5, self.6, self.7);

@@ -109,13 +109,6 @@ impl Geometry for float2 {
 
 impl float2 {
   #[inline(always)]
-  pub fn bitcast<T>(x: T) -> float2 {
-    assert_eq!(std::mem::size_of::<T>(), std::mem::size_of::<Self>());
-
-    return unsafe { std::mem::transmute_copy(&x) };
-  }
-
-  #[inline(always)]
   pub fn lo(self) -> f32 {
     return self.0;
   }

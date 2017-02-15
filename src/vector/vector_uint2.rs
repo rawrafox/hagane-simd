@@ -95,13 +95,6 @@ impl Integer for uint2 {
 
 impl uint2 {
   #[inline(always)]
-  pub fn bitcast<T>(x: T) -> uint2 {
-    assert_eq!(std::mem::size_of::<T>(), std::mem::size_of::<Self>());
-
-    return unsafe { std::mem::transmute_copy(&x) };
-  }
-
-  #[inline(always)]
   pub fn lo(self) -> u32 {
     return self.0;
   }

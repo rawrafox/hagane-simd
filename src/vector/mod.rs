@@ -127,6 +127,13 @@ pub trait Vector : Sized + Copy + Add<Output=Self> + Sub<Output=Self> + Mul<Outp
   fn reduce(self, f: &Fn(Self::Scalar, Self::Scalar) -> Self::Scalar) -> Self::Scalar;
 
   #[inline(always)]
+  fn bitcast<T: Vector>(x: T) -> Self {
+    assert_eq!(std::mem::size_of::<T>(), std::mem::size_of::<Self>());
+
+    return unsafe { std::mem::transmute_copy(&x) };
+  }
+
+  #[inline(always)]
   fn broadcast(x: Self::Scalar) -> Self {
     return x.into();
   }
@@ -703,7 +710,7 @@ pub fn refract<T: Geometry>(x: T, n: T, eta: T::Scalar) -> T {
   return x.refract(n, eta);
 }
 
-pub trait Integer : Vector<Scalar=<Self as Integer>::IntegerScalar> + Rem<Output=Self> + BitAnd<Output=Self> + BitOr<Output=Self> + BitXor<Output=Self> {
+pub trait Integer : Vector<Scalar=<Self as Integer>::IntegerScalar> + Rem<Output=Self> + BitAnd<Output=Self> + BitOr<Output=Self> + BitXor<Output=Self> + std::ops::Shr<<Self as Integer>::IntegerScalar, Output=Self> + std::ops::Shl<<Self as Integer>::IntegerScalar, Output=Self> {
   type IntegerScalar: scalar::IntegerScalar + Into<Self>;
 
   const SIGN_MASK: Self::Scalar;
@@ -759,17 +766,23 @@ pub fn any<T: Integer>(x: T) -> bool {
   return x.any();
 }
 
-pub trait Select<T> : Integer {
-  fn select(self, a: T, b: T) -> T;
+pub trait Select<T: Vector> : Integer {
+  const MASK_SHIFT: Self::Scalar;
+
+  #[inline(always)]
+  fn select(self, a: T, b: T) -> T {
+    return (self >> Self::MASK_SHIFT).bitselect(a, b);
+  }
+
   fn bitselect(self, a: T, b: T) -> T;
 }
 
 #[inline(always)]
-pub fn select<T, B: Select<T>>(condition: B, a: T, b: T) -> T {
+pub fn select<T: Vector, B: Select<T>>(condition: B, a: T, b: T) -> T {
   return condition.select(a, b);
 }
 
 #[inline(always)]
-pub fn bitselect<T, B: Select<T>>(condition: B, a: T, b: T) -> T {
+pub fn bitselect<T: Vector, B: Select<T>>(condition: B, a: T, b: T) -> T {
   return condition.bitselect(a, b);
 }

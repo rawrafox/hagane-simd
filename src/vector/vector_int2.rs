@@ -96,10 +96,7 @@ impl Integer for int2 {
 }
 
 impl Select<int2> for int2 {
-  #[inline(always)]
-  fn select(self, a: int2, b: int2) -> int2 {
-    return (self >> 31).bitselect(a, b);
-  }
+  const MASK_SHIFT: i32 = 31;
 
   #[inline(always)]
   fn bitselect(self, a: int2, b: int2) -> int2 {
@@ -108,10 +105,7 @@ impl Select<int2> for int2 {
 }
 
 impl Select<uint2> for int2 {
-  #[inline(always)]
-  fn select(self, a: uint2, b: uint2) -> uint2 {
-    return (self >> 31).bitselect(a, b);
-  }
+  const MASK_SHIFT: i32 = 31;
 
   #[inline(always)]
   fn bitselect(self, a: uint2, b: uint2) -> uint2 {
@@ -120,10 +114,7 @@ impl Select<uint2> for int2 {
 }
 
 impl Select<float2> for int2 {
-  #[inline(always)]
-  fn select(self, a: float2, b: float2) -> float2 {
-    return (self >> 31).bitselect(a, b);
-  }
+  const MASK_SHIFT: i32 = 31;
 
   #[inline(always)]
   fn bitselect(self, a: float2, b: float2) -> float2 {
@@ -132,13 +123,6 @@ impl Select<float2> for int2 {
 }
 
 impl int2 {
-  #[inline(always)]
-  pub fn bitcast<T>(x: T) -> int2 {
-    assert_eq!(std::mem::size_of::<T>(), std::mem::size_of::<Self>());
-
-    return unsafe { std::mem::transmute_copy(&x) };
-  }
-
   #[inline(always)]
   pub fn lo(self) -> i32 {
     return self.0;
