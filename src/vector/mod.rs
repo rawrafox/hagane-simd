@@ -104,7 +104,7 @@ declare_vector!(ulong2, ulong3, ulong4, ulong8, ulong16, u64, unsigned);
 declare_vector!(float2, float3, float4, float8, float16, f32, float);
 declare_vector!(double2, double3, double4, double8, double16, f64, float);
 
-pub trait Vector : Sized + Copy + Add<Output=Self> + Sub<Output=Self> + Mul<Output=Self> + Div<Output=Self> + Rem<Output=Self> + Dot<Self, DotProduct=<Self as Vector>::Scalar> + From<isize> {
+pub trait Vector : Sized + Copy + Add<Output=Self> + Sub<Output=Self> + Mul<Output=Self> + Div<Output=Self> + Dot<Self, DotProduct=<Self as Vector>::Scalar> + From<isize> {
   type Scalar: scalar::Scalar + Into<Self>;
   type Boolean: Select<Self> + Vector;
 
@@ -703,7 +703,7 @@ pub fn refract<T: Geometry>(x: T, n: T, eta: T::Scalar) -> T {
   return x.refract(n, eta);
 }
 
-pub trait Integer : Vector<Scalar=<Self as Integer>::IntegerScalar> + BitAnd<Output=Self> + BitOr<Output=Self> + BitXor<Output=Self> {
+pub trait Integer : Vector<Scalar=<Self as Integer>::IntegerScalar> + Rem<Output=Self> + BitAnd<Output=Self> + BitOr<Output=Self> + BitXor<Output=Self> {
   type IntegerScalar: scalar::IntegerScalar + Into<Self>;
 
   const SIGN_MASK: Self::Scalar;

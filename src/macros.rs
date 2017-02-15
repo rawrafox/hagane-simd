@@ -184,15 +184,6 @@ macro_rules! impl_vector {
   };
   ($vector:ident, $scalar:ident, float) => {
     impl_vector!($vector, $scalar, common);
-
-    impl std::ops::Rem for $vector {
-      type Output = Self;
-
-      #[inline(always)]
-      fn rem(self, other: Self) -> Self {
-        return self - (self / other).trunc() * other;
-      }
-    }
   };
   ($vector:ident, $scalar:ident, common) => {
     impl_trait!($vector, $scalar, simd_add, Add, add);
