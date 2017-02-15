@@ -2,7 +2,7 @@ use std;
 use std::ops::*;
 
 use ::*;
-use scalar::{Scalar, FloatScalar};
+use scalar::{Scalar, FloatScalar, IntegerScalar};
 
 mod vector_char2;
 mod vector_char3;
@@ -440,11 +440,11 @@ pub fn cross<T: Cross>(x: T, y: T) -> T::CrossProduct {
 pub trait Float : Vector<Scalar=<Self as Float>::FloatScalar> {
   type FloatScalar: scalar::FloatScalar + Into<Self>;
 
-  const SIGN_MASK: Self::Boolean;
+  const SIGN_MASK: <<Self as Vector>::Boolean as Vector>::Scalar;
 
   #[inline(always)]
   fn copysign(self, magnitude: Self) -> Self {
-    return Self::SIGN_MASK.bitselect(magnitude, self);
+    return Self::Boolean::broadcast(Self::SIGN_MASK).bitselect(magnitude, self);
   }
 
   #[inline(always)]
@@ -690,13 +690,24 @@ pub fn refract<T: Geometry>(x: T, n: T, eta: T::Scalar) -> T {
   return x.refract(n, eta);
 }
 
-pub trait Integer : Vector + BitAnd<Output=Self> + BitOr<Output=Self> + BitXor<Output=Self> {
+pub trait Integer : Vector<Scalar=<Self as Integer>::IntegerScalar> + BitAnd<Output=Self> + BitOr<Output=Self> + BitXor<Output=Self> {
+  type IntegerScalar: scalar::IntegerScalar + Into<Self>;
+
+  const SIGN_MASK: Self::Scalar;
+
   fn reduce_and(self) -> Self::Scalar;
   fn reduce_or(self) -> Self::Scalar;
   fn reduce_xor(self) -> Self::Scalar;
 
-  fn all(self) -> bool;
-  fn any(self) -> bool;
+  #[inline(always)]
+  fn all(self) -> bool {
+    return self.reduce_and() & Self::SIGN_MASK != Self::Scalar::ZERO;
+  }
+  
+  #[inline(always)]
+  fn any(self) -> bool {
+    return self.reduce_or() & Self::SIGN_MASK != Self::Scalar::ZERO;
+  }
 }
 
 #[inline(always)]

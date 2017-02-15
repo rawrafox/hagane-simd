@@ -98,6 +98,10 @@ impl Dot<ulong2> for ulong2 {
 }
 
 impl Integer for ulong2 {
+  type IntegerScalar = u64;
+
+  const SIGN_MASK: u64 = 0x8000000000000000;
+
   #[inline(always)]
   fn reduce_and(self) -> Self::Scalar {
     return self.0 & self.1
@@ -111,16 +115,6 @@ impl Integer for ulong2 {
   #[inline(always)]
   fn reduce_xor(self) -> Self::Scalar {
     return self.0 ^ self.1
-  }
-
-  #[inline(always)]
-  fn all(self) -> bool {
-    return self.reduce_and() & 0x8000000000000000 != 0;
-  }
-
-  #[inline(always)]
-  fn any(self) -> bool {
-    return self.reduce_or() & 0x8000000000000000 != 0;
   }
 }
 

@@ -101,7 +101,8 @@ impl Dot<double16> for double16 {
 
 impl Float for double16 {
   type FloatScalar = f64;
-  const SIGN_MASK: long16 = long16(std::i64::MAX, std::i64::MAX, std::i64::MAX, std::i64::MAX, std::i64::MAX, std::i64::MAX, std::i64::MAX, std::i64::MAX, std::i64::MAX, std::i64::MAX, std::i64::MAX, std::i64::MAX, std::i64::MAX, std::i64::MAX, std::i64::MAX, std::i64::MAX);
+
+  const SIGN_MASK: i64 = std::i64::MAX;
 }
 
 impl Geometry for double16 {

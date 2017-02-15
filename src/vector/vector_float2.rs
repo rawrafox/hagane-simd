@@ -110,7 +110,8 @@ impl Dot<float2> for float2 {
 
 impl Float for float2 {
   type FloatScalar = f32;
-  const SIGN_MASK: int2 = int2(std::i32::MAX, std::i32::MAX);
+
+  const SIGN_MASK: i32 = std::i32::MAX;
 }
 
 impl Geometry for float2 {

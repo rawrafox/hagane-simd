@@ -100,6 +100,10 @@ impl Dot<short2> for short2 {
 }
 
 impl Integer for short2 {
+  type IntegerScalar = i16;
+
+  const SIGN_MASK: i16 = std::i16::MIN;
+
   #[inline(always)]
   fn reduce_and(self) -> Self::Scalar {
     return self.0 & self.1
@@ -113,16 +117,6 @@ impl Integer for short2 {
   #[inline(always)]
   fn reduce_xor(self) -> Self::Scalar {
     return self.0 ^ self.1
-  }
-
-  #[inline(always)]
-  fn all(self) -> bool {
-    return self.reduce_and() & std::i16::MIN != 0;
-  }
-
-  #[inline(always)]
-  fn any(self) -> bool {
-    return self.reduce_or() & std::i16::MIN != 0;
   }
 }
 

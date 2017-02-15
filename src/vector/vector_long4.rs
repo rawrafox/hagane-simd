@@ -100,6 +100,10 @@ impl Dot<long4> for long4 {
 }
 
 impl Integer for long4 {
+  type IntegerScalar = i64;
+
+  const SIGN_MASK: i64 = std::i64::MIN;
+
   #[inline(always)]
   fn reduce_and(self) -> Self::Scalar {
     return (self.lo() & self.hi()).reduce_and();
@@ -113,16 +117,6 @@ impl Integer for long4 {
   #[inline(always)]
   fn reduce_xor(self) -> Self::Scalar {
     return (self.lo() ^ self.hi()).reduce_xor();
-  }
-
-  #[inline(always)]
-  fn all(self) -> bool {
-    return self.reduce_and() & std::i64::MIN != 0;
-  }
-
-  #[inline(always)]
-  fn any(self) -> bool {
-    return self.reduce_or() & std::i64::MIN != 0;
   }
 }
 

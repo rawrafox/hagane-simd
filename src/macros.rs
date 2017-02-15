@@ -227,6 +227,10 @@ macro_rules! impl_scalar {
         return std::cmp::min(x, y);
       }
     }
+
+    impl IntegerScalar for $scalar {
+      const ZERO: $scalar = 0;
+    }
   };
   ($scalar:ident, unsigned) =>  {
     impl_scalar!($scalar, signed);

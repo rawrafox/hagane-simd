@@ -98,6 +98,10 @@ impl Dot<ushort2> for ushort2 {
 }
 
 impl Integer for ushort2 {
+  type IntegerScalar = u16;
+
+  const SIGN_MASK: u16 = 0x8000;
+
   #[inline(always)]
   fn reduce_and(self) -> Self::Scalar {
     return self.0 & self.1
@@ -111,16 +115,6 @@ impl Integer for ushort2 {
   #[inline(always)]
   fn reduce_xor(self) -> Self::Scalar {
     return self.0 ^ self.1
-  }
-
-  #[inline(always)]
-  fn all(self) -> bool {
-    return self.reduce_and() & 0x8000 != 0;
-  }
-
-  #[inline(always)]
-  fn any(self) -> bool {
-    return self.reduce_or() & 0x8000 != 0;
   }
 }
 

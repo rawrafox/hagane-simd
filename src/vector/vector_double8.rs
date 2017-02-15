@@ -101,7 +101,8 @@ impl Dot<double8> for double8 {
 
 impl Float for double8 {
   type FloatScalar = f64;
-  const SIGN_MASK: long8 = long8(std::i64::MAX, std::i64::MAX, std::i64::MAX, std::i64::MAX, std::i64::MAX, std::i64::MAX, std::i64::MAX, std::i64::MAX);
+
+  const SIGN_MASK: i64 = std::i64::MAX;
 }
 
 impl Geometry for double8 {

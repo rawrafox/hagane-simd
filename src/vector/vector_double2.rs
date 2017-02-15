@@ -110,7 +110,8 @@ impl Dot<double2> for double2 {
 
 impl Float for double2 {
   type FloatScalar = f64;
-  const SIGN_MASK: long2 = long2(std::i64::MAX, std::i64::MAX);
+
+  const SIGN_MASK: i64 = std::i64::MAX;
 }
 
 impl Geometry for double2 {

@@ -98,6 +98,10 @@ impl Dot<uint8> for uint8 {
 }
 
 impl Integer for uint8 {
+  type IntegerScalar = u32;
+
+  const SIGN_MASK: u32 = 0x80000000;
+
   #[inline(always)]
   fn reduce_and(self) -> Self::Scalar {
     return (self.lo() & self.hi()).reduce_and();
@@ -111,16 +115,6 @@ impl Integer for uint8 {
   #[inline(always)]
   fn reduce_xor(self) -> Self::Scalar {
     return (self.lo() ^ self.hi()).reduce_xor();
-  }
-
-  #[inline(always)]
-  fn all(self) -> bool {
-    return self.reduce_and() & 0x80000000 != 0;
-  }
-
-  #[inline(always)]
-  fn any(self) -> bool {
-    return self.reduce_or() & 0x80000000 != 0;
   }
 }
 

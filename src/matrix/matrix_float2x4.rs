@@ -39,11 +39,6 @@ impl float2x4 {
   }
 
   #[inline]
-  pub fn sub(x: float2x4, y: float2x4) -> float2x4 {
-    return float2x4(x.0 - y.0, x.1 - y.1);
-  }
-
-  #[inline]
   pub fn transpose(self) -> float4x2 {
     let c0 = float2((self.0).0, (self.1).0);
     let c1 = float2((self.0).1, (self.1).1);

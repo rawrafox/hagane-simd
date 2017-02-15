@@ -39,11 +39,6 @@ impl double2x3 {
   }
 
   #[inline]
-  pub fn sub(x: double2x3, y: double2x3) -> double2x3 {
-    return double2x3(x.0 - y.0, x.1 - y.1);
-  }
-
-  #[inline]
   pub fn transpose(self) -> double3x2 {
     let c0 = double2((self.0).0, (self.1).0);
     let c1 = double2((self.0).1, (self.1).1);

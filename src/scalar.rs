@@ -1,7 +1,7 @@
 use std;
 use std::ops::*;
 
-pub trait Scalar : Sized + Copy + Add<Output=Self> + Sub<Output=Self> + Mul<Output=Self> + Div<Output=Self> {
+pub trait Scalar : Sized + Copy + Add<Output=Self> + Sub<Output=Self> + Mul<Output=Self> + Div<Output=Self> + PartialEq {
   fn max(x: Self, y: Self) -> Self;
   fn min(x: Self, y: Self) -> Self;
 }
@@ -16,6 +16,10 @@ pub trait FloatScalar : Scalar {
 
   fn sin(x: Self) -> Self;
   fn cos(x: Self) -> Self;
+}
+
+pub trait IntegerScalar : Scalar + BitAnd<Output=Self> + BitOr<Output=Self> + BitXor<Output=Self> + PartialEq {
+  const ZERO: Self;
 }
 
 impl_scalar!(i8, signed);

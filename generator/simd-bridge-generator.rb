@@ -190,10 +190,9 @@ module Bridge
 
           if kind.include?(:float)
             o.block("impl Float for #{name}", pad: true) do |o|
-              o.puts("type FloatScalar = #{scalar};")
+              o.puts("type FloatScalar = #{scalar};", pad: true)
 
-              sign_mask = width.times.map { |i| "std::#{TYPES_BY_NAME[bool][:type]}::MAX" }
-              o.puts("const SIGN_MASK: #{bool_name} = #{bool_name}(#{sign_mask.join(", ")});")
+              o.puts("const SIGN_MASK: #{TYPES_BY_NAME[bool][:type]} = std::#{TYPES_BY_NAME[bool][:type]}::MAX;", pad: true)
             end
 
             o.block("impl Geometry for #{name}", pad: true) do |o|
@@ -202,6 +201,10 @@ module Bridge
 
           if kind.include?(:integer)
             o.block("impl Integer for #{name}", pad: true) do |o|
+              o.puts("type IntegerScalar = #{scalar};", pad: true)
+
+              o.puts("const SIGN_MASK: #{scalar} = #{kind.include?(:signed) ? "std::#{scalar}::MIN" : "0x8#{"0" * (attributes.fetch(:size) * 2 - 1)}"};", pad: true)
+              
               o.puts("#[inline(always)]", pad: true)
               o.block("fn reduce_and(self) -> Self::Scalar") do |o|
                 case width
@@ -236,18 +239,6 @@ module Bridge
                 else
                   o.puts("return (self.lo() ^ self.hi()).reduce_xor();")
                 end
-              end
-
-              constant = kind.include?(:signed) ? "std::#{scalar}::MIN" : "0x8#{"0" * (attributes.fetch(:size) * 2 - 1)}"
-
-              o.puts("#[inline(always)]", pad: true)
-              o.block("fn all(self) -> bool") do |o|
-                o.puts("return self.reduce_and() & #{constant} != 0;")
-              end
-
-              o.puts("#[inline(always)]", pad: true)
-              o.block("fn any(self) -> bool") do |o|
-                o.puts("return self.reduce_or() & #{constant} != 0;")
               end
             end
           end
@@ -467,11 +458,6 @@ module Bridge
                 o.puts("let b = #{vector_name}::broadcast(b);")
 
                 o.puts("return #{name}(#{j.times.map { |k| "a * x.#{k} + b * y.#{k}" }.join(", ")});")
-              end
-
-              o.puts("#[inline]", pad: true)
-              o.block("pub fn sub(x: #{name}, y: #{name}) -> #{name}") do |o|
-                o.puts("return #{name}(#{j.times.map { |k| "x.#{k} - y.#{k}" }.join(", ")});")
               end
 
               transpose_vector_name = "#{type}#{j}"

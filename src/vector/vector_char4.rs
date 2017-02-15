@@ -100,6 +100,10 @@ impl Dot<char4> for char4 {
 }
 
 impl Integer for char4 {
+  type IntegerScalar = i8;
+
+  const SIGN_MASK: i8 = std::i8::MIN;
+
   #[inline(always)]
   fn reduce_and(self) -> Self::Scalar {
     return (self.lo() & self.hi()).reduce_and();
@@ -113,16 +117,6 @@ impl Integer for char4 {
   #[inline(always)]
   fn reduce_xor(self) -> Self::Scalar {
     return (self.lo() ^ self.hi()).reduce_xor();
-  }
-
-  #[inline(always)]
-  fn all(self) -> bool {
-    return self.reduce_and() & std::i8::MIN != 0;
-  }
-
-  #[inline(always)]
-  fn any(self) -> bool {
-    return self.reduce_or() & std::i8::MIN != 0;
   }
 }
 

@@ -100,6 +100,10 @@ impl Dot<int8> for int8 {
 }
 
 impl Integer for int8 {
+  type IntegerScalar = i32;
+
+  const SIGN_MASK: i32 = std::i32::MIN;
+
   #[inline(always)]
   fn reduce_and(self) -> Self::Scalar {
     return (self.lo() & self.hi()).reduce_and();
@@ -113,16 +117,6 @@ impl Integer for int8 {
   #[inline(always)]
   fn reduce_xor(self) -> Self::Scalar {
     return (self.lo() ^ self.hi()).reduce_xor();
-  }
-
-  #[inline(always)]
-  fn all(self) -> bool {
-    return self.reduce_and() & std::i32::MIN != 0;
-  }
-
-  #[inline(always)]
-  fn any(self) -> bool {
-    return self.reduce_or() & std::i32::MIN != 0;
   }
 }
 
