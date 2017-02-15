@@ -19,18 +19,18 @@ impl Vector for ulong2 {
   type DoubleVector = double2;
 
   #[inline(always)]
+  fn map_unary(self, f: &Fn(Self::Scalar) -> Self::Scalar) -> Self {
+    return ulong2(f(self.0), f(self.1));
+  }
+
+  #[inline(always)]
+  fn map_binary(self, other: Self, f: &Fn(Self::Scalar, Self::Scalar) -> Self::Scalar) -> Self {
+    return ulong2(f(self.0, other.0), f(self.1, other.1));
+  }
+
+  #[inline(always)]
   fn abs(self) -> Self {
     return self;
-  }
-
-  #[inline(always)]
-  fn max(self, other: Self) -> Self {
-    return gt(other, self).bitselect(self, other);
-  }
-
-  #[inline(always)]
-  fn min(self, other: Self) -> Self {
-    return lt(other, self).bitselect(self, other);
   }
 
   #[inline(always)]

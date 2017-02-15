@@ -19,20 +19,20 @@ impl Vector for double2 {
   type DoubleVector = double2;
 
   #[inline(always)]
+  fn map_unary(self, f: &Fn(Self::Scalar) -> Self::Scalar) -> Self {
+    return double2(f(self.0), f(self.1));
+  }
+
+  #[inline(always)]
+  fn map_binary(self, other: Self, f: &Fn(Self::Scalar, Self::Scalar) -> Self::Scalar) -> Self {
+    return double2(f(self.0, other.0), f(self.1, other.1));
+  }
+
+  #[inline(always)]
   fn abs(self) -> Self {
     let x = Self::Boolean::broadcast(std::i64::MAX);
 
     return x.bitselect(Self::from(0), self);
-  }
-
-  #[inline(always)]
-  fn max(self, other: Self) -> Self {
-    return double2(self.0.max(other.0), self.1.max(other.1));
-  }
-
-  #[inline(always)]
-  fn min(self, other: Self) -> Self {
-    return double2(self.0.min(other.0), self.1.min(other.1));
   }
 
   #[inline(always)]
@@ -109,54 +109,11 @@ impl Dot<double2> for double2 {
 }
 
 impl Float for double2 {
-  #[inline(always)]
-  fn copysign(self, magnitude: Self) -> Self {
-    let x: Self::Boolean = broadcast(std::i64::MAX);
-
-    return x.bitselect(magnitude, self);
-  }
-
-  #[inline(always)]
-  fn sqrt(self) -> Self {
-    return double2(self.0.sqrt(), self.1.sqrt());
-  }
-
-  #[inline(always)]
-  fn fract(self) -> Self {
-    return double2(self.0.fract(), self.1.fract());
-  }
-
-  #[inline(always)]
-  fn ceil(self) -> Self {
-    return double2(self.0.ceil(), self.1.ceil());
-  }
-
-  #[inline(always)]
-  fn floor(self) -> Self {
-    return double2(self.0.floor(), self.1.floor());
-  }
-
-  #[inline(always)]
-  fn trunc(self) -> Self {
-    return double2(self.0.trunc(), self.1.trunc());
-  }
-
-  #[inline(always)]
-  fn sin(self) -> Self {
-    return double2(self.0.sin(), self.1.sin());
-  }
-
-  #[inline(always)]
-  fn cos(self) -> Self {
-    return double2(self.0.cos(), self.1.cos());
-  }
+  type FloatScalar = f64;
+  const SIGN_MASK: long2 = long2(std::i64::MAX, std::i64::MAX);
 }
 
 impl Geometry for double2 {
-  #[inline(always)]
-  fn length(self) -> Self::Scalar {
-    return self.length_squared().sqrt();
-  }
 }
 
 impl double2 {

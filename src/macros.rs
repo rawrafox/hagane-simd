@@ -140,7 +140,7 @@ macro_rules! impl_trait {
 
 macro_rules! impl_vector {
   ($vector:ident, $scalar:ident, integer) => {
-    impl_vector!($vector, $scalar, float);
+    impl_vector!($vector, $scalar, common);
 
     impl_trait!($vector, $scalar, simd_and, BitAnd, bitand);
     impl_trait!($vector, $scalar, simd_or, BitOr, bitor);
@@ -149,6 +149,14 @@ macro_rules! impl_vector {
     impl_trait!($vector, $scalar, simd_shl, Shl, shl);
     impl_trait!($vector, $scalar, simd_shr, Shr, shr);
 
+    impl std::ops::Rem for $vector {
+      type Output = Self;
+
+      #[inline(always)]
+      fn rem(self, other: Self) -> Self {
+        return self - (self / other) * other;
+      }
+    }
   };
   ($vector:ident, $scalar:ident, signed) => {
     impl_vector!($vector, $scalar, integer);
@@ -156,7 +164,7 @@ macro_rules! impl_vector {
     impl std::ops::Not for $vector {
       type Output = Self;
 
-      #[inline]
+      #[inline(always)]
       fn not(self) -> Self {
         return self ^ -1;
       }
@@ -168,27 +176,108 @@ macro_rules! impl_vector {
     impl std::ops::Not for $vector {
       type Output = Self;
 
-      #[inline]
+      #[inline(always)]
       fn not(self) -> Self {
         return self ^ std::$scalar::MAX;
       }
     }
   };
   ($vector:ident, $scalar:ident, float) => {
+    impl_vector!($vector, $scalar, common);
+
+    impl std::ops::Rem for $vector {
+      type Output = Self;
+
+      #[inline(always)]
+      fn rem(self, other: Self) -> Self {
+        return self - (self / other).trunc() * other;
+      }
+    }
+  };
+  ($vector:ident, $scalar:ident, common) => {
     impl_trait!($vector, $scalar, simd_add, Add, add);
     impl_trait!($vector, $scalar, simd_sub, Sub, sub);
     impl_trait!($vector, $scalar, simd_mul, Mul, mul);
     impl_trait!($vector, $scalar, simd_div, Div, div);
 
     impl PartialEq for $vector {
-      #[inline]
+      #[inline(always)]
       fn eq(&self, other: &Self) -> bool {
         return eq(*self, *other).all();
       }
 
-      #[inline]
+      #[inline(always)]
       fn ne(&self, other: &Self) -> bool {
         return ne(*self, *other).all();
+      }
+    }
+  }
+}
+
+macro_rules! impl_scalar {
+  ($scalar:ident, signed) => {
+    impl Scalar for $scalar {
+      #[inline(always)]
+      fn max(x: Self, y: Self) -> Self {
+        return std::cmp::max(x, y);
+      }
+
+      #[inline(always)]
+      fn min(x: Self, y: Self) -> Self {
+        return std::cmp::min(x, y);
+      }
+    }
+  };
+  ($scalar:ident, unsigned) =>  {
+    impl_scalar!($scalar, signed);
+  };
+  ($scalar:ident, float) => {
+    impl Scalar for $scalar {
+      #[inline(always)]
+      fn max(x: Self, y: Self) -> Self {
+        return x.max(y);
+      }
+
+      #[inline(always)]
+      fn min(x: Self, y: Self) -> Self {
+        return x.min(y);
+      }
+    }
+
+    impl FloatScalar for $scalar {
+      #[inline(always)]
+      fn sqrt(x: Self) -> Self {
+        return x.sqrt();
+      }
+
+      #[inline(always)]
+      fn fract(x: Self) -> Self {
+        return x.fract();
+      }
+
+      #[inline(always)]
+      fn ceil(x: Self) -> Self {
+        return x.ceil();
+      }
+
+      #[inline(always)]
+      fn floor(x: Self) -> Self {
+        return x.floor();
+      }
+
+      #[inline(always)]
+      fn trunc(x: Self) -> Self {
+        return x.trunc();
+      }
+
+      #[inline(always)]
+      fn sin(x: Self) -> Self {
+        return x.sin();
+      }
+
+      #[inline(always)]
+      fn cos(x: Self) -> Self{
+        return x.cos();
       }
     }
   }

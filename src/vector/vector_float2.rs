@@ -19,20 +19,20 @@ impl Vector for float2 {
   type DoubleVector = double2;
 
   #[inline(always)]
+  fn map_unary(self, f: &Fn(Self::Scalar) -> Self::Scalar) -> Self {
+    return float2(f(self.0), f(self.1));
+  }
+
+  #[inline(always)]
+  fn map_binary(self, other: Self, f: &Fn(Self::Scalar, Self::Scalar) -> Self::Scalar) -> Self {
+    return float2(f(self.0, other.0), f(self.1, other.1));
+  }
+
+  #[inline(always)]
   fn abs(self) -> Self {
     let x = Self::Boolean::broadcast(std::i32::MAX);
 
     return x.bitselect(Self::from(0), self);
-  }
-
-  #[inline(always)]
-  fn max(self, other: Self) -> Self {
-    return float2(self.0.max(other.0), self.1.max(other.1));
-  }
-
-  #[inline(always)]
-  fn min(self, other: Self) -> Self {
-    return float2(self.0.min(other.0), self.1.min(other.1));
   }
 
   #[inline(always)]
@@ -109,54 +109,11 @@ impl Dot<float2> for float2 {
 }
 
 impl Float for float2 {
-  #[inline(always)]
-  fn copysign(self, magnitude: Self) -> Self {
-    let x: Self::Boolean = broadcast(std::i32::MAX);
-
-    return x.bitselect(magnitude, self);
-  }
-
-  #[inline(always)]
-  fn sqrt(self) -> Self {
-    return float2(self.0.sqrt(), self.1.sqrt());
-  }
-
-  #[inline(always)]
-  fn fract(self) -> Self {
-    return float2(self.0.fract(), self.1.fract());
-  }
-
-  #[inline(always)]
-  fn ceil(self) -> Self {
-    return float2(self.0.ceil(), self.1.ceil());
-  }
-
-  #[inline(always)]
-  fn floor(self) -> Self {
-    return float2(self.0.floor(), self.1.floor());
-  }
-
-  #[inline(always)]
-  fn trunc(self) -> Self {
-    return float2(self.0.trunc(), self.1.trunc());
-  }
-
-  #[inline(always)]
-  fn sin(self) -> Self {
-    return float2(self.0.sin(), self.1.sin());
-  }
-
-  #[inline(always)]
-  fn cos(self) -> Self {
-    return float2(self.0.cos(), self.1.cos());
-  }
+  type FloatScalar = f32;
+  const SIGN_MASK: int2 = int2(std::i32::MAX, std::i32::MAX);
 }
 
 impl Geometry for float2 {
-  #[inline(always)]
-  fn length(self) -> Self::Scalar {
-    return self.length_squared().sqrt();
-  }
 }
 
 impl float2 {

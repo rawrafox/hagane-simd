@@ -2,6 +2,7 @@ use std;
 use std::ops::*;
 
 use ::*;
+use scalar::{Scalar, FloatScalar};
 
 mod vector_char2;
 mod vector_char3;
@@ -103,8 +104,8 @@ declare_vector!(ulong2, ulong3, ulong4, ulong8, ulong16, u64, unsigned);
 declare_vector!(float2, float3, float4, float8, float16, f32, float);
 declare_vector!(double2, double3, double4, double8, double16, f64, float);
 
-pub trait Vector : Sized + Copy + Add<Output=Self> + Sub<Output=Self> + Mul<Output=Self> + Div<Output=Self> + Dot<Self, DotProduct=<Self as Vector>::Scalar> + From<isize> {
-  type Scalar: Sized + Copy + Into<Self> + Add<Output=Self::Scalar> + Sub<Output=Self::Scalar> + Mul<Output=Self::Scalar> + Div<Output=Self::Scalar>;
+pub trait Vector : Sized + Copy + Add<Output=Self> + Sub<Output=Self> + Mul<Output=Self> + Div<Output=Self> + Rem<Output=Self> + Dot<Self, DotProduct=<Self as Vector>::Scalar> + From<isize> {
+  type Scalar: scalar::Scalar + Into<Self>;
   type Boolean: Select<Self> + Vector;
 
   type CharVector;
@@ -119,6 +120,9 @@ pub trait Vector : Sized + Copy + Add<Output=Self> + Sub<Output=Self> + Mul<Outp
 
   type FloatVector;
   type DoubleVector;
+
+  fn map_unary(self, f: &Fn(Self::Scalar) -> Self::Scalar) -> Self;
+  fn map_binary(self, other: Self, f: &Fn(Self::Scalar, Self::Scalar) -> Self::Scalar) -> Self;
 
   #[inline(always)]
   fn broadcast(x: Self::Scalar) -> Self {
@@ -171,8 +175,16 @@ pub trait Vector : Sized + Copy + Add<Output=Self> + Sub<Output=Self> + Mul<Outp
   }
 
   fn abs(self) -> Self;
-  fn max(self, other: Self) -> Self;
-  fn min(self, other: Self) -> Self;
+
+  #[inline(always)]
+  fn max(self, other: Self) -> Self {
+    return self.map_binary(other, &Self::Scalar::max);
+  }
+
+  #[inline(always)]
+  fn min(self, other: Self) -> Self {
+    return self.map_binary(other, &Self::Scalar::min);
+  }
 
   #[inline(always)]
   fn clamp(self, min: Self, max: Self) -> Self  {
@@ -425,16 +437,26 @@ pub fn cross<T: Cross>(x: T, y: T) -> T::CrossProduct {
   return x.cross(y);
 }
 
-pub trait Float : Vector {
-  fn copysign(self, magnitude: Self) -> Self;
+pub trait Float : Vector<Scalar=<Self as Float>::FloatScalar> {
+  type FloatScalar: scalar::FloatScalar + Into<Self>;
+
+  const SIGN_MASK: Self::Boolean;
+
+  #[inline(always)]
+  fn copysign(self, magnitude: Self) -> Self {
+    return Self::SIGN_MASK.bitselect(magnitude, self);
+  }
 
   #[inline(always)]
   fn sign(self) -> Self {
     return (self.eq(Self::from(0)) | self.ne(self)).bitselect(Self::from(1).copysign(self), Self::from(0));
   }
 
-  fn sqrt(self) -> Self;
-  
+  #[inline(always)]
+  fn sqrt(self) -> Self {
+    return self.map_unary(&Self::Scalar::sqrt);
+  }
+
   #[inline(always)]
   fn recip(self) -> Self {
     return Self::from(1) / self;
@@ -445,10 +467,25 @@ pub trait Float : Vector {
     return self.sqrt().recip();
   }
 
-  fn fract(self) -> Self;
-  fn ceil(self) -> Self;
-  fn floor(self) -> Self;
-  fn trunc(self) -> Self;
+  #[inline(always)]
+  fn fract(self) -> Self {
+    return self.map_unary(&Self::Scalar::fract);
+  }
+
+  #[inline(always)]
+  fn ceil(self) -> Self {
+    return self.map_unary(&Self::Scalar::ceil);
+  }
+
+  #[inline(always)]
+  fn floor(self) -> Self {
+    return self.map_unary(&Self::Scalar::floor);
+  }
+
+  #[inline(always)]
+  fn trunc(self) -> Self {
+    return self.map_unary(&Self::Scalar::trunc);
+  }
 
   #[inline(always)]
   fn mix(self, a: Self, b: Self) -> Self {
@@ -467,8 +504,15 @@ pub trait Float : Vector {
     return t * t * (Self::from(3) - Self::from(2) * t);
   }
 
-  fn sin(self) -> Self;
-  fn cos(self) -> Self;
+  #[inline(always)]
+  fn sin(self) -> Self {
+    return self.map_unary(&Self::Scalar::sin);
+  }
+
+  #[inline(always)]
+  fn cos(self) -> Self {
+    return self.map_unary(&Self::Scalar::cos);
+  }
 }
 
 #[inline(always)]
@@ -547,8 +591,11 @@ pub trait Geometry : Float {
     return Self::broadcast(self.dot(onto) / onto.dot(onto)) * onto
   }
 
-  fn length(self) -> Self::Scalar;
-  
+  #[inline(always)]
+  fn length(self) -> Self::Scalar {
+    return Self::Scalar::sqrt(self.length_squared());
+  }
+
   #[inline(always)]
   fn length_squared(self) -> Self::Scalar {
     return self.dot(self);

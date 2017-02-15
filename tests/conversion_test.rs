@@ -5,6 +5,7 @@ use simd::*;
 #[test]
 fn test_to_char() {
   assert_eq!(to_char(float2(10.0, -3.0)), char2(10, -3));
+  assert_eq!(to_char(float2(10.0, -130.0)), char2(10, 126));
   assert_eq!(to_char(float3(10.0, -3.0, -9.5)), char3(10, -3, -9));
   assert_eq!(to_char(float4(10.0, -3.0, -9.5, 400.0)), char4(10, -3, -9, -112));
 

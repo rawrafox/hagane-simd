@@ -19,20 +19,20 @@ impl Vector for double16 {
   type DoubleVector = double16;
 
   #[inline(always)]
+  fn map_unary(self, f: &Fn(Self::Scalar) -> Self::Scalar) -> Self {
+    return double16(f(self.0), f(self.1), f(self.2), f(self.3), f(self.4), f(self.5), f(self.6), f(self.7), f(self.8), f(self.9), f(self.10), f(self.11), f(self.12), f(self.13), f(self.14), f(self.15));
+  }
+
+  #[inline(always)]
+  fn map_binary(self, other: Self, f: &Fn(Self::Scalar, Self::Scalar) -> Self::Scalar) -> Self {
+    return double16(f(self.0, other.0), f(self.1, other.1), f(self.2, other.2), f(self.3, other.3), f(self.4, other.4), f(self.5, other.5), f(self.6, other.6), f(self.7, other.7), f(self.8, other.8), f(self.9, other.9), f(self.10, other.10), f(self.11, other.11), f(self.12, other.12), f(self.13, other.13), f(self.14, other.14), f(self.15, other.15));
+  }
+
+  #[inline(always)]
   fn abs(self) -> Self {
     let x = Self::Boolean::broadcast(std::i64::MAX);
 
     return x.bitselect(Self::from(0), self);
-  }
-
-  #[inline(always)]
-  fn max(self, other: Self) -> Self {
-    return double16(self.0.max(other.0), self.1.max(other.1), self.2.max(other.2), self.3.max(other.3), self.4.max(other.4), self.5.max(other.5), self.6.max(other.6), self.7.max(other.7), self.8.max(other.8), self.9.max(other.9), self.10.max(other.10), self.11.max(other.11), self.12.max(other.12), self.13.max(other.13), self.14.max(other.14), self.15.max(other.15));
-  }
-
-  #[inline(always)]
-  fn min(self, other: Self) -> Self {
-    return double16(self.0.min(other.0), self.1.min(other.1), self.2.min(other.2), self.3.min(other.3), self.4.min(other.4), self.5.min(other.5), self.6.min(other.6), self.7.min(other.7), self.8.min(other.8), self.9.min(other.9), self.10.min(other.10), self.11.min(other.11), self.12.min(other.12), self.13.min(other.13), self.14.min(other.14), self.15.min(other.15));
   }
 
   #[inline(always)]
@@ -100,54 +100,11 @@ impl Dot<double16> for double16 {
 }
 
 impl Float for double16 {
-  #[inline(always)]
-  fn copysign(self, magnitude: Self) -> Self {
-    let x: Self::Boolean = broadcast(std::i64::MAX);
-
-    return x.bitselect(magnitude, self);
-  }
-
-  #[inline(always)]
-  fn sqrt(self) -> Self {
-    return double16(self.0.sqrt(), self.1.sqrt(), self.2.sqrt(), self.3.sqrt(), self.4.sqrt(), self.5.sqrt(), self.6.sqrt(), self.7.sqrt(), self.8.sqrt(), self.9.sqrt(), self.10.sqrt(), self.11.sqrt(), self.12.sqrt(), self.13.sqrt(), self.14.sqrt(), self.15.sqrt());
-  }
-
-  #[inline(always)]
-  fn fract(self) -> Self {
-    return double16(self.0.fract(), self.1.fract(), self.2.fract(), self.3.fract(), self.4.fract(), self.5.fract(), self.6.fract(), self.7.fract(), self.8.fract(), self.9.fract(), self.10.fract(), self.11.fract(), self.12.fract(), self.13.fract(), self.14.fract(), self.15.fract());
-  }
-
-  #[inline(always)]
-  fn ceil(self) -> Self {
-    return double16(self.0.ceil(), self.1.ceil(), self.2.ceil(), self.3.ceil(), self.4.ceil(), self.5.ceil(), self.6.ceil(), self.7.ceil(), self.8.ceil(), self.9.ceil(), self.10.ceil(), self.11.ceil(), self.12.ceil(), self.13.ceil(), self.14.ceil(), self.15.ceil());
-  }
-
-  #[inline(always)]
-  fn floor(self) -> Self {
-    return double16(self.0.floor(), self.1.floor(), self.2.floor(), self.3.floor(), self.4.floor(), self.5.floor(), self.6.floor(), self.7.floor(), self.8.floor(), self.9.floor(), self.10.floor(), self.11.floor(), self.12.floor(), self.13.floor(), self.14.floor(), self.15.floor());
-  }
-
-  #[inline(always)]
-  fn trunc(self) -> Self {
-    return double16(self.0.trunc(), self.1.trunc(), self.2.trunc(), self.3.trunc(), self.4.trunc(), self.5.trunc(), self.6.trunc(), self.7.trunc(), self.8.trunc(), self.9.trunc(), self.10.trunc(), self.11.trunc(), self.12.trunc(), self.13.trunc(), self.14.trunc(), self.15.trunc());
-  }
-
-  #[inline(always)]
-  fn sin(self) -> Self {
-    return double16(self.0.sin(), self.1.sin(), self.2.sin(), self.3.sin(), self.4.sin(), self.5.sin(), self.6.sin(), self.7.sin(), self.8.sin(), self.9.sin(), self.10.sin(), self.11.sin(), self.12.sin(), self.13.sin(), self.14.sin(), self.15.sin());
-  }
-
-  #[inline(always)]
-  fn cos(self) -> Self {
-    return double16(self.0.cos(), self.1.cos(), self.2.cos(), self.3.cos(), self.4.cos(), self.5.cos(), self.6.cos(), self.7.cos(), self.8.cos(), self.9.cos(), self.10.cos(), self.11.cos(), self.12.cos(), self.13.cos(), self.14.cos(), self.15.cos());
-  }
+  type FloatScalar = f64;
+  const SIGN_MASK: long16 = long16(std::i64::MAX, std::i64::MAX, std::i64::MAX, std::i64::MAX, std::i64::MAX, std::i64::MAX, std::i64::MAX, std::i64::MAX, std::i64::MAX, std::i64::MAX, std::i64::MAX, std::i64::MAX, std::i64::MAX, std::i64::MAX, std::i64::MAX, std::i64::MAX);
 }
 
 impl Geometry for double16 {
-  #[inline(always)]
-  fn length(self) -> Self::Scalar {
-    return self.length_squared().sqrt();
-  }
 }
 
 impl double16 {

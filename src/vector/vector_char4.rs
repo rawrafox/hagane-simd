@@ -19,20 +19,20 @@ impl Vector for char4 {
   type DoubleVector = double4;
 
   #[inline(always)]
+  fn map_unary(self, f: &Fn(Self::Scalar) -> Self::Scalar) -> Self {
+    return char4(f(self.0), f(self.1), f(self.2), f(self.3));
+  }
+
+  #[inline(always)]
+  fn map_binary(self, other: Self, f: &Fn(Self::Scalar, Self::Scalar) -> Self::Scalar) -> Self {
+    return char4(f(self.0, other.0), f(self.1, other.1), f(self.2, other.2), f(self.3, other.3));
+  }
+
+  #[inline(always)]
   fn abs(self) -> Self {
     let mask = self >> 7;
 
     return (self ^ mask) - mask;
-  }
-
-  #[inline(always)]
-  fn max(self, other: Self) -> Self {
-    return gt(other, self).bitselect(self, other);
-  }
-
-  #[inline(always)]
-  fn min(self, other: Self) -> Self {
-    return lt(other, self).bitselect(self, other);
   }
 
   #[inline(always)]

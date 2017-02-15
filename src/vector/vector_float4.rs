@@ -19,20 +19,20 @@ impl Vector for float4 {
   type DoubleVector = double4;
 
   #[inline(always)]
+  fn map_unary(self, f: &Fn(Self::Scalar) -> Self::Scalar) -> Self {
+    return float4(f(self.0), f(self.1), f(self.2), f(self.3));
+  }
+
+  #[inline(always)]
+  fn map_binary(self, other: Self, f: &Fn(Self::Scalar, Self::Scalar) -> Self::Scalar) -> Self {
+    return float4(f(self.0, other.0), f(self.1, other.1), f(self.2, other.2), f(self.3, other.3));
+  }
+
+  #[inline(always)]
   fn abs(self) -> Self {
     let x = Self::Boolean::broadcast(std::i32::MAX);
 
     return x.bitselect(Self::from(0), self);
-  }
-
-  #[inline(always)]
-  fn max(self, other: Self) -> Self {
-    return float4(self.0.max(other.0), self.1.max(other.1), self.2.max(other.2), self.3.max(other.3));
-  }
-
-  #[inline(always)]
-  fn min(self, other: Self) -> Self {
-    return float4(self.0.min(other.0), self.1.min(other.1), self.2.min(other.2), self.3.min(other.3));
   }
 
   #[inline(always)]
@@ -100,54 +100,11 @@ impl Dot<float4> for float4 {
 }
 
 impl Float for float4 {
-  #[inline(always)]
-  fn copysign(self, magnitude: Self) -> Self {
-    let x: Self::Boolean = broadcast(std::i32::MAX);
-
-    return x.bitselect(magnitude, self);
-  }
-
-  #[inline(always)]
-  fn sqrt(self) -> Self {
-    return float4(self.0.sqrt(), self.1.sqrt(), self.2.sqrt(), self.3.sqrt());
-  }
-
-  #[inline(always)]
-  fn fract(self) -> Self {
-    return float4(self.0.fract(), self.1.fract(), self.2.fract(), self.3.fract());
-  }
-
-  #[inline(always)]
-  fn ceil(self) -> Self {
-    return float4(self.0.ceil(), self.1.ceil(), self.2.ceil(), self.3.ceil());
-  }
-
-  #[inline(always)]
-  fn floor(self) -> Self {
-    return float4(self.0.floor(), self.1.floor(), self.2.floor(), self.3.floor());
-  }
-
-  #[inline(always)]
-  fn trunc(self) -> Self {
-    return float4(self.0.trunc(), self.1.trunc(), self.2.trunc(), self.3.trunc());
-  }
-
-  #[inline(always)]
-  fn sin(self) -> Self {
-    return float4(self.0.sin(), self.1.sin(), self.2.sin(), self.3.sin());
-  }
-
-  #[inline(always)]
-  fn cos(self) -> Self {
-    return float4(self.0.cos(), self.1.cos(), self.2.cos(), self.3.cos());
-  }
+  type FloatScalar = f32;
+  const SIGN_MASK: int4 = int4(std::i32::MAX, std::i32::MAX, std::i32::MAX, std::i32::MAX);
 }
 
 impl Geometry for float4 {
-  #[inline(always)]
-  fn length(self) -> Self::Scalar {
-    return self.length_squared().sqrt();
-  }
 }
 
 impl float4 {

@@ -62,6 +62,20 @@ module Bridge
             o.puts("type DoubleVector = double#{width};")
 
             o.puts("#[inline(always)]", pad: true)
+            o.block("fn map_unary(self, f: &Fn(Self::Scalar) -> Self::Scalar) -> Self") do |o|
+              result = width.times.map { |i| "f(self.#{i})" }
+
+              o.puts("return #{name}(#{result.join(", ")});")
+            end
+
+            o.puts("#[inline(always)]", pad: true)
+            o.block("fn map_binary(self, other: Self, f: &Fn(Self::Scalar, Self::Scalar) -> Self::Scalar) -> Self") do |o|
+              result = width.times.map { |i| "f(self.#{i}, other.#{i})" }
+
+              o.puts("return #{name}(#{result.join(", ")});")
+            end
+
+            o.puts("#[inline(always)]", pad: true)
             o.block("fn abs(self) -> Self") do |o|
               if kind.include?(:signed)
                 o.puts("let mask = self >> #{attributes.fetch(:size) * 8 - 1};", pad: true)
@@ -73,28 +87,6 @@ module Bridge
                 o.puts("return x.bitselect(Self::from(0), self);", pad: true)
               else
                 o.puts("return self;")
-              end
-            end
-
-            o.puts("#[inline(always)]", pad: true)
-            o.block("fn max(self, other: Self) -> Self") do |o|
-              if kind.include?(:float)
-                result = width.times.map { |i| "self.#{i}.max(other.#{i})" }.join(", ")
-
-                o.puts("return #{name}(#{result});")
-              else
-                o.puts("return gt(other, self).bitselect(self, other);")
-              end
-            end
-
-            o.puts("#[inline(always)]", pad: true)
-            o.block("fn min(self, other: Self) -> Self") do |o|
-              if kind.include?(:float)
-                result = width.times.map { |i| "self.#{i}.min(other.#{i})" }.join(", ")
-
-                o.puts("return #{name}(#{result});")
-              else
-                o.puts("return lt(other, self).bitselect(self, other);")
               end
             end
 
@@ -195,73 +187,16 @@ module Bridge
               o.puts("return reduce_add(self * other);")
             end
           end
-          
+
           if kind.include?(:float)
             o.block("impl Float for #{name}", pad: true) do |o|
-              o.puts("#[inline(always)]", pad: true)
-              o.block("fn copysign(self, magnitude: Self) -> Self") do |o|
-                o.puts("let x: Self::Boolean = broadcast(std::#{TYPES_BY_NAME[bool][:type]}::MAX);", pad: true)
+              o.puts("type FloatScalar = #{scalar};")
 
-                o.puts("return x.bitselect(magnitude, self);", pad: true)
-              end
-
-              o.puts("#[inline(always)]", pad: true)
-              o.block("fn sqrt(self) -> Self") do |o|
-                result = width.times.map { |i| "self.#{i}.sqrt()" }.join(", ")
-
-                o.puts("return #{name}(#{result});")
-              end
-
-              o.puts("#[inline(always)]", pad: true)
-              o.block("fn fract(self) -> Self") do |o|
-                result = width.times.map { |i| "self.#{i}.fract()" }.join(", ")
-
-                o.puts("return #{name}(#{result});")
-              end
-
-              o.puts("#[inline(always)]", pad: true)
-              o.block("fn ceil(self) -> Self") do |o|
-                result = width.times.map { |i| "self.#{i}.ceil()" }.join(", ")
-
-                o.puts("return #{name}(#{result});")
-              end
-
-              o.puts("#[inline(always)]", pad: true)
-              o.block("fn floor(self) -> Self") do |o|
-                result = width.times.map { |i| "self.#{i}.floor()" }.join(", ")
-
-                o.puts("return #{name}(#{result});")
-              end
-
-              o.puts("#[inline(always)]", pad: true)
-              o.block("fn trunc(self) -> Self") do |o|
-                result = width.times.map { |i| "self.#{i}.trunc()" }.join(", ")
-
-                o.puts("return #{name}(#{result});")
-              end
-
-              o.puts("#[inline(always)]", pad: true)
-              o.block("fn sin(self) -> Self") do |o|
-                result = width.times.map { |i| "self.#{i}.sin()" }.join(", ")
-
-                o.puts("return #{name}(#{result});")
-              end
-
-              o.puts("#[inline(always)]", pad: true)
-              o.block("fn cos(self) -> Self") do |o|
-                result = width.times.map { |i| "self.#{i}.cos()" }.join(", ")
-
-                o.puts("return #{name}(#{result});")
-              end
+              sign_mask = width.times.map { |i| "std::#{TYPES_BY_NAME[bool][:type]}::MAX" }
+              o.puts("const SIGN_MASK: #{bool_name} = #{bool_name}(#{sign_mask.join(", ")});")
             end
-          end
 
-          if kind.include?(:float)
             o.block("impl Geometry for #{name}", pad: true) do |o|
-              o.puts("#[inline(always)]", pad: true)
-              o.block("fn length(self) -> Self::Scalar") do |o|
-                o.puts("return self.length_squared().sqrt();")
-              end
             end
           end
 
@@ -584,7 +519,7 @@ module Bridge
 
       files
     end
-    
+
     def self.conversion(o, in_ty, out_ty, width, saturate: false)
       in_ty = TYPES_BY_NAME.fetch(in_ty)
       out_ty = TYPES_BY_NAME.fetch(out_ty)
@@ -620,10 +555,29 @@ module Bridge
           end
         end
       else
-        if width == 3 && !in_kind.include?(:float) && in_size < out_size # TODO: Fix this compiler bug
+        if in_kind.include?(:float) && out_kind.include?(:signed) && out_scalar != "i64" # TODO: Is this a compiler bug?
+          # o.puts("#[inline(always)]", pad: true)
+          # o.block("fn to_#{out_type}(self) -> #{out_name}") do |o|
+          #   result = width.times.map { |i| "self.#{i} as i64 as #{out_scalar}"}
+          #
+          #   o.puts("return #{out_name}(#{result.join(", ")});")
+          # end
+        elsif in_kind.include?(:float) && out_kind.include?(:unsigned)
+          # o.puts("#[inline(always)]", pad: true)
+          # o.block("fn to_#{out_type}(self) -> #{out_name}") do |o|
+          #   o.puts("let max = Self::broadcast(std::#{out_scalar}::MAX as #{in_scalar});", pad: true)
+          #   o.puts("let modulus = ((self % max) + max) % max;")
+          # 
+          #   result = width.times.map { |i| "modulus.#{i} as #{out_scalar}" }
+          # 
+          #   o.puts("return #{out_name}(#{result.join(", ")});", pad: true)
+          # end
+        elsif width == 3 && !in_kind.include?(:float) && in_size < out_size # TODO: Fix this compiler bug
           o.puts("#[inline(always)]", pad: true)
           o.block("fn to_#{out_type}(self) -> #{out_name}") do |o|
-            o.puts("return #{out_name}(self.0 as #{out_scalar}, self.1 as #{out_scalar}, self.2 as #{out_scalar});")
+            result = width.times.map { |i| "self.#{i} as #{out_scalar}"}
+
+            o.puts("return #{out_name}(#{result.join(", ")});")
           end
         end
       end

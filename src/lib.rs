@@ -8,6 +8,7 @@ pub mod common;
 pub mod matrix;
 pub mod objc;
 pub mod vector;
+pub mod scalar;
 
 pub use common::*;
 pub use matrix::*;

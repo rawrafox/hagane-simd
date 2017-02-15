@@ -19,18 +19,18 @@ impl Vector for ushort16 {
   type DoubleVector = double16;
 
   #[inline(always)]
+  fn map_unary(self, f: &Fn(Self::Scalar) -> Self::Scalar) -> Self {
+    return ushort16(f(self.0), f(self.1), f(self.2), f(self.3), f(self.4), f(self.5), f(self.6), f(self.7), f(self.8), f(self.9), f(self.10), f(self.11), f(self.12), f(self.13), f(self.14), f(self.15));
+  }
+
+  #[inline(always)]
+  fn map_binary(self, other: Self, f: &Fn(Self::Scalar, Self::Scalar) -> Self::Scalar) -> Self {
+    return ushort16(f(self.0, other.0), f(self.1, other.1), f(self.2, other.2), f(self.3, other.3), f(self.4, other.4), f(self.5, other.5), f(self.6, other.6), f(self.7, other.7), f(self.8, other.8), f(self.9, other.9), f(self.10, other.10), f(self.11, other.11), f(self.12, other.12), f(self.13, other.13), f(self.14, other.14), f(self.15, other.15));
+  }
+
+  #[inline(always)]
   fn abs(self) -> Self {
     return self;
-  }
-
-  #[inline(always)]
-  fn max(self, other: Self) -> Self {
-    return gt(other, self).bitselect(self, other);
-  }
-
-  #[inline(always)]
-  fn min(self, other: Self) -> Self {
-    return lt(other, self).bitselect(self, other);
   }
 
   #[inline(always)]

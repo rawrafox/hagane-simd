@@ -19,20 +19,20 @@ impl Vector for float3 {
   type DoubleVector = double3;
 
   #[inline(always)]
+  fn map_unary(self, f: &Fn(Self::Scalar) -> Self::Scalar) -> Self {
+    return float3(f(self.0), f(self.1), f(self.2));
+  }
+
+  #[inline(always)]
+  fn map_binary(self, other: Self, f: &Fn(Self::Scalar, Self::Scalar) -> Self::Scalar) -> Self {
+    return float3(f(self.0, other.0), f(self.1, other.1), f(self.2, other.2));
+  }
+
+  #[inline(always)]
   fn abs(self) -> Self {
     let x = Self::Boolean::broadcast(std::i32::MAX);
 
     return x.bitselect(Self::from(0), self);
-  }
-
-  #[inline(always)]
-  fn max(self, other: Self) -> Self {
-    return float3(self.0.max(other.0), self.1.max(other.1), self.2.max(other.2));
-  }
-
-  #[inline(always)]
-  fn min(self, other: Self) -> Self {
-    return float3(self.0.min(other.0), self.1.min(other.1), self.2.min(other.2));
   }
 
   #[inline(always)]
@@ -111,54 +111,11 @@ impl Dot<float3> for float3 {
 }
 
 impl Float for float3 {
-  #[inline(always)]
-  fn copysign(self, magnitude: Self) -> Self {
-    let x: Self::Boolean = broadcast(std::i32::MAX);
-
-    return x.bitselect(magnitude, self);
-  }
-
-  #[inline(always)]
-  fn sqrt(self) -> Self {
-    return float3(self.0.sqrt(), self.1.sqrt(), self.2.sqrt());
-  }
-
-  #[inline(always)]
-  fn fract(self) -> Self {
-    return float3(self.0.fract(), self.1.fract(), self.2.fract());
-  }
-
-  #[inline(always)]
-  fn ceil(self) -> Self {
-    return float3(self.0.ceil(), self.1.ceil(), self.2.ceil());
-  }
-
-  #[inline(always)]
-  fn floor(self) -> Self {
-    return float3(self.0.floor(), self.1.floor(), self.2.floor());
-  }
-
-  #[inline(always)]
-  fn trunc(self) -> Self {
-    return float3(self.0.trunc(), self.1.trunc(), self.2.trunc());
-  }
-
-  #[inline(always)]
-  fn sin(self) -> Self {
-    return float3(self.0.sin(), self.1.sin(), self.2.sin());
-  }
-
-  #[inline(always)]
-  fn cos(self) -> Self {
-    return float3(self.0.cos(), self.1.cos(), self.2.cos());
-  }
+  type FloatScalar = f32;
+  const SIGN_MASK: int3 = int3(std::i32::MAX, std::i32::MAX, std::i32::MAX);
 }
 
 impl Geometry for float3 {
-  #[inline(always)]
-  fn length(self) -> Self::Scalar {
-    return self.length_squared().sqrt();
-  }
 }
 
 impl float3 {
