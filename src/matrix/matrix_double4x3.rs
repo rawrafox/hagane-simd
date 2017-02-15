@@ -24,7 +24,7 @@ impl std::ops::Mul<f64> for double4x3 {
 
   #[inline]
   fn mul(self, other: f64) -> Self {
-    let a: double3 = broadcast(other);
+    let a = double3::broadcast(other);
 
     return double4x3(a * self.0, a * self.1, a * self.2, a * self.3);
   }
@@ -33,8 +33,8 @@ impl std::ops::Mul<f64> for double4x3 {
 impl double4x3 {
   #[inline]
   pub fn linear_combination(a: f64, x: double4x3, b: f64, y: double4x3) -> double4x3 {
-    let a: double3 = broadcast(a);
-    let b: double3 = broadcast(b);
+    let a = double3::broadcast(a);
+    let b = double3::broadcast(b);
     return double4x3(a * x.0 + b * y.0, a * x.1 + b * y.1, a * x.2 + b * y.2, a * x.3 + b * y.3);
   }
 

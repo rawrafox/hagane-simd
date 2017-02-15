@@ -25,12 +25,12 @@ impl Vector for ushort4 {
 
   #[inline(always)]
   fn max(self, other: Self) -> Self {
-    return bitselect(gt(other, self), self, other);
+    return gt(other, self).bitselect(self, other);
   }
 
   #[inline(always)]
   fn min(self, other: Self) -> Self {
-    return bitselect(lt(other, self), self, other);
+    return lt(other, self).bitselect(self, other);
   }
 
   #[inline(always)]
@@ -50,17 +50,17 @@ impl Vector for ushort4 {
 
   #[inline(always)]
   fn to_char_sat(self) -> char4 {
-    return ushort4::to_char(min(self, broadcast(std::i8::MAX as u16)));
+    return ushort4::to_char(self.min(Self::broadcast(std::i8::MAX as u16)));
   }
 
   #[inline(always)]
   fn to_uchar_sat(self) -> uchar4 {
-    return ushort4::to_uchar(min(self, broadcast(std::u8::MAX as u16)));
+    return ushort4::to_uchar(self.min(Self::broadcast(std::u8::MAX as u16)));
   }
 
   #[inline(always)]
   fn to_short_sat(self) -> short4 {
-    return ushort4::to_short(min(self, broadcast(std::i16::MAX as u16)));
+    return ushort4::to_short(self.min(Self::broadcast(std::i16::MAX as u16)));
   }
 
   #[inline(always)]
@@ -70,7 +70,7 @@ impl Vector for ushort4 {
 
   #[inline(always)]
   fn to_int_sat(self) -> int4 {
-    return ushort4::to_int(min(self, broadcast(std::i32::MAX as u16)));
+    return ushort4::to_int(self.min(Self::broadcast(std::i32::MAX as u16)));
   }
 
   #[inline(always)]
@@ -80,7 +80,7 @@ impl Vector for ushort4 {
 
   #[inline(always)]
   fn to_long_sat(self) -> long4 {
-    return ushort4::to_long(min(self, broadcast(std::i64::MAX as u16)));
+    return ushort4::to_long(self.min(Self::broadcast(std::i64::MAX as u16)));
   }
 
   #[inline(always)]

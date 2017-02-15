@@ -20,7 +20,7 @@ impl Vector for float8 {
 
   #[inline(always)]
   fn abs(self) -> Self {
-    let x: Self::Boolean = broadcast(std::i32::MAX);
+    let x = Self::Boolean::broadcast(std::i32::MAX);
 
     return x.bitselect(Self::from(0), self);
   }
@@ -52,42 +52,42 @@ impl Vector for float8 {
 
   #[inline(always)]
   fn to_char_sat(self) -> char8 {
-    return float8::to_char(clamp(self, broadcast(std::i8::MIN as f32), broadcast(std::i8::MAX as f32)));
+    return float8::to_char(self.clamp(Self::broadcast(std::i8::MIN as f32), Self::broadcast(std::i8::MAX as f32)));
   }
 
   #[inline(always)]
   fn to_uchar_sat(self) -> uchar8 {
-    return float8::to_uchar(clamp(self, broadcast(std::u8::MIN as f32), broadcast(std::u8::MAX as f32)));
+    return float8::to_uchar(self.clamp(Self::broadcast(std::u8::MIN as f32), Self::broadcast(std::u8::MAX as f32)));
   }
 
   #[inline(always)]
   fn to_short_sat(self) -> short8 {
-    return float8::to_short(clamp(self, broadcast(std::i16::MIN as f32), broadcast(std::i16::MAX as f32)));
+    return float8::to_short(self.clamp(Self::broadcast(std::i16::MIN as f32), Self::broadcast(std::i16::MAX as f32)));
   }
 
   #[inline(always)]
   fn to_ushort_sat(self) -> ushort8 {
-    return float8::to_ushort(clamp(self, broadcast(std::u16::MIN as f32), broadcast(std::u16::MAX as f32)));
+    return float8::to_ushort(self.clamp(Self::broadcast(std::u16::MIN as f32), Self::broadcast(std::u16::MAX as f32)));
   }
 
   #[inline(always)]
   fn to_int_sat(self) -> int8 {
-    return float8::to_int(clamp(self, broadcast(std::i32::MIN as f32), broadcast(std::i32::MAX as f32)));
+    return float8::to_int(self.clamp(Self::broadcast(std::i32::MIN as f32), Self::broadcast(std::i32::MAX as f32)));
   }
 
   #[inline(always)]
   fn to_uint_sat(self) -> uint8 {
-    return float8::to_uint(clamp(self, broadcast(std::u32::MIN as f32), broadcast(std::u32::MAX as f32)));
+    return float8::to_uint(self.clamp(Self::broadcast(std::u32::MIN as f32), Self::broadcast(std::u32::MAX as f32)));
   }
 
   #[inline(always)]
   fn to_long_sat(self) -> long8 {
-    return float8::to_long(clamp(self, broadcast(std::i64::MIN as f32), broadcast(std::i64::MAX as f32)));
+    return float8::to_long(self.clamp(Self::broadcast(std::i64::MIN as f32), Self::broadcast(std::i64::MAX as f32)));
   }
 
   #[inline(always)]
   fn to_ulong_sat(self) -> ulong8 {
-    return float8::to_ulong(clamp(self, broadcast(std::u64::MIN as f32), broadcast(std::u64::MAX as f32)));
+    return float8::to_ulong(self.clamp(Self::broadcast(std::u64::MIN as f32), Self::broadcast(std::u64::MAX as f32)));
   }
 }
 

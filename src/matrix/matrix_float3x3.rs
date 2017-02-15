@@ -46,7 +46,7 @@ impl std::ops::Mul<f32> for float3x3 {
 
   #[inline]
   fn mul(self, other: f32) -> Self {
-    let a: float3 = broadcast(other);
+    let a = float3::broadcast(other);
 
     return float3x3(a * self.0, a * self.1, a * self.2);
   }
@@ -78,8 +78,8 @@ impl float3x3 {
 
   #[inline]
   pub fn linear_combination(a: f32, x: float3x3, b: f32, y: float3x3) -> float3x3 {
-    let a: float3 = broadcast(a);
-    let b: float3 = broadcast(b);
+    let a = float3::broadcast(a);
+    let b = float3::broadcast(b);
     return float3x3(a * x.0 + b * y.0, a * x.1 + b * y.1, a * x.2 + b * y.2);
   }
 

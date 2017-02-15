@@ -46,7 +46,7 @@ impl std::ops::Mul<f32> for float2x2 {
 
   #[inline]
   fn mul(self, other: f32) -> Self {
-    let a: float2 = broadcast(other);
+    let a = float2::broadcast(other);
 
     return float2x2(a * self.0, a * self.1);
   }
@@ -78,8 +78,8 @@ impl float2x2 {
 
   #[inline]
   pub fn linear_combination(a: f32, x: float2x2, b: f32, y: float2x2) -> float2x2 {
-    let a: float2 = broadcast(a);
-    let b: float2 = broadcast(b);
+    let a = float2::broadcast(a);
+    let b = float2::broadcast(b);
     return float2x2(a * x.0 + b * y.0, a * x.1 + b * y.1);
   }
 

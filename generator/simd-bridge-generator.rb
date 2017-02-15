@@ -61,11 +61,6 @@ module Bridge
             o.puts("type FloatVector = float#{width};", pad: true)
             o.puts("type DoubleVector = double#{width};")
 
-            zero = (["0#{".0" if kind.include?(:float)}"] * width).join(", ")
-            one = (["1#{".0" if kind.include?(:float)}"] * width).join(", ")
-            two = (["2#{".0" if kind.include?(:float)}"] * width).join(", ")
-            three = (["3#{".0" if kind.include?(:float)}"] * width).join(", ")
-
             o.puts("#[inline(always)]", pad: true)
             o.block("fn abs(self) -> Self") do |o|
               if kind.include?(:signed)
@@ -73,7 +68,7 @@ module Bridge
 
                 o.puts("return (self ^ mask) - mask;", pad: true)
               elsif kind.include?(:float)
-                o.puts("let x: Self::Boolean = broadcast(std::#{TYPES_BY_NAME[bool][:type]}::MAX);", pad: true)
+                o.puts("let x = Self::Boolean::broadcast(std::#{TYPES_BY_NAME[bool][:type]}::MAX);", pad: true)
 
                 o.puts("return x.bitselect(Self::from(0), self);", pad: true)
               else
@@ -88,7 +83,7 @@ module Bridge
 
                 o.puts("return #{name}(#{result});")
               else
-                o.puts("return bitselect(gt(other, self), self, other);")
+                o.puts("return gt(other, self).bitselect(self, other);")
               end
             end
 
@@ -99,7 +94,7 @@ module Bridge
 
                 o.puts("return #{name}(#{result});")
               else
-                o.puts("return bitselect(lt(other, self), self, other);")
+                o.puts("return lt(other, self).bitselect(self, other);")
               end
             end
 
@@ -495,7 +490,7 @@ module Bridge
               o.puts
               o.puts("#[inline]")
               o.block("fn mul(self, other: #{scalar}) -> Self") do |o|
-                o.puts("let a: #{vector_name} = broadcast(other);")
+                o.puts("let a = #{vector_name}::broadcast(other);")
                 o.puts
                 o.puts("return #{name}(#{j.times.map { |k| "a * self.#{k}" }.join(", ")});")
               end
@@ -533,8 +528,8 @@ module Bridge
 
               o.puts("#[inline]", pad: true)
               o.block("pub fn linear_combination(a: #{scalar}, x: #{name}, b: #{scalar}, y: #{name}) -> #{name}") do |o|
-                o.puts("let a: #{vector_name} = broadcast(a);")
-                o.puts("let b: #{vector_name} = broadcast(b);")
+                o.puts("let a = #{vector_name}::broadcast(a);")
+                o.puts("let b = #{vector_name}::broadcast(b);")
 
                 o.puts("return #{name}(#{j.times.map { |k| "a * x.#{k} + b * y.#{k}" }.join(", ")});")
               end
@@ -609,19 +604,19 @@ module Bridge
       if saturate
         o.puts("#[inline(always)]", pad: true)
         o.block("fn to_#{out_type}_sat(self) -> #{out_name}") do |o|
-          min = "broadcast(std::#{out_scalar}::MIN as #{in_scalar})"
-          max = "broadcast(std::#{out_scalar}::MAX as #{in_scalar})"
+          min = "Self::broadcast(std::#{out_scalar}::MIN as #{in_scalar})"
+          max = "Self::broadcast(std::#{out_scalar}::MAX as #{in_scalar})"
 
           if in_scalar == out_scalar
             o.puts("return self;")
           elsif in_kind == out_kind && in_size < out_size
             o.puts("return #{in_name}::to_#{out_type}(self);")
           elsif in_kind.include?(:signed) && out_kind.include?(:unsigned) && in_size <= out_size
-            o.puts("return #{in_name}::to_#{out_type}(max(self, broadcast::<isize, Self>(0isize)));")
+            o.puts("return #{in_name}::to_#{out_type}(self.max(Self::from(0)));")
           elsif in_kind.include?(:unsigned)
-            o.puts("return #{in_name}::to_#{out_type}(min(self, #{max}));")
+            o.puts("return #{in_name}::to_#{out_type}(self.min(#{max}));")
           else
-            o.puts("return #{in_name}::to_#{out_type}(clamp(self, #{min}, #{max}));")
+            o.puts("return #{in_name}::to_#{out_type}(self.clamp(#{min}, #{max}));")
           end
         end
       else
