@@ -29,25 +29,15 @@ impl Vector for short8 {
   }
 
   #[inline(always)]
+  fn reduce(self, f: &Fn(Self::Scalar, Self::Scalar) -> Self::Scalar) -> Self::Scalar {
+    return f(self.7, f(self.6, f(self.5, f(self.4, f(self.3, f(self.2, f(self.1, self.0)))))));
+  }
+
+  #[inline(always)]
   fn abs(self) -> Self {
     let mask = self >> 15;
 
     return (self ^ mask) - mask;
-  }
-
-  #[inline(always)]
-  fn reduce_add(self) -> Self::Scalar {
-    return reduce_add(self.lo() + self.hi());
-  }
-
-  #[inline(always)]
-  fn reduce_min(self) -> Self::Scalar {
-    return reduce_min(min(self.lo(), self.hi()));
-  }
-
-  #[inline(always)]
-  fn reduce_max(self) -> Self::Scalar {
-    return reduce_max(max(self.lo(), self.hi()));
   }
 
   #[inline(always)]
@@ -103,21 +93,6 @@ impl Integer for short8 {
   type IntegerScalar = i16;
 
   const SIGN_MASK: i16 = std::i16::MIN;
-
-  #[inline(always)]
-  fn reduce_and(self) -> Self::Scalar {
-    return (self.lo() & self.hi()).reduce_and();
-  }
-
-  #[inline(always)]
-  fn reduce_or(self) -> Self::Scalar {
-    return (self.lo() | self.hi()).reduce_or();
-  }
-
-  #[inline(always)]
-  fn reduce_xor(self) -> Self::Scalar {
-    return (self.lo() ^ self.hi()).reduce_xor();
-  }
 }
 
 impl Select<short8> for short8 {
@@ -145,29 +120,29 @@ impl Select<ushort8> for short8 {
 }
 
 impl short8 {
-  #[inline]
+  #[inline(always)]
   pub fn bitcast<T>(x: T) -> short8 {
     assert_eq!(std::mem::size_of::<T>(), std::mem::size_of::<Self>());
 
     return unsafe { std::mem::transmute_copy(&x) };
   }
 
-  #[inline]
+  #[inline(always)]
   pub fn lo(self) -> short4 {
     return short4(self.0, self.1, self.2, self.3);
   }
 
-  #[inline]
+  #[inline(always)]
   pub fn hi(self) -> short4 {
     return short4(self.4, self.5, self.6, self.7);
   }
 
-  #[inline]
+  #[inline(always)]
   pub fn odd(self) -> short4 {
     return short4(self.1, self.3, self.5, self.7);
   }
 
-  #[inline]
+  #[inline(always)]
   pub fn even(self) -> short4 {
     return short4(self.0, self.2, self.4, self.6);
   }

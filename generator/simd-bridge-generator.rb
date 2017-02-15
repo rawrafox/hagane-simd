@@ -76,6 +76,13 @@ module Bridge
             end
 
             o.puts("#[inline(always)]", pad: true)
+            o.block("fn reduce(self, f: &Fn(Self::Scalar, Self::Scalar) -> Self::Scalar) -> Self::Scalar") do |o|
+              result = width.times.map { |i| "self.#{i}" }.reduce { |sum, i| "f(#{i}, #{sum})" }
+
+              o.puts("return #{result};")
+            end
+
+            o.puts("#[inline(always)]", pad: true)
             o.block("fn abs(self) -> Self") do |o|
               if kind.include?(:signed)
                 o.puts("let mask = self >> #{attributes.fetch(:size) * 8 - 1};", pad: true)
@@ -87,58 +94,6 @@ module Bridge
                 o.puts("return x.bitselect(Self::from(0), self);", pad: true)
               else
                 o.puts("return self;")
-              end
-            end
-
-            o.puts("#[inline(always)]", pad: true)
-            o.block("fn reduce_add(self) -> Self::Scalar") do |o|
-              case width
-              when 2
-                o.puts("return self.0 + self.1;")
-              when 3
-                o.puts("return self.0 + self.1 + self.2;")
-              else
-                o.puts("return reduce_add(self.lo() + self.hi());")
-              end
-            end
-
-            o.puts("#[inline(always)]", pad: true)
-            o.block("fn reduce_min(self) -> Self::Scalar") do |o|
-              case width
-              when 2
-                if kind.include?(:float)
-                  o.puts("return self.0.min(self.1);")
-                else
-                  o.puts("return std::cmp::min(self.0, self.1);")
-                end
-              when 3
-                if kind.include?(:float)
-                  o.puts("return self.2.min(reduce_min(self.lo()));")
-                else
-                  o.puts("return std::cmp::min(reduce_min(self.lo()), self.2);")
-                end
-              else
-                o.puts("return reduce_min(min(self.lo(), self.hi()));")
-              end
-            end
-
-            o.puts("#[inline(always)]", pad: true)
-            o.block("fn reduce_max(self) -> Self::Scalar") do |o|
-              case width
-              when 2
-                if kind.include?(:float)
-                  o.puts("return self.0.max(self.1);")
-                else
-                  o.puts("return std::cmp::max(self.0, self.1);")
-                end
-              when 3
-                if kind.include?(:float)
-                  o.puts("return self.2.max(reduce_max(self.lo()));")
-                else
-                  o.puts("return std::cmp::max(reduce_max(self.lo()), self.2);")
-                end
-              else
-                o.puts("return reduce_max(max(self.lo(), self.hi()));")
               end
             end
 
@@ -204,42 +159,6 @@ module Bridge
               o.puts("type IntegerScalar = #{scalar};", pad: true)
 
               o.puts("const SIGN_MASK: #{scalar} = #{kind.include?(:signed) ? "std::#{scalar}::MIN" : "0x8#{"0" * (attributes.fetch(:size) * 2 - 1)}"};", pad: true)
-              
-              o.puts("#[inline(always)]", pad: true)
-              o.block("fn reduce_and(self) -> Self::Scalar") do |o|
-                case width
-                when 2
-                  o.puts("return self.0 & self.1")
-                when 3
-                  o.puts("return self.0 & self.1 & self.2")
-                else
-                  o.puts("return (self.lo() & self.hi()).reduce_and();")
-                end
-              end
-
-              o.puts("#[inline(always)]", pad: true)
-              o.block("fn reduce_or(self) -> Self::Scalar") do |o|
-                case width
-                when 2
-                  o.puts("return self.0 | self.1")
-                when 3
-                  o.puts("return self.0 | self.1 | self.2")
-                else
-                  o.puts("return (self.lo() | self.hi()).reduce_or();")
-                end
-              end
-
-              o.puts("#[inline(always)]", pad: true)
-              o.block("fn reduce_xor(self) -> Self::Scalar") do |o|
-                case width
-                when 2
-                  o.puts("return self.0 ^ self.1")
-                when 3
-                  o.puts("return self.0 ^ self.1 ^ self.2")
-                else
-                  o.puts("return (self.lo() ^ self.hi()).reduce_xor();")
-                end
-              end
             end
           end
 
@@ -266,7 +185,7 @@ module Bridge
           end
 
           o.block("impl #{name}", pad: true) do |o|
-            o.puts("#[inline]", pad: true)
+            o.puts("#[inline(always)]", pad: true)
             o.block("pub fn bitcast<T>(x: T) -> #{name}") do |o|
               o.puts("assert_eq!(std::mem::size_of::<T>(), std::mem::size_of::<Self>());")
               o.puts
@@ -277,62 +196,62 @@ module Bridge
 
             case width
             when 2
-              o.puts("#[inline]", pad: true)
+              o.puts("#[inline(always)]", pad: true)
               o.block("pub fn lo(self) -> #{scalar}") do |o|
                 o.puts("return self.0;")
               end
 
-              o.puts("#[inline]", pad: true)
+              o.puts("#[inline(always)]", pad: true)
               o.block("pub fn hi(self) -> #{scalar}") do |o|
                 o.puts("return self.1;")
               end
 
-              o.puts("#[inline]", pad: true)
+              o.puts("#[inline(always)]", pad: true)
               o.block("pub fn odd(self) -> #{scalar}") do |o|
                 o.puts("return self.1;")
               end
 
-              o.puts("#[inline]", pad: true)
+              o.puts("#[inline(always)]", pad: true)
               o.block("pub fn even(self) -> #{scalar}") do |o|
                 o.puts("return self.0;")
               end
             when 3
-              o.puts("#[inline]", pad: true)
+              o.puts("#[inline(always)]", pad: true)
               o.block("pub fn lo(self) -> #{type}2") do |o|
                 o.puts("return #{type}2(self.0, self.1);")
               end
 
-              o.puts("#[inline]", pad: true)
+              o.puts("#[inline(always)]", pad: true)
               o.block("pub fn hi(self) -> #{type}2") do |o|
                 o.puts("return #{type}2(self.2, 0#{".0" if kind.include?(:float)});")
               end
 
-              o.puts("#[inline]", pad: true)
+              o.puts("#[inline(always)]", pad: true)
               o.block("pub fn odd(self) -> #{type}2") do |o|
                 o.puts("return #{type}2(self.1, 0#{".0" if kind.include?(:float)});")
               end
 
-              o.puts("#[inline]", pad: true)
+              o.puts("#[inline(always)]", pad: true)
               o.block("pub fn even(self) -> #{type}2") do |o|
                 o.puts("return #{type}2(self.0, self.2);")
               end
             else
-              o.puts("#[inline]", pad: true)
+              o.puts("#[inline(always)]", pad: true)
               o.block("pub fn lo(self) -> #{type}#{width / 2}") do |o|
                 o.puts("return #{type}#{width / 2}(#{(width / 2).times.map { |i| "self.#{i}"}.join(", ")});")
               end
 
-              o.puts("#[inline]", pad: true)
+              o.puts("#[inline(always)]", pad: true)
               o.block("pub fn hi(self) -> #{type}#{width / 2}") do |o|
                 o.puts("return #{type}#{width / 2}(#{(width / 2).times.map { |i| "self.#{width / 2 + i}"}.join(", ")});")
               end
 
-              o.puts("#[inline]", pad: true)
+              o.puts("#[inline(always)]", pad: true)
               o.block("pub fn odd(self) -> #{type}#{width / 2}") do |o|
                 o.puts("return #{type}#{width / 2}(#{(width / 2).times.map { |i| "self.#{2 * i + 1}"}.join(", ")});")
               end
 
-              o.puts("#[inline]", pad: true)
+              o.puts("#[inline(always)]", pad: true)
               o.block("pub fn even(self) -> #{type}#{width / 2}") do |o|
                 o.puts("return #{type}#{width / 2}(#{(width / 2).times.map { |i| "self.#{2 * i}"}.join(", ")});")
               end
@@ -376,7 +295,7 @@ module Bridge
             o.block("impl std::ops::Add for #{name}", pad: true) do |o|
               o.puts("type Output = Self;")
               o.puts
-              o.puts("#[inline]")
+              o.puts("#[inline(always)]")
               o.block("fn add(self, other: Self) -> Self") do |o|
                 o.puts("return #{name}(#{j.times.map { |k| "self.#{k} + other.#{k}" }.join(", ")});")
               end
@@ -385,7 +304,7 @@ module Bridge
             o.block("impl std::ops::Sub for #{name}", pad: true) do |o|
               o.puts("type Output = Self;")
               o.puts
-              o.puts("#[inline]")
+              o.puts("#[inline(always)]")
               o.block("fn sub(self, other: Self) -> Self") do |o|
                 o.puts("return #{name}(#{j.times.map { |k| "self.#{k} - other.#{k}" }.join(", ")});")
               end
@@ -395,7 +314,7 @@ module Bridge
               o.block("impl std::ops::Mul for #{name}", pad: true) do |o|
                 o.puts("type Output = Self;")
                 o.puts
-                o.puts("#[inline]")
+                o.puts("#[inline(always)]")
                 o.block("fn mul(self, other: Self) -> Self") do |o|
                   o.puts("return self.dot(other);")
                 end
@@ -404,7 +323,7 @@ module Bridge
               o.block("impl std::ops::Mul<#{vector_name}> for #{name}", pad: true) do |o|
                 o.puts("type Output = #{vector_name};")
                 o.puts
-                o.puts("#[inline]")
+                o.puts("#[inline(always)]")
                 o.block("fn mul(self, other: #{vector_name}) -> #{vector_name}") do |o|
                   o.puts("return self.dot(other);")
                 end
@@ -414,7 +333,7 @@ module Bridge
             o.block("impl std::ops::Mul<#{scalar}> for #{name}", pad: true) do |o|
               o.puts("type Output = Self;")
               o.puts
-              o.puts("#[inline]")
+              o.puts("#[inline(always)]")
               o.block("fn mul(self, other: #{scalar}) -> Self") do |o|
                 o.puts("let a = #{vector_name}::broadcast(other);")
                 o.puts
@@ -426,7 +345,7 @@ module Bridge
               o.block("impl Dot<#{name}> for #{name}", pad: true) do |o|
                 o.puts("type DotProduct = #{name};")
                 o.puts
-                o.puts("#[inline]")
+                o.puts("#[inline(always)]")
                 o.block("fn dot(self, other: #{name}) -> #{name}") do |o|
                   o.puts("return #{name}(#{j.times.map { |k| "self.dot(other.#{k})" }.join(", ")});")
                 end
@@ -435,7 +354,7 @@ module Bridge
               o.block("impl Dot<#{vector_name}> for #{name}", pad: true) do |o|
                 o.puts("type DotProduct = #{vector_name};")
                 o.puts
-                o.puts("#[inline]")
+                o.puts("#[inline(always)]")
                 o.block("fn dot(self, other: #{vector_name}) -> #{vector_name}") do |o|
                   o.puts("return #{j.times.map { |k| "self.#{k} * other.#{k}" }.join(" + ")};")
                 end
@@ -444,7 +363,7 @@ module Bridge
 
             o.block("impl #{name}", pad: true) do
               if i == j
-                o.puts("#[inline]", pad: true)
+                o.puts("#[inline(always)]", pad: true)
                 o.block("pub fn identity(self) -> #{name}") do |o|
                   identity = j.times.map { |k| "#{vector_name}(#{([0.0] * i).tap { |ary| ary[k] = 1.0 }.join(", ")})" }.join(", ")
 
@@ -452,7 +371,7 @@ module Bridge
                 end
               end
 
-              o.puts("#[inline]", pad: true)
+              o.puts("#[inline(always)]", pad: true)
               o.block("pub fn linear_combination(a: #{scalar}, x: #{name}, b: #{scalar}, y: #{name}) -> #{name}") do |o|
                 o.puts("let a = #{vector_name}::broadcast(a);")
                 o.puts("let b = #{vector_name}::broadcast(b);")
@@ -463,7 +382,7 @@ module Bridge
               transpose_vector_name = "#{type}#{j}"
               transpose_matrix_name = "#{type}#{i}x#{j}"
 
-              o.puts("#[inline]", pad: true)
+              o.puts("#[inline(always)]", pad: true)
               o.block("pub fn transpose(self) -> #{transpose_matrix_name}") do |o|
                 i.times do |k|
                   o.puts("let c#{k} = #{transpose_vector_name}(#{j.times.map { |l| "(self.#{l}).#{k}" }.join(", ")});")
@@ -477,7 +396,7 @@ module Bridge
               if i == j && ["f32", "f64"].include?(scalar)
                 typecode = { "f32" => "f", "f64" => "d" }.fetch(scalar)
 
-                o.puts("#[inline]", pad: true)
+                o.puts("#[inline(always)]", pad: true)
                 o.block("pub fn inverse(self) -> #{name}") do |o|
                   o.puts("return unsafe { __invert_#{typecode}#{i}(self) };")
                 end
@@ -485,15 +404,15 @@ module Bridge
 
               # matrix_multiply is expressed via the `Dot` trait
 
-              # TODO: o.puts("#[inline]", pad: true)
+              # TODO: o.puts("#[inline(always)]", pad: true)
               #o.block("pub fn equal(x: #{name}, y: #{name}) -> bool") do |o|
               #end
 
-              # TODO: o.puts("#[inline]", pad: true)
+              # TODO: o.puts("#[inline(always)]", pad: true)
               # o.block("pub fn almost_equal_elements(x: #{name}, y: #{name}, tolerance: #{scalar}) -> bool") do |o|
               # end
 
-              # TODO: o.puts("#[inline]", pad: true)
+              # TODO: o.puts("#[inline(always)]", pad: true)
               # o.block("pub fn almost_equal_elements_relative(x: #{name}, y: #{name}, tolerance: #{scalar}) -> bool") do |o|
               # end
             end

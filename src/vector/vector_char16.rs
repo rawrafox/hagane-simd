@@ -29,25 +29,15 @@ impl Vector for char16 {
   }
 
   #[inline(always)]
+  fn reduce(self, f: &Fn(Self::Scalar, Self::Scalar) -> Self::Scalar) -> Self::Scalar {
+    return f(self.15, f(self.14, f(self.13, f(self.12, f(self.11, f(self.10, f(self.9, f(self.8, f(self.7, f(self.6, f(self.5, f(self.4, f(self.3, f(self.2, f(self.1, self.0)))))))))))))));
+  }
+
+  #[inline(always)]
   fn abs(self) -> Self {
     let mask = self >> 7;
 
     return (self ^ mask) - mask;
-  }
-
-  #[inline(always)]
-  fn reduce_add(self) -> Self::Scalar {
-    return reduce_add(self.lo() + self.hi());
-  }
-
-  #[inline(always)]
-  fn reduce_min(self) -> Self::Scalar {
-    return reduce_min(min(self.lo(), self.hi()));
-  }
-
-  #[inline(always)]
-  fn reduce_max(self) -> Self::Scalar {
-    return reduce_max(max(self.lo(), self.hi()));
   }
 
   #[inline(always)]
@@ -103,21 +93,6 @@ impl Integer for char16 {
   type IntegerScalar = i8;
 
   const SIGN_MASK: i8 = std::i8::MIN;
-
-  #[inline(always)]
-  fn reduce_and(self) -> Self::Scalar {
-    return (self.lo() & self.hi()).reduce_and();
-  }
-
-  #[inline(always)]
-  fn reduce_or(self) -> Self::Scalar {
-    return (self.lo() | self.hi()).reduce_or();
-  }
-
-  #[inline(always)]
-  fn reduce_xor(self) -> Self::Scalar {
-    return (self.lo() ^ self.hi()).reduce_xor();
-  }
 }
 
 impl Select<char16> for char16 {
@@ -145,29 +120,29 @@ impl Select<uchar16> for char16 {
 }
 
 impl char16 {
-  #[inline]
+  #[inline(always)]
   pub fn bitcast<T>(x: T) -> char16 {
     assert_eq!(std::mem::size_of::<T>(), std::mem::size_of::<Self>());
 
     return unsafe { std::mem::transmute_copy(&x) };
   }
 
-  #[inline]
+  #[inline(always)]
   pub fn lo(self) -> char8 {
     return char8(self.0, self.1, self.2, self.3, self.4, self.5, self.6, self.7);
   }
 
-  #[inline]
+  #[inline(always)]
   pub fn hi(self) -> char8 {
     return char8(self.8, self.9, self.10, self.11, self.12, self.13, self.14, self.15);
   }
 
-  #[inline]
+  #[inline(always)]
   pub fn odd(self) -> char8 {
     return char8(self.1, self.3, self.5, self.7, self.9, self.11, self.13, self.15);
   }
 
-  #[inline]
+  #[inline(always)]
   pub fn even(self) -> char8 {
     return char8(self.0, self.2, self.4, self.6, self.8, self.10, self.12, self.14);
   }

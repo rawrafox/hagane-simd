@@ -29,23 +29,13 @@ impl Vector for uint2 {
   }
 
   #[inline(always)]
+  fn reduce(self, f: &Fn(Self::Scalar, Self::Scalar) -> Self::Scalar) -> Self::Scalar {
+    return f(self.1, self.0);
+  }
+
+  #[inline(always)]
   fn abs(self) -> Self {
     return self;
-  }
-
-  #[inline(always)]
-  fn reduce_add(self) -> Self::Scalar {
-    return self.0 + self.1;
-  }
-
-  #[inline(always)]
-  fn reduce_min(self) -> Self::Scalar {
-    return std::cmp::min(self.0, self.1);
-  }
-
-  #[inline(always)]
-  fn reduce_max(self) -> Self::Scalar {
-    return std::cmp::max(self.0, self.1);
   }
 
   #[inline(always)]
@@ -101,47 +91,32 @@ impl Integer for uint2 {
   type IntegerScalar = u32;
 
   const SIGN_MASK: u32 = 0x80000000;
-
-  #[inline(always)]
-  fn reduce_and(self) -> Self::Scalar {
-    return self.0 & self.1
-  }
-
-  #[inline(always)]
-  fn reduce_or(self) -> Self::Scalar {
-    return self.0 | self.1
-  }
-
-  #[inline(always)]
-  fn reduce_xor(self) -> Self::Scalar {
-    return self.0 ^ self.1
-  }
 }
 
 impl uint2 {
-  #[inline]
+  #[inline(always)]
   pub fn bitcast<T>(x: T) -> uint2 {
     assert_eq!(std::mem::size_of::<T>(), std::mem::size_of::<Self>());
 
     return unsafe { std::mem::transmute_copy(&x) };
   }
 
-  #[inline]
+  #[inline(always)]
   pub fn lo(self) -> u32 {
     return self.0;
   }
 
-  #[inline]
+  #[inline(always)]
   pub fn hi(self) -> u32 {
     return self.1;
   }
 
-  #[inline]
+  #[inline(always)]
   pub fn odd(self) -> u32 {
     return self.1;
   }
 
-  #[inline]
+  #[inline(always)]
   pub fn even(self) -> u32 {
     return self.0;
   }

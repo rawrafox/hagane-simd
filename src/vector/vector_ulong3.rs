@@ -29,23 +29,13 @@ impl Vector for ulong3 {
   }
 
   #[inline(always)]
+  fn reduce(self, f: &Fn(Self::Scalar, Self::Scalar) -> Self::Scalar) -> Self::Scalar {
+    return f(self.2, f(self.1, self.0));
+  }
+
+  #[inline(always)]
   fn abs(self) -> Self {
     return self;
-  }
-
-  #[inline(always)]
-  fn reduce_add(self) -> Self::Scalar {
-    return self.0 + self.1 + self.2;
-  }
-
-  #[inline(always)]
-  fn reduce_min(self) -> Self::Scalar {
-    return std::cmp::min(reduce_min(self.lo()), self.2);
-  }
-
-  #[inline(always)]
-  fn reduce_max(self) -> Self::Scalar {
-    return std::cmp::max(reduce_max(self.lo()), self.2);
   }
 
   #[inline(always)]
@@ -101,47 +91,32 @@ impl Integer for ulong3 {
   type IntegerScalar = u64;
 
   const SIGN_MASK: u64 = 0x8000000000000000;
-
-  #[inline(always)]
-  fn reduce_and(self) -> Self::Scalar {
-    return self.0 & self.1 & self.2
-  }
-
-  #[inline(always)]
-  fn reduce_or(self) -> Self::Scalar {
-    return self.0 | self.1 | self.2
-  }
-
-  #[inline(always)]
-  fn reduce_xor(self) -> Self::Scalar {
-    return self.0 ^ self.1 ^ self.2
-  }
 }
 
 impl ulong3 {
-  #[inline]
+  #[inline(always)]
   pub fn bitcast<T>(x: T) -> ulong3 {
     assert_eq!(std::mem::size_of::<T>(), std::mem::size_of::<Self>());
 
     return unsafe { std::mem::transmute_copy(&x) };
   }
 
-  #[inline]
+  #[inline(always)]
   pub fn lo(self) -> ulong2 {
     return ulong2(self.0, self.1);
   }
 
-  #[inline]
+  #[inline(always)]
   pub fn hi(self) -> ulong2 {
     return ulong2(self.2, 0);
   }
 
-  #[inline]
+  #[inline(always)]
   pub fn odd(self) -> ulong2 {
     return ulong2(self.1, 0);
   }
 
-  #[inline]
+  #[inline(always)]
   pub fn even(self) -> ulong2 {
     return ulong2(self.0, self.2);
   }

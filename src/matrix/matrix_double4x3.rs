@@ -4,7 +4,7 @@ use ::*;
 impl std::ops::Add for double4x3 {
   type Output = Self;
 
-  #[inline]
+  #[inline(always)]
   fn add(self, other: Self) -> Self {
     return double4x3(self.0 + other.0, self.1 + other.1, self.2 + other.2, self.3 + other.3);
   }
@@ -13,7 +13,7 @@ impl std::ops::Add for double4x3 {
 impl std::ops::Sub for double4x3 {
   type Output = Self;
 
-  #[inline]
+  #[inline(always)]
   fn sub(self, other: Self) -> Self {
     return double4x3(self.0 - other.0, self.1 - other.1, self.2 - other.2, self.3 - other.3);
   }
@@ -22,7 +22,7 @@ impl std::ops::Sub for double4x3 {
 impl std::ops::Mul<f64> for double4x3 {
   type Output = Self;
 
-  #[inline]
+  #[inline(always)]
   fn mul(self, other: f64) -> Self {
     let a = double3::broadcast(other);
 
@@ -31,14 +31,14 @@ impl std::ops::Mul<f64> for double4x3 {
 }
 
 impl double4x3 {
-  #[inline]
+  #[inline(always)]
   pub fn linear_combination(a: f64, x: double4x3, b: f64, y: double4x3) -> double4x3 {
     let a = double3::broadcast(a);
     let b = double3::broadcast(b);
     return double4x3(a * x.0 + b * y.0, a * x.1 + b * y.1, a * x.2 + b * y.2, a * x.3 + b * y.3);
   }
 
-  #[inline]
+  #[inline(always)]
   pub fn transpose(self) -> double3x4 {
     let c0 = double4((self.0).0, (self.1).0, (self.2).0, (self.3).0);
     let c1 = double4((self.0).1, (self.1).1, (self.2).1, (self.3).1);

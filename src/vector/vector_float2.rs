@@ -29,25 +29,15 @@ impl Vector for float2 {
   }
 
   #[inline(always)]
+  fn reduce(self, f: &Fn(Self::Scalar, Self::Scalar) -> Self::Scalar) -> Self::Scalar {
+    return f(self.1, self.0);
+  }
+
+  #[inline(always)]
   fn abs(self) -> Self {
     let x = Self::Boolean::broadcast(std::i32::MAX);
 
     return x.bitselect(Self::from(0), self);
-  }
-
-  #[inline(always)]
-  fn reduce_add(self) -> Self::Scalar {
-    return self.0 + self.1;
-  }
-
-  #[inline(always)]
-  fn reduce_min(self) -> Self::Scalar {
-    return self.0.min(self.1);
-  }
-
-  #[inline(always)]
-  fn reduce_max(self) -> Self::Scalar {
-    return self.0.max(self.1);
   }
 
   #[inline(always)]
@@ -118,29 +108,29 @@ impl Geometry for float2 {
 }
 
 impl float2 {
-  #[inline]
+  #[inline(always)]
   pub fn bitcast<T>(x: T) -> float2 {
     assert_eq!(std::mem::size_of::<T>(), std::mem::size_of::<Self>());
 
     return unsafe { std::mem::transmute_copy(&x) };
   }
 
-  #[inline]
+  #[inline(always)]
   pub fn lo(self) -> f32 {
     return self.0;
   }
 
-  #[inline]
+  #[inline(always)]
   pub fn hi(self) -> f32 {
     return self.1;
   }
 
-  #[inline]
+  #[inline(always)]
   pub fn odd(self) -> f32 {
     return self.1;
   }
 
-  #[inline]
+  #[inline(always)]
   pub fn even(self) -> f32 {
     return self.0;
   }

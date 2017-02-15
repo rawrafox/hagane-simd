@@ -124,6 +124,8 @@ pub trait Vector : Sized + Copy + Add<Output=Self> + Sub<Output=Self> + Mul<Outp
   fn map_unary(self, f: &Fn(Self::Scalar) -> Self::Scalar) -> Self;
   fn map_binary(self, other: Self, f: &Fn(Self::Scalar, Self::Scalar) -> Self::Scalar) -> Self;
 
+  fn reduce(self, f: &Fn(Self::Scalar, Self::Scalar) -> Self::Scalar) -> Self::Scalar;
+
   #[inline(always)]
   fn broadcast(x: Self::Scalar) -> Self {
     return x.into();
@@ -191,9 +193,20 @@ pub trait Vector : Sized + Copy + Add<Output=Self> + Sub<Output=Self> + Mul<Outp
     return self.max(min).min(max)
   }
 
-  fn reduce_add(self) -> Self::Scalar;
-  fn reduce_max(self) -> Self::Scalar;
-  fn reduce_min(self) -> Self::Scalar;
+  #[inline(always)]
+  fn reduce_add(self) -> Self::Scalar {
+    return self.reduce(&Self::Scalar::add);
+  }
+
+  #[inline(always)]
+  fn reduce_max(self) -> Self::Scalar {
+    return self.reduce(&Self::Scalar::max);
+  }
+
+  #[inline(always)]
+  fn reduce_min(self) -> Self::Scalar {
+    return self.reduce(&Self::Scalar::min);
+  }
 
   #[inline(always)]
   fn to_char(self) -> Self::CharVector {
@@ -695,9 +708,20 @@ pub trait Integer : Vector<Scalar=<Self as Integer>::IntegerScalar> + BitAnd<Out
 
   const SIGN_MASK: Self::Scalar;
 
-  fn reduce_and(self) -> Self::Scalar;
-  fn reduce_or(self) -> Self::Scalar;
-  fn reduce_xor(self) -> Self::Scalar;
+  #[inline(always)]
+  fn reduce_and(self) -> Self::Scalar {
+    return self.reduce(&Self::Scalar::bitand);
+  }
+
+  #[inline(always)]
+  fn reduce_or(self) -> Self::Scalar {
+    return self.reduce(&Self::Scalar::bitor);
+  }
+
+  #[inline(always)]
+  fn reduce_xor(self) -> Self::Scalar {
+    return self.reduce(&Self::Scalar::bitxor);
+  }
 
   #[inline(always)]
   fn all(self) -> bool {

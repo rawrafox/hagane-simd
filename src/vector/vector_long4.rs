@@ -29,25 +29,15 @@ impl Vector for long4 {
   }
 
   #[inline(always)]
+  fn reduce(self, f: &Fn(Self::Scalar, Self::Scalar) -> Self::Scalar) -> Self::Scalar {
+    return f(self.3, f(self.2, f(self.1, self.0)));
+  }
+
+  #[inline(always)]
   fn abs(self) -> Self {
     let mask = self >> 63;
 
     return (self ^ mask) - mask;
-  }
-
-  #[inline(always)]
-  fn reduce_add(self) -> Self::Scalar {
-    return reduce_add(self.lo() + self.hi());
-  }
-
-  #[inline(always)]
-  fn reduce_min(self) -> Self::Scalar {
-    return reduce_min(min(self.lo(), self.hi()));
-  }
-
-  #[inline(always)]
-  fn reduce_max(self) -> Self::Scalar {
-    return reduce_max(max(self.lo(), self.hi()));
   }
 
   #[inline(always)]
@@ -103,21 +93,6 @@ impl Integer for long4 {
   type IntegerScalar = i64;
 
   const SIGN_MASK: i64 = std::i64::MIN;
-
-  #[inline(always)]
-  fn reduce_and(self) -> Self::Scalar {
-    return (self.lo() & self.hi()).reduce_and();
-  }
-
-  #[inline(always)]
-  fn reduce_or(self) -> Self::Scalar {
-    return (self.lo() | self.hi()).reduce_or();
-  }
-
-  #[inline(always)]
-  fn reduce_xor(self) -> Self::Scalar {
-    return (self.lo() ^ self.hi()).reduce_xor();
-  }
 }
 
 impl Select<long4> for long4 {
@@ -157,29 +132,29 @@ impl Select<double4> for long4 {
 }
 
 impl long4 {
-  #[inline]
+  #[inline(always)]
   pub fn bitcast<T>(x: T) -> long4 {
     assert_eq!(std::mem::size_of::<T>(), std::mem::size_of::<Self>());
 
     return unsafe { std::mem::transmute_copy(&x) };
   }
 
-  #[inline]
+  #[inline(always)]
   pub fn lo(self) -> long2 {
     return long2(self.0, self.1);
   }
 
-  #[inline]
+  #[inline(always)]
   pub fn hi(self) -> long2 {
     return long2(self.2, self.3);
   }
 
-  #[inline]
+  #[inline(always)]
   pub fn odd(self) -> long2 {
     return long2(self.1, self.3);
   }
 
-  #[inline]
+  #[inline(always)]
   pub fn even(self) -> long2 {
     return long2(self.0, self.2);
   }

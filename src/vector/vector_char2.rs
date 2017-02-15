@@ -29,25 +29,15 @@ impl Vector for char2 {
   }
 
   #[inline(always)]
+  fn reduce(self, f: &Fn(Self::Scalar, Self::Scalar) -> Self::Scalar) -> Self::Scalar {
+    return f(self.1, self.0);
+  }
+
+  #[inline(always)]
   fn abs(self) -> Self {
     let mask = self >> 7;
 
     return (self ^ mask) - mask;
-  }
-
-  #[inline(always)]
-  fn reduce_add(self) -> Self::Scalar {
-    return self.0 + self.1;
-  }
-
-  #[inline(always)]
-  fn reduce_min(self) -> Self::Scalar {
-    return std::cmp::min(self.0, self.1);
-  }
-
-  #[inline(always)]
-  fn reduce_max(self) -> Self::Scalar {
-    return std::cmp::max(self.0, self.1);
   }
 
   #[inline(always)]
@@ -103,21 +93,6 @@ impl Integer for char2 {
   type IntegerScalar = i8;
 
   const SIGN_MASK: i8 = std::i8::MIN;
-
-  #[inline(always)]
-  fn reduce_and(self) -> Self::Scalar {
-    return self.0 & self.1
-  }
-
-  #[inline(always)]
-  fn reduce_or(self) -> Self::Scalar {
-    return self.0 | self.1
-  }
-
-  #[inline(always)]
-  fn reduce_xor(self) -> Self::Scalar {
-    return self.0 ^ self.1
-  }
 }
 
 impl Select<char2> for char2 {
@@ -145,29 +120,29 @@ impl Select<uchar2> for char2 {
 }
 
 impl char2 {
-  #[inline]
+  #[inline(always)]
   pub fn bitcast<T>(x: T) -> char2 {
     assert_eq!(std::mem::size_of::<T>(), std::mem::size_of::<Self>());
 
     return unsafe { std::mem::transmute_copy(&x) };
   }
 
-  #[inline]
+  #[inline(always)]
   pub fn lo(self) -> i8 {
     return self.0;
   }
 
-  #[inline]
+  #[inline(always)]
   pub fn hi(self) -> i8 {
     return self.1;
   }
 
-  #[inline]
+  #[inline(always)]
   pub fn odd(self) -> i8 {
     return self.1;
   }
 
-  #[inline]
+  #[inline(always)]
   pub fn even(self) -> i8 {
     return self.0;
   }

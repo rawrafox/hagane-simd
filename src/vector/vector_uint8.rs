@@ -29,23 +29,13 @@ impl Vector for uint8 {
   }
 
   #[inline(always)]
+  fn reduce(self, f: &Fn(Self::Scalar, Self::Scalar) -> Self::Scalar) -> Self::Scalar {
+    return f(self.7, f(self.6, f(self.5, f(self.4, f(self.3, f(self.2, f(self.1, self.0)))))));
+  }
+
+  #[inline(always)]
   fn abs(self) -> Self {
     return self;
-  }
-
-  #[inline(always)]
-  fn reduce_add(self) -> Self::Scalar {
-    return reduce_add(self.lo() + self.hi());
-  }
-
-  #[inline(always)]
-  fn reduce_min(self) -> Self::Scalar {
-    return reduce_min(min(self.lo(), self.hi()));
-  }
-
-  #[inline(always)]
-  fn reduce_max(self) -> Self::Scalar {
-    return reduce_max(max(self.lo(), self.hi()));
   }
 
   #[inline(always)]
@@ -101,47 +91,32 @@ impl Integer for uint8 {
   type IntegerScalar = u32;
 
   const SIGN_MASK: u32 = 0x80000000;
-
-  #[inline(always)]
-  fn reduce_and(self) -> Self::Scalar {
-    return (self.lo() & self.hi()).reduce_and();
-  }
-
-  #[inline(always)]
-  fn reduce_or(self) -> Self::Scalar {
-    return (self.lo() | self.hi()).reduce_or();
-  }
-
-  #[inline(always)]
-  fn reduce_xor(self) -> Self::Scalar {
-    return (self.lo() ^ self.hi()).reduce_xor();
-  }
 }
 
 impl uint8 {
-  #[inline]
+  #[inline(always)]
   pub fn bitcast<T>(x: T) -> uint8 {
     assert_eq!(std::mem::size_of::<T>(), std::mem::size_of::<Self>());
 
     return unsafe { std::mem::transmute_copy(&x) };
   }
 
-  #[inline]
+  #[inline(always)]
   pub fn lo(self) -> uint4 {
     return uint4(self.0, self.1, self.2, self.3);
   }
 
-  #[inline]
+  #[inline(always)]
   pub fn hi(self) -> uint4 {
     return uint4(self.4, self.5, self.6, self.7);
   }
 
-  #[inline]
+  #[inline(always)]
   pub fn odd(self) -> uint4 {
     return uint4(self.1, self.3, self.5, self.7);
   }
 
-  #[inline]
+  #[inline(always)]
   pub fn even(self) -> uint4 {
     return uint4(self.0, self.2, self.4, self.6);
   }
