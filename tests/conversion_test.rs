@@ -5,13 +5,12 @@ use simd::*;
 #[test]
 fn test_to_char() {
   assert_eq!(to_char(float2(10.0, -3.0)), char2(10, -3));
-  assert_eq!(to_char(float2(10.0, -130.0)), char2(10, 126));
   assert_eq!(to_char(float3(10.0, -3.0, -9.5)), char3(10, -3, -9));
-  assert_eq!(to_char(float4(10.0, -3.0, -9.5, 400.0)), char4(10, -3, -9, -112));
+  assert_eq!(to_char(float4(10.0, -3.0, -9.5, 13.0)), char4(10, -3, -9, 13));
 
   assert_eq!(to_char(double2(10.0, -3.0)), char2(10, -3));
   assert_eq!(to_char(double3(10.0, -3.0, -9.5)), char3(10, -3, -9));
-  assert_eq!(to_char(double4(10.0, -3.0, -9.5, 400.0)), char4(10, -3, -9, -112));
+  assert_eq!(to_char(double4(10.0, -3.0, -9.5, 13.0)), char4(10, -3, -9, 13));
 
   assert_eq!(to_char(char2(10, -3)), char2(10, -3));
   assert_eq!(to_char(char3(10, -3, -9)), char3(10, -3, -9));
@@ -48,13 +47,13 @@ fn test_to_char() {
 
 #[test]
 fn test_to_uchar() {
-  assert_eq!(to_uchar(float2(10.0, -3.0)), uchar2(10, 253));
-  assert_eq!(to_uchar(float3(10.0, -3.0, -9.5)), uchar3(10, 253, 247));
-  assert_eq!(to_uchar(float4(10.0, -3.0, -9.5, 400.0)), uchar4(10, 253, 247, 144));
+  assert_eq!(to_uchar(float2(10.0, 3.0)), uchar2(10, 3));
+  assert_eq!(to_uchar(float3(10.0, 3.0, 9.5)), uchar3(10, 3, 9));
+  assert_eq!(to_uchar(float4(10.0, 3.0, 9.5, 40.0)), uchar4(10, 3, 9, 40));
 
-  assert_eq!(to_uchar(double2(10.0, -3.0)), uchar2(10, 253));
-  assert_eq!(to_uchar(double3(10.0, -3.0, -9.5)), uchar3(10, 253, 247));
-  assert_eq!(to_uchar(double4(10.0, -3.0, -9.5, 400.0)), uchar4(10, 253, 247, 144));
+  assert_eq!(to_uchar(double2(10.0, 3.0)), uchar2(10, 3));
+  assert_eq!(to_uchar(double3(10.0, 3.0, 9.5)), uchar3(10, 3, 9));
+  assert_eq!(to_uchar(double4(10.0, 3.0, 9.5, 40.0)), uchar4(10, 3, 9, 40));
 
   assert_eq!(to_uchar(char2(10, -3)), uchar2(10, 253));
   assert_eq!(to_uchar(char3(10, -3, -9)), uchar3(10, 253, 247));
@@ -179,12 +178,12 @@ fn test_to_uchar_sat() {
 fn test_to_short() {
   assert_eq!(to_short(float2(10.0, -3.0)), short2(10, -3));
   assert_eq!(to_short(float3(10.0, -3.0, -9.5)), short3(10, -3, -9));
-  assert_eq!(to_short(float4(10.0, -3.0, -9.5, 40000.0)), short4(10, -3, -9, -25536));
-  
+  assert_eq!(to_short(float4(10.0, -3.0, -9.5, 400.0)), short4(10, -3, -9, 400));
+
   assert_eq!(to_short(double2(10.0, -3.0)), short2(10, -3));
   assert_eq!(to_short(double3(10.0, -3.0, -9.5)), short3(10, -3, -9));
-  assert_eq!(to_short(double4(10.0, -3.0, -9.5, 40000.0)), short4(10, -3, -9, -25536));
-  
+  assert_eq!(to_short(double4(10.0, -3.0, -9.5, 400.0)), short4(10, -3, -9, 400));
+
   assert_eq!(to_short(char2(10, -3)), short2(10, -3));
   assert_eq!(to_short(char3(10, -3, -9)), short3(10, -3, -9));
   assert_eq!(to_short(char4(10, -3, -9, 0)), short4(10, -3, -9, 0));
@@ -220,13 +219,13 @@ fn test_to_short() {
 
 #[test]
 fn test_to_ushort() {
-  assert_eq!(to_ushort(float2(10.0, -3.0)), ushort2(10, 65533));
-  assert_eq!(to_ushort(float3(10.0, -3.0, -9.5)), ushort3(10, 65533, 65527));
-  assert_eq!(to_ushort(float4(10.0, -3.0, -9.5, 400.0)), ushort4(10, 65533, 65527, 400));
+  assert_eq!(to_ushort(float2(10.0, 3.0)), ushort2(10, 3));
+  assert_eq!(to_ushort(float3(10.0, 3.0, 9.5)), ushort3(10, 3, 9));
+  assert_eq!(to_ushort(float4(10.0, 3.0, 9.5, 400.0)), ushort4(10, 3, 9, 400));
 
-  assert_eq!(to_ushort(double2(10.0, -3.0)), ushort2(10, 65533));
-  assert_eq!(to_ushort(double3(10.0, -3.0, -9.5)), ushort3(10, 65533, 65527));
-  assert_eq!(to_ushort(double4(10.0, -3.0, -9.5, 400.0)), ushort4(10, 65533, 65527, 400));
+  assert_eq!(to_ushort(double2(10.0, 3.0)), ushort2(10, 3));
+  assert_eq!(to_ushort(double3(10.0, 3.0, 9.5)), ushort3(10, 3, 9));
+  assert_eq!(to_ushort(double4(10.0, 3.0, 9.5, 400.0)), ushort4(10, 3, 9, 400));
 
   assert_eq!(to_ushort(char2(10, -3)), ushort2(10, 65533));
   assert_eq!(to_ushort(char3(10, -3, -9)), ushort3(10, 65533, 65527));
@@ -352,11 +351,11 @@ fn test_to_int() {
   assert_eq!(to_int(float2(10.0, -3.0)), int2(10, -3));
   assert_eq!(to_int(float3(10.0, -3.0, -9.5)), int3(10, -3, -9));
   assert_eq!(to_int(float4(10.0, -3.0, -9.5, 40000.0)), int4(10, -3, -9, 40000));
-  
+
   assert_eq!(to_int(double2(10.0, -3.0)), int2(10, -3));
   assert_eq!(to_int(double3(10.0, -3.0, -9.5)), int3(10, -3, -9));
   assert_eq!(to_int(double4(10.0, -3.0, -9.5, 40000.0)), int4(10, -3, -9, 40000));
-  
+
   assert_eq!(to_int(char2(10, -3)), int2(10, -3));
   assert_eq!(to_int(char3(10, -3, -9)), int3(10, -3, -9));
   assert_eq!(to_int(char4(10, -3, -9, 0)), int4(10, -3, -9, 0));
@@ -392,13 +391,13 @@ fn test_to_int() {
 
 #[test]
 fn test_to_uint() {
-  assert_eq!(to_uint(float2(10.0, -3.0)), uint2(10, 4294967293));
-  assert_eq!(to_uint(float3(10.0, -3.0, -9.5)), uint3(10, 4294967293, 4294967287));
-  assert_eq!(to_uint(float4(10.0, -3.0, -9.5, 400.0)), uint4(10, 4294967293, 4294967287, 400));
+  assert_eq!(to_uint(float2(10.0, 3.0)), uint2(10, 3));
+  assert_eq!(to_uint(float3(10.0, 3.0, 9.5)), uint3(10, 3, 9));
+  assert_eq!(to_uint(float4(10.0, 3.0, 9.5, 400.0)), uint4(10, 3, 9, 400));
 
-  assert_eq!(to_uint(double2(10.0, -3.0)), uint2(10, 4294967293));
-  assert_eq!(to_uint(double3(10.0, -3.0, -9.5)), uint3(10, 4294967293, 4294967287));
-  assert_eq!(to_uint(double4(10.0, -3.0, -9.5, 400.0)), uint4(10, 4294967293, 4294967287, 400));
+  assert_eq!(to_uint(double2(10.0, 3.0)), uint2(10, 3));
+  assert_eq!(to_uint(double3(10.0, 3.0, 9.5)), uint3(10, 3, 9));
+  assert_eq!(to_uint(double4(10.0, 3.0, 9.5, 400.0)), uint4(10, 3, 9, 400));
 
   assert_eq!(to_uint(char2(10, -3)), uint2(10, 4294967293));
   assert_eq!(to_uint(char3(10, -3, -9)), uint3(10, 4294967293, 4294967287));
@@ -524,11 +523,11 @@ fn test_to_long() {
   assert_eq!(to_long(float2(10.0, -3.0)), long2(10, -3));
   assert_eq!(to_long(float3(10.0, -3.0, -9.5)), long3(10, -3, -9));
   assert_eq!(to_long(float4(10.0, -3.0, -9.5, 40000.0)), long4(10, -3, -9, 40000));
-  
+
   assert_eq!(to_long(double2(10.0, -3.0)), long2(10, -3));
   assert_eq!(to_long(double3(10.0, -3.0, -9.5)), long3(10, -3, -9));
   assert_eq!(to_long(double4(10.0, -3.0, -9.5, 40000.0)), long4(10, -3, -9, 40000));
-  
+
   assert_eq!(to_long(char2(10, -3)), long2(10, -3));
   assert_eq!(to_long(char3(10, -3, -9)), long3(10, -3, -9));
   assert_eq!(to_long(char4(10, -3, -9, 0)), long4(10, -3, -9, 0));
@@ -564,13 +563,13 @@ fn test_to_long() {
 
 #[test]
 fn test_to_ulong() {
-  assert_eq!(to_ulong(float2(10.0, -3.0)), ulong2(10, 18446744073709551613));
-  assert_eq!(to_ulong(float3(10.0, -3.0, -9.5)), ulong3(10, 18446744073709551613, 18446744073709551607));
-  assert_eq!(to_ulong(float4(10.0, -3.0, -9.5, 400.0)), ulong4(10, 18446744073709551613, 18446744073709551607, 400));
+  assert_eq!(to_ulong(float2(10.0, 3.0)), ulong2(10, 3));
+  assert_eq!(to_ulong(float3(10.0, 3.0, 9.5)), ulong3(10, 3, 9));
+  assert_eq!(to_ulong(float4(10.0, 3.0, 9.5, 400.0)), ulong4(10, 3, 9, 400));
 
-  assert_eq!(to_ulong(double2(10.0, -3.0)), ulong2(10, 18446744073709551613));
-  assert_eq!(to_ulong(double3(10.0, -3.0, -9.5)), ulong3(10, 18446744073709551613, 18446744073709551607));
-  assert_eq!(to_ulong(double4(10.0, -3.0, -9.5, 400.0)), ulong4(10, 18446744073709551613, 18446744073709551607, 400));
+  assert_eq!(to_ulong(double2(10.0, 3.0)), ulong2(10, 3));
+  assert_eq!(to_ulong(double3(10.0, 3.0, 9.5)), ulong3(10, 3, 9));
+  assert_eq!(to_ulong(double4(10.0, 3.0, 9.5, 400.0)), ulong4(10, 3, 9, 400));
 
   assert_eq!(to_ulong(char2(10, -3)), ulong2(10, 18446744073709551613));
   assert_eq!(to_ulong(char3(10, -3, -9)), ulong3(10, 18446744073709551613, 18446744073709551607));

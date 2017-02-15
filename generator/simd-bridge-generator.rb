@@ -460,24 +460,7 @@ module Bridge
           end
         end
       else
-        if in_kind.include?(:float) && out_kind.include?(:signed) && out_scalar != "i64" # TODO: Is this a compiler bug?
-          # o.puts("#[inline(always)]", pad: true)
-          # o.block("fn to_#{out_type}(self) -> #{out_name}") do |o|
-          #   result = width.times.map { |i| "self.#{i} as i64 as #{out_scalar}"}
-          #
-          #   o.puts("return #{out_name}(#{result.join(", ")});")
-          # end
-        elsif in_kind.include?(:float) && out_kind.include?(:unsigned)
-          # o.puts("#[inline(always)]", pad: true)
-          # o.block("fn to_#{out_type}(self) -> #{out_name}") do |o|
-          #   o.puts("let max = Self::broadcast(std::#{out_scalar}::MAX as #{in_scalar});", pad: true)
-          #   o.puts("let modulus = ((self % max) + max) % max;")
-          # 
-          #   result = width.times.map { |i| "modulus.#{i} as #{out_scalar}" }
-          # 
-          #   o.puts("return #{out_name}(#{result.join(", ")});", pad: true)
-          # end
-        elsif width == 3 && !in_kind.include?(:float) && in_size < out_size # TODO: Fix this compiler bug
+        if width == 3 && !in_kind.include?(:float) && in_size < out_size # TODO: Fix this compiler bug
           o.puts("#[inline(always)]", pad: true)
           o.block("fn to_#{out_type}(self) -> #{out_name}") do |o|
             result = width.times.map { |i| "self.#{i} as #{out_scalar}"}
