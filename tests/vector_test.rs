@@ -1,6 +1,6 @@
-extern crate hagane_simd as simd;
+extern crate hagane_simd;
 
-use simd::*;
+use hagane_simd::*;
 
 #[test]
 fn test_abs() {

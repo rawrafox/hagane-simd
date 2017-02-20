@@ -1,6 +1,23 @@
 use std;
 use ::*;
 
+#[cfg(target_feature = "sse")]
+extern "platform-intrinsic" {
+  fn x86_mm_sqrt_ps(x: float4) -> float4;
+  fn x86_mm_rsqrt_ps(x: float4) -> float4;
+}
+
+#[cfg(target_feature = "sse4.1")]
+extern "platform-intrinsic" {
+  fn x86_mm_dp_ps(x: float4, y: float4, z: i32) -> float4;
+}
+
+#[cfg(target_feature = "avx2")] // TODO: Compiler bug, should actually be "fma"
+extern {
+  #[link_name = "llvm.fma.v4f32"]
+  fn fma_v4f32(a: float4, b: float4, c: float4) -> float4;
+}
+
 impl Vector for float4 {
   type Scalar = f32;
   type Boolean = int4;
@@ -38,6 +55,12 @@ impl Vector for float4 {
     let x = Self::Boolean::broadcast(std::i32::MAX);
 
     return x.bitselect(Self::from(0), self);
+  }
+
+  #[cfg(target_feature = "avx2")] // TODO: Compiler bug, should actually be "fma"
+  #[inline(always)]
+  fn add_mul(self, a: Self, b: Self) -> Self {
+    return unsafe { fma_v4f32(a, b, self) };
   }
 
   #[inline(always)]
@@ -83,6 +106,14 @@ impl Vector for float4 {
 
 impl Dot<float4> for float4 {
   type DotProduct = f32;
+
+  #[cfg(target_feature = "sse4.1")]
+  #[inline(always)]
+  fn dot(self, other: Self) -> Self::DotProduct {
+    return unsafe { x86_mm_dp_ps(self, other, 0xF1).0 };
+  }
+
+  #[cfg(not(target_feature = "sse4.1"))]
   #[inline(always)]
   fn dot(self, other: Self) -> Self::DotProduct {
     return reduce_add(self * other);
@@ -93,6 +124,20 @@ impl Float for float4 {
   type FloatScalar = f32;
 
   const SIGN_MASK: i32 = std::i32::MAX;
+
+  #[cfg(target_feature = "sse")]
+  #[inline(always)]
+  fn sqrt(self) -> Self {
+    return unsafe { x86_mm_sqrt_ps(self) };
+  }
+
+  #[cfg(target_feature = "sse")]
+  #[inline(always)]
+  fn rsqrt(self) -> Self {
+    let r = unsafe { x86_mm_rsqrt_ps(self) };
+
+    return r * (1.5 - 0.5 * self.eq(Self::broadcast(0.0)).bitselect(self, Self::broadcast(-std::f32::INFINITY)) * r * r);
+  }
 }
 
 impl Geometry for float4 {

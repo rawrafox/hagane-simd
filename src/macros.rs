@@ -191,6 +191,15 @@ macro_rules! impl_vector {
     impl_trait!($vector, $scalar, simd_mul, Mul, mul);
     impl_trait!($vector, $scalar, simd_div, Div, div);
 
+    impl std::ops::Neg for $vector {
+      type Output = Self;
+
+      #[inline(always)]
+      fn neg(self) -> Self {
+        return Self::from(0) - self;
+      }
+    }
+
     impl PartialEq for $vector {
       #[inline(always)]
       fn eq(&self, other: &Self) -> bool {

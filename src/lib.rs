@@ -1,4 +1,4 @@
-#![feature(repr_simd, platform_intrinsics, associated_consts)]
+#![feature(associated_consts, cfg_target_feature, link_llvm_intrinsics, platform_intrinsics, repr_simd, simd_ffi)]
 
 #![allow(non_camel_case_types)]
 

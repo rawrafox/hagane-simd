@@ -265,6 +265,11 @@ pub trait Vector : Sized + Copy + Add<Output=Self> + Sub<Output=Self> + Mul<Outp
     return unsafe { simd_cast(self) };
   }
 
+  #[inline(always)]
+  fn to_boolean(self) -> Self::Boolean {
+    return unsafe { std::mem::transmute_copy(&self) };
+  }
+
   fn to_char_sat(self) -> Self::CharVector;
   fn to_short_sat(self) -> Self::ShortVector;
   fn to_int_sat(self) -> Self::IntVector;
@@ -404,6 +409,11 @@ pub fn to_float<T: Vector>(x: T) -> T::FloatVector {
 #[inline(always)]
 pub fn to_double<T: Vector>(x: T) -> T::DoubleVector {
   return x.to_double();
+}
+
+#[inline(always)]
+pub fn to_boolean<T: Vector>(x: T) -> T::Boolean {
+  return x.to_boolean();
 }
 
 #[inline(always)]

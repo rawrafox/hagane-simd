@@ -1,6 +1,8 @@
-extern crate hagane_simd as simd;
+extern crate hagane_simd;
 
-use simd::*;
+use hagane_simd::*;
+
+#[macro_use] mod macros;
 
 #[test]
 fn test_sign() {
@@ -26,9 +28,9 @@ fn test_mix() {
 
 #[test]
 fn test_recip() {
-  assert_eq!(recip(float2(10.0, -2.0)), float2(0.1, -0.5));
-  assert_eq!(recip(float3(10.0, -2.0, -1.0)), float3(0.1, -0.5, -1.0));
-  assert_eq!(recip(float4(10.0, -2.0, -1.0, 1.0)), float4(0.1, -0.5, -1.0, 1.0));
+  assert_near_f32!(recip(float2(10.0, -2.0)), float2(0.1, -0.5), 1);
+  assert_near_f32!(recip(float3(10.0, -2.0, -1.0)), float3(0.1, -0.5, -1.0), 1);
+  assert_near_f32!(recip(float4(10.0, -2.0, -1.0, 1.0)), float4(0.1, -0.5, -1.0, 1.0), 1);
 
   assert_eq!(recip(double2(10.0, -2.0)), double2(0.1, -0.5));
   assert_eq!(recip(double3(10.0, -2.0, -1.0)), double3(0.1, -0.5, -1.0));
@@ -37,9 +39,9 @@ fn test_recip() {
 
 #[test]
 fn test_rsqrt() {
-  assert_eq!(rsqrt(float2(100.0, 4.0)), float2(0.1, 0.5));
-  assert_eq!(rsqrt(float3(100.0, 4.0, 1.0)), float3(0.1, 0.5, 1.0));
-  assert_eq!(rsqrt(float4(100.0, 4.0, 1.0, 9.0)), float4(0.1, 0.5, 1.0, 1.0 / 3.0));
+  assert_near_f32!(rsqrt(float2(100.0, 4.0)), float2(0.1, 0.5), 1);
+  assert_near_f32!(rsqrt(float3(100.0, 4.0, 1.0)), float3(0.1, 0.5, 1.0), 1);
+  assert_near_f32!(rsqrt(float4(100.0, 4.0, 1.0, 9.0)), float4(0.1, 0.5, 1.0, 1.0 / 3.0), 1);
 
   assert_eq!(rsqrt(double2(100.0, 4.0)), double2(0.1, 0.5));
   assert_eq!(rsqrt(double3(100.0, 4.0, 1.0)), double3(0.1, 0.5, 1.0));
