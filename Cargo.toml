@@ -1,5 +1,6 @@
 [package]
 name = "hagane-simd"
-license = "MIT"
 version = "0.1.0"
 authors = ["Aurora <aurora@aventine.se>"]
+license = "MIT"
+description = "A generic SIMD vector / matrix library"
