@@ -19,6 +19,24 @@ impl std::ops::Sub for float3x4 {
   }
 }
 
+impl std::ops::Mul<float4x3> for float3x4 {
+  type Output = float4x4;
+
+  #[inline(always)]
+  fn mul(self, other: float4x3) -> Self::Output {
+    return self.dot(other);
+  }
+}
+
+impl std::ops::Mul<float3> for float3x4 {
+  type Output = float4;
+
+  #[inline(always)]
+  fn mul(self, other: float3) -> Self::Output {
+    return self.dot(other);
+  }
+}
+
 impl std::ops::Mul<f32> for float3x4 {
   type Output = Self;
 
@@ -30,7 +48,42 @@ impl std::ops::Mul<f32> for float3x4 {
   }
 }
 
+impl Dot<float4x3> for float3x4 {
+  type DotProduct = float4x4;
+
+  #[inline(always)]
+  fn dot(self, other: float4x3) -> Self::DotProduct {
+    return float4x4(self.dot(other.0), self.dot(other.1), self.dot(other.2), self.dot(other.3));
+  }
+}
+
+impl Dot<float3> for float3x4 {
+  type DotProduct = float4;
+
+  #[inline(always)]
+  fn dot(self, other: float3) -> Self::DotProduct {
+    return self.0 * other.0 + self.1 * other.1 + self.2 * other.2;
+  }
+}
+
+impl PartialEq for float3x4 {
+  #[inline]
+  fn eq(&self, other: &float3x4) -> bool {
+    return (self.0.eq(other.0) & self.1.eq(other.1) & self.2.eq(other.2)).all()
+  }
+}
+
 impl float3x4 {
+  #[inline(always)]
+  pub fn from_columns(c0: float4, c1: float4, c2: float4) -> float3x4 {
+    return float3x4(c0, c1, c2);
+  }
+
+  #[inline(always)]
+  pub fn from_rows(r0: float3, r1: float3, r2: float3, r3: float3) -> float3x4 {
+    return float4x3(r0, r1, r2, r3).transpose();
+  }
+
   #[inline(always)]
   pub fn linear_combination(a: f32, x: float3x4, b: f32, y: float3x4) -> float3x4 {
     let a = float4::broadcast(a);

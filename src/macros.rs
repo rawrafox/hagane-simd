@@ -208,7 +208,7 @@ macro_rules! impl_vector {
 
       #[inline(always)]
       fn ne(&self, other: &Self) -> bool {
-        return ne(*self, *other).all();
+        return ne(*self, *other).any();
       }
     }
   }

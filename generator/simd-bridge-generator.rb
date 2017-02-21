@@ -45,6 +45,9 @@ module Bridge
             name = "#{type}#{j}x#{i}"
             content = (["pub #{vector_name}"] * j).join(", ")
 
+            transpose_vector_name = "#{type}#{j}"
+            transpose_name = "#{type}#{i}x#{j}"
+
             o.puts("use std;", pad: true)
             o.puts("use ::*;")
 
@@ -76,23 +79,21 @@ module Bridge
               end
             end
 
-            if i == j # TODO: Implement this for i != j
-              o.block("impl std::ops::Mul for #{name}", pad: true) do |o|
-                o.puts("type Output = Self;")
-                o.puts
-                o.puts("#[inline(always)]")
-                o.block("fn mul(self, other: Self) -> Self") do |o|
-                  o.puts("return self.dot(other);")
-                end
+            o.block("impl std::ops::Mul<#{transpose_name}> for #{name}", pad: true) do |o|
+              o.puts("type Output = #{type}#{i}x#{i};")
+              o.puts
+              o.puts("#[inline(always)]")
+              o.block("fn mul(self, other: #{transpose_name}) -> Self::Output") do |o|
+                o.puts("return self.dot(other);")
               end
+            end
 
-              o.block("impl std::ops::Mul<#{vector_name}> for #{name}", pad: true) do |o|
-                o.puts("type Output = #{vector_name};")
-                o.puts
-                o.puts("#[inline(always)]")
-                o.block("fn mul(self, other: #{vector_name}) -> #{vector_name}") do |o|
-                  o.puts("return self.dot(other);")
-                end
+            o.block("impl std::ops::Mul<#{transpose_vector_name}> for #{name}", pad: true) do |o|
+              o.puts("type Output = #{vector_name};")
+              o.puts
+              o.puts("#[inline(always)]")
+              o.block("fn mul(self, other: #{transpose_vector_name}) -> Self::Output") do |o|
+                o.puts("return self.dot(other);")
               end
             end
 
@@ -107,27 +108,42 @@ module Bridge
               end
             end
 
-            if i == j
-              o.block("impl Dot<#{name}> for #{name}", pad: true) do |o|
-                o.puts("type DotProduct = #{name};")
-                o.puts
-                o.puts("#[inline(always)]")
-                o.block("fn dot(self, other: #{name}) -> #{name}") do |o|
-                  o.puts("return #{name}(#{j.times.map { |k| "self.dot(other.#{k})" }.join(", ")});")
-                end
+            o.block("impl Dot<#{transpose_name}> for #{name}", pad: true) do |o|
+              o.puts("type DotProduct = #{type}#{i}x#{i};")
+              o.puts
+              o.puts("#[inline(always)]")
+              o.block("fn dot(self, other: #{transpose_name}) -> Self::DotProduct") do |o|
+                o.puts("return #{type}#{i}x#{i}(#{i.times.map { |k| "self.dot(other.#{k})" }.join(", ")});")
               end
+            end
 
-              o.block("impl Dot<#{vector_name}> for #{name}", pad: true) do |o|
-                o.puts("type DotProduct = #{vector_name};")
-                o.puts
-                o.puts("#[inline(always)]")
-                o.block("fn dot(self, other: #{vector_name}) -> #{vector_name}") do |o|
-                  o.puts("return #{j.times.map { |k| "self.#{k} * other.#{k}" }.join(" + ")};")
-                end
+            o.block("impl Dot<#{transpose_vector_name}> for #{name}", pad: true) do |o|
+              o.puts("type DotProduct = #{vector_name};")
+              o.puts
+              o.puts("#[inline(always)]")
+              o.block("fn dot(self, other: #{transpose_vector_name}) -> Self::DotProduct") do |o|
+                o.puts("return #{j.times.map { |k| "self.#{k} * other.#{k}" }.join(" + ")};")
+              end
+            end
+
+            o.block("impl PartialEq for #{name}", pad: true) do |o|
+              o.puts("#[inline]")
+              o.block("fn eq(&self, other: &#{name}) -> bool") do |o|
+                o.puts("return (#{j.times.map { |k| "self.#{k}.eq(other.#{k})" }.join(" & ")}).all()")
               end
             end
 
             o.block("impl #{name}", pad: true) do
+              o.puts("#[inline(always)]", pad: true)
+              o.block("pub fn from_columns(#{j.times.map { |k| "c#{k}: #{vector_name}" }.join(", ")}) -> #{name}") do |o|
+                o.puts("return #{name}(#{j.times.map { |k| "c#{k}" }.join(", ")});")
+              end
+
+              o.puts("#[inline(always)]", pad: true)
+              o.block("pub fn from_rows(#{i.times.map { |k| "r#{k}: #{transpose_vector_name}" }.join(", ")}) -> #{name}") do |o|
+                o.puts("return #{transpose_name}(#{i.times.map { |k| "r#{k}" }.join(", ")}).transpose();")
+              end
+
               if i == j
                 o.puts("#[inline(always)]", pad: true)
                 o.block("pub fn identity(self) -> #{name}") do |o|
@@ -145,16 +161,13 @@ module Bridge
                 o.puts("return #{name}(#{j.times.map { |k| "a * x.#{k} + b * y.#{k}" }.join(", ")});")
               end
 
-              transpose_vector_name = "#{type}#{j}"
-              transpose_matrix_name = "#{type}#{i}x#{j}"
-
               o.puts("#[inline(always)]", pad: true)
-              o.block("pub fn transpose(self) -> #{transpose_matrix_name}") do |o|
+              o.block("pub fn transpose(self) -> #{transpose_name}") do |o|
                 i.times do |k|
                   o.puts("let c#{k} = #{transpose_vector_name}(#{j.times.map { |l| "(self.#{l}).#{k}" }.join(", ")});")
                 end
                 o.puts
-                o.puts("return #{transpose_matrix_name}(#{i.times.map { |k| "c#{k}" }.join(", ")});")
+                o.puts("return #{transpose_name}(#{i.times.map { |k| "c#{k}" }.join(", ")});")
               end
 
               # TODO: matrix_determinant
@@ -169,10 +182,6 @@ module Bridge
               end
 
               # matrix_multiply is expressed via the `Dot` trait
-
-              # TODO: o.puts("#[inline(always)]", pad: true)
-              #o.block("pub fn equal(x: #{name}, y: #{name}) -> bool") do |o|
-              #end
 
               # TODO: o.puts("#[inline(always)]", pad: true)
               # o.block("pub fn almost_equal_elements(x: #{name}, y: #{name}, tolerance: #{scalar}) -> bool") do |o|

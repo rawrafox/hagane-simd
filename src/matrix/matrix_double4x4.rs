@@ -23,11 +23,11 @@ impl std::ops::Sub for double4x4 {
   }
 }
 
-impl std::ops::Mul for double4x4 {
-  type Output = Self;
+impl std::ops::Mul<double4x4> for double4x4 {
+  type Output = double4x4;
 
   #[inline(always)]
-  fn mul(self, other: Self) -> Self {
+  fn mul(self, other: double4x4) -> Self::Output {
     return self.dot(other);
   }
 }
@@ -36,7 +36,7 @@ impl std::ops::Mul<double4> for double4x4 {
   type Output = double4;
 
   #[inline(always)]
-  fn mul(self, other: double4) -> double4 {
+  fn mul(self, other: double4) -> Self::Output {
     return self.dot(other);
   }
 }
@@ -56,7 +56,7 @@ impl Dot<double4x4> for double4x4 {
   type DotProduct = double4x4;
 
   #[inline(always)]
-  fn dot(self, other: double4x4) -> double4x4 {
+  fn dot(self, other: double4x4) -> Self::DotProduct {
     return double4x4(self.dot(other.0), self.dot(other.1), self.dot(other.2), self.dot(other.3));
   }
 }
@@ -65,12 +65,29 @@ impl Dot<double4> for double4x4 {
   type DotProduct = double4;
 
   #[inline(always)]
-  fn dot(self, other: double4) -> double4 {
+  fn dot(self, other: double4) -> Self::DotProduct {
     return self.0 * other.0 + self.1 * other.1 + self.2 * other.2 + self.3 * other.3;
   }
 }
 
+impl PartialEq for double4x4 {
+  #[inline]
+  fn eq(&self, other: &double4x4) -> bool {
+    return (self.0.eq(other.0) & self.1.eq(other.1) & self.2.eq(other.2) & self.3.eq(other.3)).all()
+  }
+}
+
 impl double4x4 {
+  #[inline(always)]
+  pub fn from_columns(c0: double4, c1: double4, c2: double4, c3: double4) -> double4x4 {
+    return double4x4(c0, c1, c2, c3);
+  }
+
+  #[inline(always)]
+  pub fn from_rows(r0: double4, r1: double4, r2: double4, r3: double4) -> double4x4 {
+    return double4x4(r0, r1, r2, r3).transpose();
+  }
+
   #[inline(always)]
   pub fn identity(self) -> double4x4 {
     return double4x4(double4(1.0, 0.0, 0.0, 0.0), double4(0.0, 1.0, 0.0, 0.0), double4(0.0, 0.0, 1.0, 0.0), double4(0.0, 0.0, 0.0, 1.0));
