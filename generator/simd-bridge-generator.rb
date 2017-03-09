@@ -146,10 +146,72 @@ module Bridge
 
               if i == j
                 o.puts("#[inline(always)]", pad: true)
-                o.block("pub fn identity(self) -> #{name}") do |o|
+                o.block("pub fn identity() -> #{name}") do |o|
                   identity = j.times.map { |k| "#{vector_name}(#{([0.0] * i).tap { |ary| ary[k] = 1.0 }.join(", ")})" }.join(", ")
 
                   o.puts("return #{name}(#{identity});")
+                end
+              end
+
+              if i == 4 && j == 4
+                o.puts("#[inline(always)]", pad: true)
+                o.block("pub fn from_scale(scale: #{scalar}) -> #{name}") do |o|
+                  x = (j - 1).times.map { |k| "#{vector_name}(#{(["0.0"] * i).tap { |ary| ary[k] = "scale" }.join(", ")})" }.join(", ")
+                  x += ", #{vector_name}(0.0, 0.0, 0.0, 1.0)"
+
+                  o.puts("return #{name}(#{x});")
+                end
+
+                o.puts("#[inline(always)]", pad: true)
+                o.block("pub fn from_translation(x: #{scalar}, y: #{scalar}, z: #{scalar}) -> #{name}") do |o|
+                  x = (j - 1).times.map { |k| "#{vector_name}(#{(["0.0"] * i).tap { |ary| ary[k] = "1.0" }.join(", ")})" }.join(", ")
+                  x += ", #{vector_name}(x, y, z, 1.0)"
+
+                  o.puts("return #{name}(#{x});")
+                end
+
+                o.puts("#[inline(always)]", pad: true)
+                o.block("pub fn from_euler_angles(roll: #{scalar}, pitch: #{scalar}, yaw: #{scalar}) -> #{name}") do |o|
+                  o.puts("let (sr, cr) = roll.sin_cos();", pad: true)
+                  o.puts("let (sp, cp) = pitch.sin_cos();")
+                  o.puts("let (sy, cy) = yaw.sin_cos();")
+
+                  o.puts("return #{name}(", pad: true)
+                  o.puts("  #{vector_name}(cy * cp, sy * cp, -sp, 0.0),")
+                  o.puts("  #{vector_name}(cy * sp * sr - sy * cr, sy * sp * sr + cy * cr, cp * sr, 0.0),")
+                  o.puts("  #{vector_name}(cy * sp * cr + sy * sr, sy * sp * cr - cy * sr, cp * cr, 0.0),")
+                  o.puts("  #{vector_name}(0.0, 0.0, 0.0, 1.0)")
+                  o.puts(");")
+                end
+
+                o.puts("#[inline(always)]", pad: true)
+                o.block("pub fn look_at(origin: #{type}3, target: #{type}3, up: #{type}3) -> #{name}") do |o|
+                  o.puts("let z = (target - origin).normalize();", pad: true)
+                  o.puts("let x = up.cross(z).normalize();")
+                  o.puts("let y = z.cross(x);")
+                  o.puts("println!(\"{:?} {:?} {:?} {:?}\", up, z, up.cross(z), up.cross(z).normalize());")
+                  o.puts("return #{name}(", pad: true)
+                  o.puts("  #{vector_name}(x.0, y.0, z.0, 0.0),")
+                  o.puts("  #{vector_name}(x.1, y.1, z.1, 0.0),")
+                  o.puts("  #{vector_name}(x.2, y.2, z.2, 0.0),")
+                  o.puts("  #{vector_name}(-x.dot(origin), -y.dot(origin), -z.dot(origin), 1.0),")
+                  o.puts(");")
+                end
+
+                o.puts("#[inline(always)]", pad: true)
+                o.block("pub fn perspective(aspect_ratio: #{scalar}, fov_y: #{scalar}, z_near: #{scalar}, z_far: #{scalar}) -> #{name}") do |o|
+                  o.puts("let fov = 1.0 / ((fov_y / 2.0).tan() * aspect_ratio);", pad: true)
+                  o.puts("let distance = z_near - z_far;")
+
+                  o.puts("let x = (z_near + z_far) / distance;", pad: true)
+                  o.puts("let y = 2.0 * z_near * z_far / distance;")
+
+                  o.puts("return #{name}(")
+                  o.puts("  #{vector_name}(fov, 0.0, 0.0,  0.0),")
+                  o.puts("  #{vector_name}(0.0, fov, 0.0,  0.0),")
+                  o.puts("  #{vector_name}(0.0, 0.0,   x, -1.0),")
+                  o.puts("  #{vector_name}(0.0, 0.0,   y,  0.0)")
+                  o.puts(");")
                 end
               end
 

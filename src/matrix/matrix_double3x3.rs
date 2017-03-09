@@ -89,7 +89,7 @@ impl double3x3 {
   }
 
   #[inline(always)]
-  pub fn identity(self) -> double3x3 {
+  pub fn identity() -> double3x3 {
     return double3x3(double3(1.0, 0.0, 0.0), double3(0.0, 1.0, 0.0), double3(0.0, 0.0, 1.0));
   }
 

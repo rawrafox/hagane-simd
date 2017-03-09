@@ -89,8 +89,62 @@ impl float4x4 {
   }
 
   #[inline(always)]
-  pub fn identity(self) -> float4x4 {
+  pub fn identity() -> float4x4 {
     return float4x4(float4(1.0, 0.0, 0.0, 0.0), float4(0.0, 1.0, 0.0, 0.0), float4(0.0, 0.0, 1.0, 0.0), float4(0.0, 0.0, 0.0, 1.0));
+  }
+
+  #[inline(always)]
+  pub fn from_scale(scale: f32) -> float4x4 {
+    return float4x4(float4(scale, 0.0, 0.0, 0.0), float4(0.0, scale, 0.0, 0.0), float4(0.0, 0.0, scale, 0.0), float4(0.0, 0.0, 0.0, 1.0));
+  }
+
+  #[inline(always)]
+  pub fn from_translation(x: f32, y: f32, z: f32) -> float4x4 {
+    return float4x4(float4(1.0, 0.0, 0.0, 0.0), float4(0.0, 1.0, 0.0, 0.0), float4(0.0, 0.0, 1.0, 0.0), float4(x, y, z, 1.0));
+  }
+
+  #[inline(always)]
+  pub fn from_euler_angles(roll: f32, pitch: f32, yaw: f32) -> float4x4 {
+    let (sr, cr) = roll.sin_cos();
+    let (sp, cp) = pitch.sin_cos();
+    let (sy, cy) = yaw.sin_cos();
+
+    return float4x4(
+      float4(cy * cp, sy * cp, -sp, 0.0),
+      float4(cy * sp * sr - sy * cr, sy * sp * sr + cy * cr, cp * sr, 0.0),
+      float4(cy * sp * cr + sy * sr, sy * sp * cr - cy * sr, cp * cr, 0.0),
+      float4(0.0, 0.0, 0.0, 1.0)
+    );
+  }
+
+  #[inline(always)]
+  pub fn look_at(origin: float3, target: float3, up: float3) -> float4x4 {
+    let z = (target - origin).normalize();
+    let x = up.cross(z).normalize();
+    let y = z.cross(x);
+    println!("{:?} {:?} {:?} {:?}", up, z, up.cross(z), up.cross(z).normalize());
+
+    return float4x4(
+      float4(x.0, y.0, z.0, 0.0),
+      float4(x.1, y.1, z.1, 0.0),
+      float4(x.2, y.2, z.2, 0.0),
+      float4(-x.dot(origin), -y.dot(origin), -z.dot(origin), 1.0),
+    );
+  }
+
+  #[inline(always)]
+  pub fn perspective(aspect_ratio: f32, fov_y: f32, z_near: f32, z_far: f32) -> float4x4 {
+    let fov = 1.0 / ((fov_y / 2.0).tan() * aspect_ratio);
+    let distance = z_near - z_far;
+
+    let x = (z_near + z_far) / distance;
+    let y = 2.0 * z_near * z_far / distance;
+    return float4x4(
+      float4(fov, 0.0, 0.0,  0.0),
+      float4(0.0, fov, 0.0,  0.0),
+      float4(0.0, 0.0,   x, -1.0),
+      float4(0.0, 0.0,   y,  0.0)
+    );
   }
 
   #[inline(always)]

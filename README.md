@@ -84,10 +84,10 @@ This is a TODO list, a check means that it is "done".
  - [ ] Matrices
    - [ ] Constructors
      - [x] Basic
-     - [ ] From columns
-     - [ ] From rows
+     - [x] From columns
+     - [x] From rows
      - [ ] From diagonal
    - [ ] Functions
-     - [ ] `equal`
+     - [x] `equal`
      - [ ] `almost_equal_elements`
      - [ ] `almost_equal_elements_relative`

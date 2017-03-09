@@ -86,9 +86,9 @@ impl Cross for double3 {
 
   #[inline(always)]
   fn cross(self, other: Self) -> Self::CrossProduct {
-    let a = self * double3(other.2, other.1, other.0) - double3(self.2, self.1, self.0) * other;
+    let a = self * double3(other.2, other.0, other.1) - double3(self.2, self.0, self.1) * other;
 
-    return double3(a.2, a.1, a.0);
+    return double3(a.2, a.0, a.1);
   }
 }
 

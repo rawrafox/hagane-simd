@@ -86,9 +86,9 @@ impl Cross for float3 {
 
   #[inline(always)]
   fn cross(self, other: Self) -> Self::CrossProduct {
-    let a = self * float3(other.2, other.1, other.0) - float3(self.2, self.1, self.0) * other;
+    let a = float3(self.2, self.0, self.1) * other - self * float3(other.2, other.0, other.1);
 
-    return float3(a.2, a.1, a.0);
+    return float3(a.2, a.0, a.1);
   }
 }
 

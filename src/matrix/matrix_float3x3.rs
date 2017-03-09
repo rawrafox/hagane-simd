@@ -89,7 +89,7 @@ impl float3x3 {
   }
 
   #[inline(always)]
-  pub fn identity(self) -> float3x3 {
+  pub fn identity() -> float3x3 {
     return float3x3(float3(1.0, 0.0, 0.0), float3(0.0, 1.0, 0.0), float3(0.0, 0.0, 1.0));
   }
 

@@ -89,8 +89,62 @@ impl double4x4 {
   }
 
   #[inline(always)]
-  pub fn identity(self) -> double4x4 {
+  pub fn identity() -> double4x4 {
     return double4x4(double4(1.0, 0.0, 0.0, 0.0), double4(0.0, 1.0, 0.0, 0.0), double4(0.0, 0.0, 1.0, 0.0), double4(0.0, 0.0, 0.0, 1.0));
+  }
+
+  #[inline(always)]
+  pub fn from_scale(scale: f64) -> double4x4 {
+    return double4x4(double4(scale, 0.0, 0.0, 0.0), double4(0.0, scale, 0.0, 0.0), double4(0.0, 0.0, scale, 0.0), double4(0.0, 0.0, 0.0, 1.0));
+  }
+
+  #[inline(always)]
+  pub fn from_translation(x: f64, y: f64, z: f64) -> double4x4 {
+    return double4x4(double4(1.0, 0.0, 0.0, 0.0), double4(0.0, 1.0, 0.0, 0.0), double4(0.0, 0.0, 1.0, 0.0), double4(x, y, z, 1.0));
+  }
+
+  #[inline(always)]
+  pub fn from_euler_angles(roll: f64, pitch: f64, yaw: f64) -> double4x4 {
+    let (sr, cr) = roll.sin_cos();
+    let (sp, cp) = pitch.sin_cos();
+    let (sy, cy) = yaw.sin_cos();
+
+    return double4x4(
+      double4(cy * cp, sy * cp, -sp, 0.0),
+      double4(cy * sp * sr - sy * cr, sy * sp * sr + cy * cr, cp * sr, 0.0),
+      double4(cy * sp * cr + sy * sr, sy * sp * cr - cy * sr, cp * cr, 0.0),
+      double4(0.0, 0.0, 0.0, 1.0)
+    );
+  }
+
+  #[inline(always)]
+  pub fn look_at(origin: double3, target: double3, up: double3) -> double4x4 {
+    let z = (target - origin).normalize();
+    let x = up.cross(z).normalize();
+    let y = z.cross(x);
+    println!("{:?} {:?} {:?} {:?}", up, z, up.cross(z), up.cross(z).normalize());
+
+    return double4x4(
+      double4(x.0, y.0, z.0, 0.0),
+      double4(x.1, y.1, z.1, 0.0),
+      double4(x.2, y.2, z.2, 0.0),
+      double4(-x.dot(origin), -y.dot(origin), -z.dot(origin), 1.0),
+    );
+  }
+
+  #[inline(always)]
+  pub fn perspective(aspect_ratio: f64, fov_y: f64, z_near: f64, z_far: f64) -> double4x4 {
+    let fov = 1.0 / ((fov_y / 2.0).tan() * aspect_ratio);
+    let distance = z_near - z_far;
+
+    let x = (z_near + z_far) / distance;
+    let y = 2.0 * z_near * z_far / distance;
+    return double4x4(
+      double4(fov, 0.0, 0.0,  0.0),
+      double4(0.0, fov, 0.0,  0.0),
+      double4(0.0, 0.0,   x, -1.0),
+      double4(0.0, 0.0,   y,  0.0)
+    );
   }
 
   #[inline(always)]

@@ -653,7 +653,7 @@ pub trait Geometry : Float {
 
   #[inline(always)]
   fn normalize(self) -> Self {
-    return self * Self::broadcast(self.length_squared());
+    return self / Self::broadcast(self.length());
   }
 
   #[inline(always)]
