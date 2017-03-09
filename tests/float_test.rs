@@ -115,3 +115,10 @@ fn test_trunc() {
   assert_eq!(trunc(float3(100.1, -4.4, 1.9)), float3(100.0, -4.0, 1.0));
   assert_eq!(trunc(float4(100.1, -4.4, 1.9, 9.0)), float4(100.0, -4.0, 1.0, 9.0));
 }
+
+#[test]
+fn test_dot() {
+  assert_near_f32_scalar!(dot(float2(10.0, -2.0), float2(0.1, 0.5)), 0.0, 1);
+  assert_near_f32_scalar!(dot(float3(10.0, -2.0, 3.0), float3(0.1, 0.5, 1.0)), 3.0, 1);
+  assert_near_f32_scalar!(dot(float4(10.0, -2.0, 3.0, 0.0), float4(0.1, 0.5, 1.0, -4.0)), 3.0, 1);
+}

@@ -118,33 +118,58 @@ impl double4x4 {
   }
 
   #[inline(always)]
-  pub fn look_at(origin: double3, target: double3, up: double3) -> double4x4 {
-    let z = (target - origin).normalize();
+  pub fn look_at(eye: double3, center: double3, up: double3) -> double4x4 {
+    let z = (center - eye).normalize();
     let x = up.cross(z).normalize();
     let y = z.cross(x);
-    println!("{:?} {:?} {:?} {:?}", up, z, up.cross(z), up.cross(z).normalize());
 
-    return double4x4(
-      double4(x.0, y.0, z.0, 0.0),
-      double4(x.1, y.1, z.1, 0.0),
-      double4(x.2, y.2, z.2, 0.0),
-      double4(-x.dot(origin), -y.dot(origin), -z.dot(origin), 1.0),
-    );
+    let p = double4(x.0, y.0, z.0, 0.0);
+    let q = double4(x.1, y.1, z.1, 0.0);
+    let r = double4(x.2, y.2, z.2, 0.0);
+    let s = double4(-x.dot(eye), -y.dot(eye), -z.dot(eye), 1.0);
+
+    return double4x4(p, q, r, s);
   }
 
   #[inline(always)]
-  pub fn perspective(aspect_ratio: f64, fov_y: f64, z_near: f64, z_far: f64) -> double4x4 {
-    let fov = 1.0 / ((fov_y / 2.0).tan() * aspect_ratio);
-    let distance = z_near - z_far;
+  pub fn perspective(width: f64, height: f64, near: f64, far: f64) -> double4x4 {
+    let z_near = 2.0 * near;
+    let z_far = far / (far - near);
 
-    let x = (z_near + z_far) / distance;
-    let y = 2.0 * z_near * z_far / distance;
-    return double4x4(
-      double4(fov, 0.0, 0.0,  0.0),
-      double4(0.0, fov, 0.0,  0.0),
-      double4(0.0, 0.0,   x, -1.0),
-      double4(0.0, 0.0,   y,  0.0)
-    );
+    let p = double4(z_near / width, 0.0, 0.0, 0.0);
+    let q = double4(0.0, z_near / height, 0.0, 0.0);
+    let r = double4(0.0, 0.0, z_far, 1.0);
+    let s = double4(0.0, 0.0, -near * z_far, 0.0);
+
+    return double4x4(p, q, r, s);
+  }
+
+  #[inline(always)]
+  pub fn perspective_fov(fov_y: f64, aspect: f64, near: f64, far: f64) -> double4x4 {
+    let y_scale = 1.0 / (0.5 * fov_y).tan();
+    let x_scale = y_scale / aspect;
+    let z_scale = far / (far - near);
+
+    let p = double4(x_scale, 0.0, 0.0, 0.0);
+    let q = double4(0.0, y_scale, 0.0, 0.0);
+    let r = double4(0.0, 0.0, z_scale, 1.0);
+    let s = double4(0.0, 0.0, -near * z_scale, 0.0);
+
+    return double4x4(p, q, r, s);
+  }
+
+  #[inline(always)]
+  pub fn orthographic(left: f64, right: f64, bottom: f64, top: f64, near: f64, far: f64) -> double4x4 {
+    let s_length = 1.0 / (right - left);
+    let s_height = 1.0 / (top - bottom);
+    let s_depth = 1.0 / (far - near);
+
+    let p = double4(2.0 * s_length, 0.0, 0.0, 0.0);
+    let q = double4(0.0, 2.0 * s_height, 0.0, 0.0);
+    let r = double4(0.0, 0.0, s_depth, 0.0);
+    let s = double4(0.0, 0.0, -near * s_depth, 1.0);
+
+    return double4x4(p, q, r, s);
   }
 
   #[inline(always)]

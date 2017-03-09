@@ -118,33 +118,58 @@ impl float4x4 {
   }
 
   #[inline(always)]
-  pub fn look_at(origin: float3, target: float3, up: float3) -> float4x4 {
-    let z = (target - origin).normalize();
+  pub fn look_at(eye: float3, center: float3, up: float3) -> float4x4 {
+    let z = (center - eye).normalize();
     let x = up.cross(z).normalize();
     let y = z.cross(x);
-    println!("{:?} {:?} {:?} {:?}", up, z, up.cross(z), up.cross(z).normalize());
 
-    return float4x4(
-      float4(x.0, y.0, z.0, 0.0),
-      float4(x.1, y.1, z.1, 0.0),
-      float4(x.2, y.2, z.2, 0.0),
-      float4(-x.dot(origin), -y.dot(origin), -z.dot(origin), 1.0),
-    );
+    let p = float4(x.0, y.0, z.0, 0.0);
+    let q = float4(x.1, y.1, z.1, 0.0);
+    let r = float4(x.2, y.2, z.2, 0.0);
+    let s = float4(-x.dot(eye), -y.dot(eye), -z.dot(eye), 1.0);
+
+    return float4x4(p, q, r, s);
   }
 
   #[inline(always)]
-  pub fn perspective(aspect_ratio: f32, fov_y: f32, z_near: f32, z_far: f32) -> float4x4 {
-    let fov = 1.0 / ((fov_y / 2.0).tan() * aspect_ratio);
-    let distance = z_near - z_far;
+  pub fn perspective(width: f32, height: f32, near: f32, far: f32) -> float4x4 {
+    let z_near = 2.0 * near;
+    let z_far = far / (far - near);
 
-    let x = (z_near + z_far) / distance;
-    let y = 2.0 * z_near * z_far / distance;
-    return float4x4(
-      float4(fov, 0.0, 0.0,  0.0),
-      float4(0.0, fov, 0.0,  0.0),
-      float4(0.0, 0.0,   x, -1.0),
-      float4(0.0, 0.0,   y,  0.0)
-    );
+    let p = float4(z_near / width, 0.0, 0.0, 0.0);
+    let q = float4(0.0, z_near / height, 0.0, 0.0);
+    let r = float4(0.0, 0.0, z_far, 1.0);
+    let s = float4(0.0, 0.0, -near * z_far, 0.0);
+
+    return float4x4(p, q, r, s);
+  }
+
+  #[inline(always)]
+  pub fn perspective_fov(fov_y: f32, aspect: f32, near: f32, far: f32) -> float4x4 {
+    let y_scale = 1.0 / (0.5 * fov_y).tan();
+    let x_scale = y_scale / aspect;
+    let z_scale = far / (far - near);
+
+    let p = float4(x_scale, 0.0, 0.0, 0.0);
+    let q = float4(0.0, y_scale, 0.0, 0.0);
+    let r = float4(0.0, 0.0, z_scale, 1.0);
+    let s = float4(0.0, 0.0, -near * z_scale, 0.0);
+
+    return float4x4(p, q, r, s);
+  }
+
+  #[inline(always)]
+  pub fn orthographic(left: f32, right: f32, bottom: f32, top: f32, near: f32, far: f32) -> float4x4 {
+    let s_length = 1.0 / (right - left);
+    let s_height = 1.0 / (top - bottom);
+    let s_depth = 1.0 / (far - near);
+
+    let p = float4(2.0 * s_length, 0.0, 0.0, 0.0);
+    let q = float4(0.0, 2.0 * s_height, 0.0, 0.0);
+    let r = float4(0.0, 0.0, s_depth, 0.0);
+    let s = float4(0.0, 0.0, -near * s_depth, 1.0);
+
+    return float4x4(p, q, r, s);
   }
 
   #[inline(always)]

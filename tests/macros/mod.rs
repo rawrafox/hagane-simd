@@ -1,11 +1,8 @@
 macro_rules! assert_near_f32_scalar {
   ($given:expr , $expected:expr, $error:expr) => ({
     let a = $given;
-    let b = $expected;
+    let b = $expected as f32;
     let e = $error;
-
-    let a_int = unsafe { mem::transmute::<f32, i32>(a) };
-    let b_int = unsafe { mem::transmute::<f32, i32>(b) };
 
     if b.is_finite() {
       if a.is_nan() {
@@ -14,14 +11,12 @@ macro_rules! assert_near_f32_scalar {
         assert!(false, "given: {:?}, expected: {:?}", a, b);
       }
 
-      let ulp = unsafe { mem::transmute::<f32, i32>((a - b).abs()) };
+      let ulp = unsafe { std::mem::transmute::<f32, i32>((a - b).abs()) };
 
-      if ulp.gt(broadcast(e)).any() {
-        assert!(false, "given: {:?}, expected: {:?}, ulp: {:?}", a, b, ulp);
-      }
+      assert!(ulp <= e, "given: {:?}, expected: {:?}, ulp: {:?}", a, b, ulp);
     } else if b.is_nan() {
       assert!(a.is_nan(), "given: {:?}, expected {:?}", a, b)
-    } else if b.is_inifinite() {
+    } else if b.is_infinite() {
       assert!(a == b, "given: {:?}, expected {:?}", a, b)
     } else {
       panic!("Should never get here.")

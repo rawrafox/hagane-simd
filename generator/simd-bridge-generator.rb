@@ -185,34 +185,60 @@ module Bridge
                 end
 
                 o.puts("#[inline(always)]", pad: true)
-                o.block("pub fn look_at(origin: #{type}3, target: #{type}3, up: #{type}3) -> #{name}") do |o|
-                  o.puts("let z = (target - origin).normalize();", pad: true)
+                o.block("pub fn look_at(eye: #{type}3, center: #{type}3, up: #{type}3) -> #{name}") do |o|
+                  o.puts("let z = (center - eye).normalize();", pad: true)
                   o.puts("let x = up.cross(z).normalize();")
                   o.puts("let y = z.cross(x);")
-                  o.puts("println!(\"{:?} {:?} {:?} {:?}\", up, z, up.cross(z), up.cross(z).normalize());")
-                  o.puts("return #{name}(", pad: true)
-                  o.puts("  #{vector_name}(x.0, y.0, z.0, 0.0),")
-                  o.puts("  #{vector_name}(x.1, y.1, z.1, 0.0),")
-                  o.puts("  #{vector_name}(x.2, y.2, z.2, 0.0),")
-                  o.puts("  #{vector_name}(-x.dot(origin), -y.dot(origin), -z.dot(origin), 1.0),")
-                  o.puts(");")
+
+                  o.puts("let p = #{vector_name}(x.0, y.0, z.0, 0.0);", pad: true)
+                  o.puts("let q = #{vector_name}(x.1, y.1, z.1, 0.0);")
+                  o.puts("let r = #{vector_name}(x.2, y.2, z.2, 0.0);")
+                  o.puts("let s = #{vector_name}(-x.dot(eye), -y.dot(eye), -z.dot(eye), 1.0);")
+
+                  o.puts("return #{name}(p, q, r, s);", pad: true)
                 end
 
                 o.puts("#[inline(always)]", pad: true)
-                o.block("pub fn perspective(aspect_ratio: #{scalar}, fov_y: #{scalar}, z_near: #{scalar}, z_far: #{scalar}) -> #{name}") do |o|
-                  o.puts("let fov = 1.0 / ((fov_y / 2.0).tan() * aspect_ratio);", pad: true)
-                  o.puts("let distance = z_near - z_far;")
+                o.block("pub fn perspective(width: #{scalar}, height: #{scalar}, near: #{scalar}, far: #{scalar}) -> #{name}") do |o|
+                  o.puts("let z_near = 2.0 * near;", pad: true)
+                  o.puts("let z_far = far / (far - near);")
 
-                  o.puts("let x = (z_near + z_far) / distance;", pad: true)
-                  o.puts("let y = 2.0 * z_near * z_far / distance;")
+                  o.puts("let p = #{vector_name}(z_near / width, 0.0, 0.0, 0.0);", pad: true)
+                  o.puts("let q = #{vector_name}(0.0, z_near / height, 0.0, 0.0);")
+                  o.puts("let r = #{vector_name}(0.0, 0.0, z_far, 1.0);")
+                  o.puts("let s = #{vector_name}(0.0, 0.0, -near * z_far, 0.0);")
 
-                  o.puts("return #{name}(")
-                  o.puts("  #{vector_name}(fov, 0.0, 0.0,  0.0),")
-                  o.puts("  #{vector_name}(0.0, fov, 0.0,  0.0),")
-                  o.puts("  #{vector_name}(0.0, 0.0,   x, -1.0),")
-                  o.puts("  #{vector_name}(0.0, 0.0,   y,  0.0)")
-                  o.puts(");")
+                  o.puts("return #{name}(p, q, r, s);", pad: true)
                 end
+
+                o.puts("#[inline(always)]", pad: true)
+                o.block("pub fn perspective_fov(fov_y: #{scalar}, aspect: #{scalar}, near: #{scalar}, far: #{scalar}) -> #{name}") do |o|
+                  o.puts("let y_scale = 1.0 / (0.5 * fov_y).tan();", pad: true)
+                  o.puts("let x_scale = y_scale / aspect;")
+                  o.puts("let z_scale = far / (far - near);")
+
+                  o.puts("let p = #{vector_name}(x_scale, 0.0, 0.0, 0.0);", pad: true)
+                  o.puts("let q = #{vector_name}(0.0, y_scale, 0.0, 0.0);")
+                  o.puts("let r = #{vector_name}(0.0, 0.0, z_scale, 1.0);")
+                  o.puts("let s = #{vector_name}(0.0, 0.0, -near * z_scale, 0.0);")
+
+                  o.puts("return #{name}(p, q, r, s);", pad: true)
+                end
+                
+                o.puts("#[inline(always)]", pad: true)
+                o.block("pub fn orthographic(left: #{scalar}, right: #{scalar}, bottom: #{scalar}, top: #{scalar}, near: #{scalar}, far: #{scalar}) -> #{name}") do |o|
+                  o.puts("let s_length = 1.0 / (right - left);", pad: true)
+                  o.puts("let s_height = 1.0 / (top - bottom);")
+                  o.puts("let s_depth = 1.0 / (far - near);")
+
+                  o.puts("let p = #{vector_name}(2.0 * s_length, 0.0, 0.0, 0.0);", pad: true)
+                  o.puts("let q = #{vector_name}(0.0, 2.0 * s_height, 0.0, 0.0);")
+                  o.puts("let r = #{vector_name}(0.0, 0.0, s_depth, 0.0);")
+                  o.puts("let s = #{vector_name}(0.0, 0.0, -near * s_depth, 1.0);")
+
+                  o.puts("return #{name}(p, q, r, s);", pad: true)
+                end
+                
               end
 
               o.puts("#[inline(always)]", pad: true)
